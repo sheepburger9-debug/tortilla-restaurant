@@ -13,7 +13,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="برجر طازج، بطاطس، ومشروبات. اطلب توصيل لحد باب البيت.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src https://*.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#FAF5EC">
 <title>Sheep & Burger — برجر طازة</title>
@@ -144,12 +144,6 @@ svg{width:20px;height:20px;flex-shrink:0}
 .sec-head .more:hover svg{transform:translateX(-3px)}
 
 /* ╔═ [CSS] شريط تقدم التوصيل */
-.free-bar{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 18px;margin-bottom:20px;box-shadow:var(--shadow-sm)}
-.free-bar-row{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;margin-bottom:10px;gap:12px}
-.free-bar-row strong{font-weight:700;color:var(--primary)}
-.free-bar-track{height:8px;border-radius:8px;background:var(--bg-2);overflow:hidden}
-.free-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--primary));border-radius:8px;transition:width .6s var(--ease)}
-.free-bar.unlocked .free-bar-fill{background:linear-gradient(90deg,var(--success),#4CAF50)}
 
 /* ╔═ [CSS] أزرار التصنيفات */
 .cats{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 14px;margin-bottom:8px;scrollbar-width:none;scroll-snap-type:x proximity}
@@ -232,6 +226,16 @@ svg{width:20px;height:20px;flex-shrink:0}
   .featured-deal-content h3{font-size:30px}
 }
 
+/* عروض الصفحة الرئيسية القادمة من جدول menu_promotions */
+.home-offers{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:0 0 30px}
+.hero-slider-controls{display:flex;align-items:center;gap:10px;margin-top:12px}.hero-slider-controls button{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.22);color:inherit;font-size:25px;font-weight:900;border:1px solid rgba(255,255,255,.35)}.hero-slider-controls span{font-size:12px;font-weight:800}
+.home-offer{display:flex;gap:12px;align-items:center;min-width:0;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow-sm)}
+.home-offer img{width:88px;height:88px;object-fit:cover;border-radius:var(--r-sm);background:var(--bg-2);flex-shrink:0}
+.home-offer-body{min-width:0;flex:1}
+.home-offer h3{font-size:15px;font-weight:900;line-height:1.4;margin-bottom:4px}
+.home-offer-value{display:inline-flex;margin:2px 0 6px;padding:4px 8px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-size:12px;font-weight:900}
+.home-offer p{font-size:12px;color:var(--ink-2);line-height:1.5;margin-bottom:8px}
+.home-offer a{display:inline-flex;color:var(--primary);font-size:12px;font-weight:800}
 /* ╔═ [CSS] الأزرار العامة */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -436,8 +440,10 @@ svg{width:20px;height:20px;flex-shrink:0}
 .voucher-info small{font-size:11.5px;color:var(--ink-2)}
 
 .achievements-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:10px}
-.ach{text-align:center;padding:10px 6px;border-radius:var(--r-sm);background:var(--bg-2);transition:opacity .2s,filter .2s}
-.ach.locked{opacity:.35;filter:grayscale(1)}
+.ach{text-align:center;padding:10px 6px;border-radius:var(--r-sm);background:linear-gradient(145deg,var(--ach-bg,#f6f6f6),#fff);border:1px solid var(--ach-border,#e4e4e4);transition:opacity .2s,filter .2s,transform .2s;box-shadow:0 2px 8px color-mix(in srgb,var(--ach-color,#777) 10%,transparent)}
+.ach-icon{color:var(--ach-color,#555)}
+.ach.locked{opacity:.48;filter:grayscale(.85)}
+.ach:not(.locked){transform:translateY(-1px)}
 .ach-icon{font-size:24px;margin-bottom:4px}
 .ach-name{font-size:10.5px;font-weight:700;line-height:1.3;color:var(--ink)}
 
@@ -559,7 +565,6 @@ svg{width:20px;height:20px;flex-shrink:0}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .empty-icon{animation:floaty 3s ease-in-out infinite}
 @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
-.free-bar:not(.unlocked) .free-bar-fill{background-size:200% 100%;animation:shimmer 2.5s linear infinite}
 @keyframes optIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .sheet.show .sheet-content > *{animation:optIn .45s var(--ease) backwards}
 .sheet.show .sheet-content > *:nth-child(2){animation-delay:60ms}.sheet.show .sheet-content > *:nth-child(3){animation-delay:100ms}.sheet.show .sheet-content > *:nth-child(4){animation-delay:140ms}.sheet.show .sheet-content > *:nth-child(n+5){animation-delay:180ms}
@@ -881,7 +886,7 @@ body:has(#stickyCart.show) .install-btn{
   ثبّت التطبيق
 </button>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'"></script>
 <script>
 (() => {
   'use strict';
@@ -890,44 +895,18 @@ body:has(#stickyCart.show) .install-btn{
      [JS] الإعدادات والثوابت
      ═══════════════════════════════════════════════ */
   const CONFIG = Object.freeze({
-    CURRENCY: 'ج.م',
-    DELIVERY_FEE: 25,
-    FREE_DELIVERY_AT: 200,
     MAX_QTY: 20,
-    STAMPS_FOR_REWARD: 10,
-    POINTS_PER_POUND: 1,
-    POINTS_DIVISOR: 10,
-    POINTS_FOR_DISCOUNT: 100,
-    DISCOUNT_VALUE: 50,
-    SECRET_CODE: 'SHEEP2024',
-    SECRET_ORDERS_NEEDED: 3,
-    DEMO_MODE: false,
     STATUS_STEP_MS: 6000,
-    STORAGE_SCHEMA: 5,
-    STORAGE_PREFIX: 'sheepburger_v5_'
+    STORAGE_SCHEMA: 6,
+    STORAGE_PREFIX: 'sheepburger_v6_'
   });
-
-  const COUPONS = Object.freeze({ SHEEP10: 0.10, WELCOME20: 0.20, BIRTHDAY50: 0.50 }); // أكواد قديمة احتياطية فقط
 
   const STATUSES = ['تم الاستلام', 'بيتحضر', 'في الطريق', 'تم التوصيل'];
   const SPICE_LEVELS = ['هادي', 'وسط', 'حار'];
   const ALLERGENS = { gluten: 'جلوتين', dairy: 'ألبان', egg: 'بيض', nuts: 'مكسرات' };
 
-  const CATS = [
-    { id: 'Burgers', label: 'برجر', emoji: '🍔' },
-    { id: 'Chicken', label: 'فراخ', emoji: '🍗' },
-    { id: 'Sides', label: 'أطباق جانبية', emoji: '🍟' },
-    { id: 'Drinks', label: 'مشروبات', emoji: '🥤' },
-    { id: 'Desserts', label: 'حلويات', emoji: '🍦' }
-  ];
-
-  const SUBCATS = {
-    Burgers: [{ id: 'beef', label: 'لحمة' }, { id: 'lamb', label: 'ضاني' }, { id: 'veggie', label: 'نباتي' }],
-    Chicken: [{ id: 'grilled', label: 'مشوي' }, { id: 'fried', label: 'مقرمش' }],
-    Sides: [{ id: 'fries', label: 'بطاطس' }, { id: 'wings', label: 'أجنحة' }],
-    Drinks: [{ id: 'cold', label: 'بارد' }],
-    Desserts: [{ id: 'icecream', label: 'آيس كريم' }]
-  };
+  const CATS = [];
+  const SUBCATS = {};
 
   const ADDONS = {
     cheese:   { name: 'جبنة زيادة', price: 8,  allergens: ['dairy'] },
@@ -938,15 +917,11 @@ body:has(#stickyCart.show) .install-btn{
     onions:   { name: 'بصل مقرمش', price: 6,  allergens: ['gluten'] }
   };
 
-  let ACHIEVEMENTS = {
-    first_order:    { name: 'أول لقمة', icon: '🍔', desc: 'أول طلب ليك' },
-    night_owl:      { name: 'سهران', icon: '🌙', desc: 'طلبت بعد 10 بالليل' },
-    guac_master:    { name: 'سيد البرجر', icon: '👑', desc: 'طلبت 10 برجر' },
-    spice_king:     { name: 'ملك الحار', icon: '🔥', desc: 'جربت كل الحار' },
-    loyal_customer: { name: 'عميل مخلص', icon: '⭐', desc: '10 طلبات' },
-    healthy_choice: { name: 'صحي', icon: '🥗', desc: '5 طلبات نباتي' },
-    secret_finder:  { name: 'مكتشف الأسرار', icon: '🤫', desc: 'فتحت المنيو السري' }
-  };
+  let ACHIEVEMENTS = {};
+
+  // لوحة ألوان متدرجة؛ يحصل كل إنجاز على لون مميز حتى لو أُضيف من الإدارة.
+  const ACHIEVEMENT_PALETTES = [['#fff0e8','#fbd1bf','#b93816'],['#edf4ff','#cbdfff','#2456a6'],['#fff7d6','#ffe8a1','#946200'],['#e8f8ef','#c4efd6','#167347'],['#f5eaff','#e2ccff','#7137a8'],['#ffeaf2','#ffc9dc','#a9275b'],['#e6f8fb','#bcecf4','#116b7a'],['#f2f2f2','#dedede','#414141']];
+  const achievementStyle = i => { const p=ACHIEVEMENT_PALETTES[i % ACHIEVEMENT_PALETTES.length]; return `--ach-bg:${p[0]};--ach-border:${p[1]};--ach-color:${p[2]}`; };
 
   // Achievement definitions are managed in the admin panel and loaded from Supabase.
   async function loadAchievementDefinitions() {
@@ -965,88 +940,16 @@ body:has(#stickyCart.show) .install-btn{
   /* ═══════════════════════════════════════════════
      [JS] بيانات المنيو
      ═══════════════════════════════════════════════ */
-  const img = id => `https://images.unsplash.com/${id}?q=80&w=800&auto=format&fit=crop`;
-
-  const MENU_ITEMS = [
-    { id:'classic-sheep', name:'سيجنتشر سماش', cat:'Burgers', subcat:'beef', img:img('photo-1568901346375-23c9450c58cd'), tags:['popular'], spice:false, freeDelivery:true,
-      desc:'قطعة لحمة سماش، شيدر معتق، خس طازج، طماطم، وصوص البيت على عيش بريوش محمص.',
-      ingr:['لحمة','شيدر','خس','طماطم','صوص البيت'],
-      allergens:['gluten','dairy','egg'],
-      addons:['cheese','bacon','patty','jalapeno','sauce'],
-      sizes:[{key:'S',label:'سنجل',price:85},{key:'D',label:'دوبل',price:115}] },
-    { id:'spicy-lamb', name:'لحم حار بالهريسة', cat:'Burgers', subcat:'lamb', img:img('photo-1594212844822-11a67c1a0a7a'), tags:['spicy','popular'], spice:true,
-      desc:'قطعة لحم ضاني طازة مع مايونيز هريسة حار، بصل أحمر مخلل، جرجير وهالبينو.',
-      ingr:['ضاني','مايونيز هريسة','هالبينو','بصل أحمر','جرجير'],
-      allergens:['gluten','egg'],
-      addons:['cheese','patty','jalapeno','sauce'],
-      sizes:[{key:'S',label:'سنجل',price:95},{key:'D',label:'دوبل',price:125}] },
-    { id:'double-cheese', name:'دوبل تشيز', cat:'Burgers', subcat:'beef', img:img('photo-1550547660-d9450f859349'), tags:['popular'], spice:false,
-      desc:'قطعتين لحمة سماش، شيدر مضاعف، مخلل، مستردة وكاتشب.',
-      ingr:['لحمة ×2','شيدر مضاعف','مخلل','مستردة'],
-      allergens:['gluten','dairy'],
-      addons:['bacon','patty','onions'],
-      sizes:[{key:'D',label:'دوبل',price:105}] },
-    { id:'crispy-chicken', name:'دجاج كرانشي', cat:'Chicken', subcat:'fried', img:img('photo-1615297928064-24977384d0da'), tags:[], spice:false, freeDelivery:true,
-      desc:'صدور فراخ مقرمشة بالبترميلك، كول سلو، مخلل ومايونيز على بريوش.',
-      ingr:['فراخ','كول سلو','مخلل','مايونيز'],
-      allergens:['gluten','egg','dairy'],
-      addons:['cheese','jalapeno','sauce'],
-      sizes:[{key:'S',label:'عادي',price:90}] },
-    { id:'grilled-chicken', name:'دجاج مشوي صحي', cat:'Chicken', subcat:'grilled', img:img('photo-1606755962773-d324e0a13086'), tags:['veggie'], spice:false,
-      desc:'صدور فراخ مشوية مع أفوكادو، طماطم وخس على عيش سن كامل.',
-      ingr:['فراخ','أفوكادو','طماطم','خس'],
-      allergens:['gluten'],
-      addons:['cheese','sauce'],
-      sizes:[{key:'S',label:'عادي',price:95}] },
-    { id:'veggie-burger', name:'هالومي ومشروم', cat:'Burgers', subcat:'veggie', img:img('photo-1520072959219-c595dc870360'), tags:['veggie'], spice:false,
-      desc:'جبنة هالومي مشوية، مشروم سوتيه، بيستو وجرجير على بريوش.',
-      ingr:['هالومي','مشروم','بيستو','جرجير'],
-      allergens:['gluten','dairy','nuts'],
-      addons:['jalapeno','sauce','onions'],
-      sizes:[{key:'S',label:'عادي',price:85}] },
-    { id:'fries', name:'بطاطس ترافل بارميزان', cat:'Sides', subcat:'fries', img:img('photo-1576107232684-1279f390859f'), tags:['popular','veggie'], spice:false, off:0.20, freeDelivery:true,
-      desc:'بطاطس مقرمشة بزيت الترافل، بارميزان وبقدونس طازة.',
-      ingr:['بطاطس','زيت ترافل','بارميزان','بقدونس'],
-      allergens:['dairy'],
-      addons:['cheese','sauce'],
-      sizes:[{key:'S',label:'عادي',price:45},{key:'L',label:'كبير',price:60}] },
-    { id:'wings', name:'أجنحة بافلو حارة', cat:'Sides', subcat:'wings', img:img('photo-1567620832903-9fc6debc209f'), tags:['spicy'], spice:true,
-      desc:'6 قطع أجنحة فراخ مقرمشة بصوص بافلو حار، مع رانش للتخفيف.',
-      ingr:['أجنحة فراخ','صوص بافلو','رانش'],
-      allergens:['dairy'],
-      addons:['sauce'],
-      sizes:[{key:'6',label:'6 قطع',price:65},{key:'12',label:'12 قطعة',price:120}] },
-    { id:'onion-rings', name:'حلقات بصل', cat:'Sides', subcat:'fries', img:img('photo-1639024471283-03518883512d'), tags:['veggie'], spice:false,
-      desc:'حلقات بصل مقرمشة مقلية مع صوص باربكيو مدخن.',
-      ingr:['بصل','بقسماط','صوص باربكيو'],
-      allergens:['gluten'],
-      addons:['sauce'],
-      sizes:[{key:'S',label:'عادي',price:40}] },
-    { id:'soda', name:'صودا كرافت', cat:'Drinks', subcat:'cold', img:img('photo-1622483767028-3f66f32aef97'), tags:['veggie'], spice:false, off:0.15, freeDelivery:true,
-      desc:'صودا مثلجة منعشة بنكهات طبيعية على اختيارك.',
-      ingr:['مياه غازية','نكهات طبيعية'],
-      allergens:[], addons:[],
-      sizes:[{key:'S',label:'علبة',price:20},{key:'L',label:'كبير',price:30}] },
-    { id:'milkshake', name:'ميلك شيك فانيليا', cat:'Drinks', subcat:'cold', img:img('photo-1572490122747-3968b75bd2a1'), tags:['popular'], spice:false,
-      desc:'ميلك شيك فانيليا تقيل وكريمي بكريمة مخفوقة فوق.',
-      ingr:['آيس كريم','لبن','فانيليا','كريمة'],
-      allergens:['dairy'],
-      addons:[],
-      sizes:[{key:'S',label:'عادي',price:50}] },
-    { id:'secret-burger', name:'الخروف الأسود', cat:'Burgers', subcat:'beef', secret:true, img:img('photo-1550547660-d9450f859349'), tags:['spicy'], spice:true,
-      desc:'دوبل باتي، عيش فحم، مايونيز ترافل وورق ذهب. أسطورة المنيو المخفية.',
-      ingr:['لحمة ×2','عيش فحم','مايونيز ترافل','ورق ذهب'],
-      allergens:['gluten','egg'],
-      addons:['cheese','bacon'],
-      sizes:[{key:'D',label:'دوبل',price:185}] }
-  ];
-  const ITEM = Object.fromEntries(MENU_ITEMS.map(i => [i.id, i]));
+  const img = () => '';
+  const MENU_ITEMS = [];
+  const ITEM = Object.create(null);
   const isSecret = it => it.secret === true;
 
   /* ═══════════════════════════════════════════════════════════════
      [LIVE] ربط منيو العميل بـ Supabase — تحديثات لحظية من لوحة الأدمن
      لا يتم استخدام service_role داخل المتصفح؛ المفتاح هنا publishable فقط.
      ═══════════════════════════════════════════════════════════════ */
+  const CUSTOMER_APP_BUILD = 'supabase-live-home-promotions-subcategories-slider-2026-10-28-fix7';
   const SB_URL = 'https://gwufhitzmupyumdjabnj.supabase.co';
   const SB_KEY = 'sb_publishable_oTZFsXGeGb_PAhI7A-eTAw_MGwsBTGG';
   const sbClient = window.supabase?.createClient
@@ -1060,6 +963,12 @@ body:has(#stickyCart.show) .install-btn{
   let customerAuthBusy = false;
   let liveMenuChannel = null;
   let liveMenuReady = false;
+  let secretMenuToken = '';
+  let liveSecretItems = [];
+  let liveSecretAddonMap = {};
+  let livePromotion = null;
+  let livePromotions = [];
+  let activePromotionIndex = 0;
 
   const categoryKey = (slug, name) => {
     const value = String(slug || '').toLowerCase();
@@ -1076,14 +985,18 @@ body:has(#stickyCart.show) .install-btn{
   const loadLiveMenu = async () => {
     if (!sbClient) return;
     try {
-      const [{ data: cats, error: catsError }, { data: rows, error: itemsError }, { data: sizes, error: sizesError }, { data: settings, error: settingsError }, { data: zones, error: zonesError }, addonResult, itemAddonResult] = await Promise.all([
+      const [{ data: cats, error: catsError }, { data: rows, error: itemsError }, { data: sizes, error: sizesError }, { data: settings, error: settingsError }, { data: zones, error: zonesError }, addonResult, itemAddonResult, subcategoryResult, promotionResult, reviewsResult] = await Promise.all([
         sbClient.from('categories').select('id,slug,name_ar,sort_order,is_active').eq('is_active', true).order('sort_order'),
-        sbClient.from('menu_items').select('id,slug,category_id,name_ar,description_ar,image_url,tags,is_spicy,is_available,is_secret,sort_order,subcategory_ar,ingredients_ar,allergens,is_vegetarian,display_badge,is_popular,free_delivery').eq('is_available', true).order('sort_order'),
+        // لا تُرسل الأصناف السرية في الاستعلام العام؛ يتم تحميلها بعد التحقق من الكود على الخادم.
+        sbClient.from('menu_items').select('id,slug,category_id,subcategory_id,name_ar,description_ar,image_url,tags,is_spicy,is_available,is_secret,sort_order,subcategory_ar,ingredients_ar,allergens,is_vegetarian,display_badge,is_popular,free_delivery').eq('is_available', true).eq('is_secret', false).order('sort_order'),
         sbClient.from('item_sizes').select('id,item_id,label_ar,price,sort_order,is_available').eq('is_available', true).order('sort_order'),
-        sbClient.from('store_settings').select('is_open,accepting_orders,min_order,free_delivery_threshold,delivery_fee,avg_prep_minutes,cash_enabled,visa_enabled').eq('id', 1).maybeSingle(),
+        sbClient.from('store_settings').select('name_ar,address_text,is_open,accepting_orders,min_order,delivery_fee,free_delivery_threshold,avg_prep_minutes,cash_enabled,visa_enabled,currency,loyalty_enabled,loyalty_points_per_currency,loyalty_redeem_points,loyalty_redeem_value,loyalty_stamps_for_reward,show_popular_filter,show_spicy_filter,show_vegetarian_filter,show_free_delivery_filter,chef_special_item_id,chef_special_discount').eq('id', 1).maybeSingle(),
         sbClient.from('delivery_zones').select('id,name_ar,fee,min_order,sort_order,is_active').eq('is_active', true).order('sort_order'),
         sbClient.from('addons').select('id,slug,name_ar,price,is_available,sort_order').eq('is_available', true).order('sort_order'),
-        sbClient.from('item_addons').select('item_id,addon_id')
+        sbClient.from('item_addons').select('item_id,addon_id'),
+        sbClient.from('subcategories').select('id,category_id,name_ar,sort_order,is_active').eq('is_active',true).order('sort_order'),
+        sbClient.from('menu_promotions').select('id,name_ar,description_ar,image_url,promotion_type,target_item_id,reward_item_id,value,priority,starts_at,ends_at,max_uses,used_count,is_active').eq('is_active', true).order('priority',{ascending:false}).limit(20),
+        sbClient.from('reviews').select('id,item_id,rating,comment,display_name,created_at').eq('is_hidden', false).order('created_at',{ascending:false}).limit(500)
       ]);
       if (catsError) throw catsError;
       if (itemsError) throw itemsError;
@@ -1091,6 +1004,22 @@ body:has(#stickyCart.show) .install-btn{
       if (settingsError) throw settingsError;
       if (zonesError) throw zonesError;
       window.SHEEPBURGER_ZONES = zones || [];
+      const nowMs = Date.now();
+      // اعرض كل العروض النشطة والصالحة زمنيًا، ولا تستبعد الوصف القصير أو المكوّن من كلمة واحدة.
+      livePromotions = (promotionResult?.data || []).filter(p =>
+        p.is_active !== false &&
+        (!p.starts_at || new Date(p.starts_at).getTime() <= nowMs) &&
+        (!p.ends_at || new Date(p.ends_at).getTime() >= nowMs) &&
+        (p.max_uses == null || Number(p.used_count || 0) < Number(p.max_uses))
+      );
+      livePromotion = livePromotions[0] || null;
+      window.SHEEPBURGER_PROMOTIONS = livePromotions;
+      window.SHEEPBURGER_PROMOTION = livePromotion;
+      if (!reviewsResult?.error) {
+        const ratingMap = {};
+        (reviewsResult?.data || []).forEach(r => { (ratingMap[r.item_id] ||= []).push({ uid:r.id, name:r.display_name || 'عميل', stars:Number(r.rating)||5, text:r.comment || '', date:r.created_at ? new Date(r.created_at).toLocaleDateString('ar-EG',{day:'numeric',month:'short'}) : '', sessionId:'' }); });
+        state.ratings = ratingMap;
+      }
 
       // الإضافات تُحمّل من نفس قاعدة البيانات، مع ربط كل إضافة بمعرّفها الحقيقي.
       if (!addonResult.error && !itemAddonResult.error) {
@@ -1101,26 +1030,39 @@ body:has(#stickyCart.show) .install-btn{
           liveAddonIds[key] = a.id;
           ADDONS[key] = { name: a.name_ar, price: Number(a.price) || 0, allergens: [], dbId: a.id };
         });
+        Object.entries(liveSecretAddonMap).forEach(([key, a]) => {
+          if (!ADDONS[key]) { liveAddonIds[key] = a.dbId; ADDONS[key] = { name:a.name, price:a.price, allergens:[], dbId:a.dbId }; }
+        });
         window.SHEEPBURGER_ITEM_ADDONS = itemAddonResult.data || [];
       } else {
         console.warn('[Supabase] تعذر تحميل الإضافات:', addonResult.error?.message || itemAddonResult.error?.message);
       }
 
+      const subcategoryRows = subcategoryResult?.data || [];
+      const subcategoryById = Object.fromEntries(subcategoryRows.map(sc => [sc.id, sc]));
+      const subcategoryByParentAndName = new Map(subcategoryRows.map(sc => [`${sc.category_id}|${sc.name_ar}`, sc.id]));
+      window.SHEEPBURGER_SUBCATEGORIES = subcategoryRows;
+      Object.keys(SUBCATS).forEach(k => delete SUBCATS[k]);
+      subcategoryRows.forEach(sc => { (SUBCATS[sc.category_id] ||= []).push({id:sc.id,label:sc.name_ar,sort_order:sc.sort_order||0}); });
+      Object.values(SUBCATS).forEach(list => list.sort((x,y)=>x.sort_order-y.sort_order));
       const categoryById = Object.fromEntries((cats || []).map(c => [c.id, c]));
-      const mappedCategories = (cats || []).map(c => ({ row: c, key: categoryKey(c.slug, c.name_ar) })).filter(x => x.key);
-      if (mappedCategories.length) {
-        CATS.splice(0, CATS.length, ...mappedCategories.map(x => ({
-          id: x.key, label: x.row.name_ar || x.key,
-          emoji: ({ Burgers:'🍔', Chicken:'🍗', Sides:'🍟', Drinks:'🥤', Desserts:'🍦' })[x.key] || '🍽️'
-        })).filter((x, i, all) => all.findIndex(y => y.id === x.id) === i));
-      }
+      window.SHEEPBURGER_CATEGORIES = categoryById;
+      // اعرض كل التصنيفات النشطة من قاعدة البيانات، وليس قائمة أسماء ثابتة.
+      // معرّف قاعدة البيانات هو مفتاح الفلترة، بينما cat الدلالي يُحتفظ به لوظائف البرجر والإحصائيات.
+      const mappedCategories = (cats || []).map(c => ({ row: c, key: categoryKey(c.slug, c.name_ar) }));
+      CATS.splice(0, CATS.length, ...mappedCategories.map(x => ({
+        id: x.row.id,
+        key: x.key,
+        label: x.row.name_ar || x.row.slug || 'تصنيف',
+        emoji: ({ Burgers:'🍔', Chicken:'🍗', Sides:'🍟', Drinks:'🥤', Desserts:'🍦' })[x.key] || '🍽️'
+      })));
       const sizesByItem = {};
       (sizes || []).forEach(z => {
         (sizesByItem[z.item_id] ||= []).push({ key: z.id, label: z.label_ar, price: Number(z.price) || 0 });
       });
       const itemAddonSet = {};
       (window.SHEEPBURGER_ITEM_ADDONS || []).forEach(x => (itemAddonSet[x.item_id] ||= new Set()).add(x.addon_id));
-      const liveItems = (rows || []).filter(r => categoryById[r.category_id] && categoryKey(categoryById[r.category_id].slug, categoryById[r.category_id].name_ar) && (sizesByItem[r.id] || []).length)
+      const liveItems = (rows || []).filter(r => categoryById[r.category_id] && (sizesByItem[r.id] || []).length)
         .map(r => {
           const c = categoryById[r.category_id];
           const cat = categoryKey(c.slug, c.name_ar);
@@ -1128,10 +1070,10 @@ body:has(#stickyCart.show) .install-btn{
           const availableAddonIds = itemAddonSet[r.id] || new Set();
           const addonKeys = Object.keys(liveAddonIds).filter(key => availableAddonIds.has(liveAddonIds[key]));
           return {
-            id: r.id, slug: r.slug, name: r.name_ar, cat,
-            subcat: r.subcategory_ar || 'all',
+            id: r.id, slug: r.slug, name: r.name_ar, cat, categoryId: c.id,
+            subcat: (r.subcategory_id || subcategoryByParentAndName.get(`${r.category_id}|${r.subcategory_ar}`) || 'all'), subcategoryId: (r.subcategory_id || subcategoryByParentAndName.get(`${r.category_id}|${r.subcategory_ar}`) || null),
             img: r.image_url || img('photo-1568901346375-23c9450c58cd'),
-            tags: [...tags, ...(r.is_popular ? ['popular'] : []), ...(r.is_vegetarian ? ['veggie'] : []), ...(r.is_spicy ? ['spicy'] : [])],
+            tags: [...tags, ...(r.is_popular ? ['popular'] : []), ...(r.is_vegetarian ? ['veggie'] : []), ...(r.is_spicy ? ['spicy'] : []), ...(r.free_delivery ? ['free_delivery'] : [])],
             spice: !!r.is_spicy, freeDelivery: !!r.free_delivery, secret: !!r.is_secret,
             desc: r.description_ar || '', ingr: Array.isArray(r.ingredients_ar) ? r.ingredients_ar : [],
             allergens: Array.isArray(r.allergens) ? r.allergens : [],
@@ -1139,7 +1081,8 @@ body:has(#stickyCart.show) .install-btn{
             displayBadge: r.display_badge || ''
           };
         });
-      if (!liveItems.length) {
+      const allLiveItems = [...liveItems, ...liveSecretItems];
+      if (!allLiveItems.length) {
         MENU_ITEMS.splice(0, MENU_ITEMS.length);
         Object.keys(ITEM).forEach(k => delete ITEM[k]);
         liveMenuReady = true;
@@ -1148,11 +1091,20 @@ body:has(#stickyCart.show) .install-btn{
         return;
       }
 
-      MENU_ITEMS.splice(0, MENU_ITEMS.length, ...liveItems);
+      MENU_ITEMS.splice(0, MENU_ITEMS.length, ...allLiveItems);
       Object.keys(ITEM).forEach(k => delete ITEM[k]);
-      liveItems.forEach(it => { ITEM[it.id] = it; });
+      allLiveItems.forEach(it => { ITEM[it.id] = it; });
+      // اختيار الشيف يُدار من لوحة الإدارة، ولا يعتمد على اختيار عشوائي محفوظ على جهاز العميل.
+      if (settings) {
+        const chefId = settings.chef_special_item_id ? String(settings.chef_special_item_id) : '';
+        const chefItem = chefId ? ITEM[chefId] : null;
+        state.chefSpecial = chefItem && !chefItem.secret
+          ? { id: chefId, discount: Math.min(0.99, Math.max(0.01, Number(settings.chef_special_discount) || 0.25)) }
+          : null;
+        safeSave(K('chef_special'), state.chefSpecial);
+      }
       // يمنع استخدام عناصر قديمة من التخزين المحلي بمعرّفات لم تعد موجودة في المنيو.
-      state.cart = state.cart.filter(line => ITEM[line.id]).map(line => ({
+      state.cart = state.cart.map(sanitizeLine).filter(Boolean).map(line => ({
         ...line, addons: (line.addons || []).filter(key => ITEM[line.id].addons.includes(key) && ADDONS[key])
       }));
       safeSave(K('cart'), state.cart);
@@ -1166,7 +1118,7 @@ body:has(#stickyCart.show) .install-btn{
       console.info('[Supabase] تم تحديث منيو العميل', { products: liveItems.length, categories: (cats || []).length });
     } catch (err) {
       console.error('[Supabase] تعذر تحميل المنيو الحي:', err?.message || err);
-      // عند تعذر الاتصال، يستمر التطبيق بالمنيو المحلي بدل تعطيل الصفحة.
+      MENU_ITEMS.splice(0, MENU_ITEMS.length); Object.keys(ITEM).forEach(k => delete ITEM[k]); liveMenuReady = false; refresh();
     }
   };
 
@@ -1176,15 +1128,19 @@ body:has(#stickyCart.show) .install-btn{
       .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, loadLiveMenu)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'item_sizes' }, loadLiveMenu)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, loadLiveMenu)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'subcategories' }, loadLiveMenu)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'store_settings' }, loadLiveMenu)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'delivery_zones' }, loadLiveMenu)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'addons' }, loadLiveMenu)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'item_addons' }, loadLiveMenu)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_promotions' }, loadLiveMenu)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, loadLiveMenu)
       .subscribe(status => {
         if (status === 'SUBSCRIBED') console.info('[Supabase] التحديثات اللحظية مفعلة');
       });
   };
   window.addEventListener('online', loadLiveMenu);
+  window.setInterval(() => { if (currentRoute() === 'home' && livePromotions.length > 1 && !document.hidden) updateHeroSlide(); }, 6000);
 
 
   /* ═══════════════════════════════════════════════
@@ -1192,7 +1148,7 @@ body:has(#stickyCart.show) .install-btn{
      ═══════════════════════════════════════════════ */
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const round2 = n => Math.round((Number(n) || 0) * 100) / 100;
-  const money = n => round2(n).toFixed(2) + ' ج.م';
+  const money = n => round2(n).toFixed(2) + (window.SHEEPBURGER_STORE?.currency ? ' ' + window.SHEEPBURGER_STORE.currency : '');
   const moneyHtml = n => `<span class="price-ltr">${money(n)}</span>`;
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const today = () => new Date().toDateString();
@@ -1284,13 +1240,13 @@ body:has(#stickyCart.show) .install-btn{
   const sessionId = safeLoad(K('session_id'), null) || (() => { const s = uid(); safeSave(K('session_id'), s); return s; })();
 
   const state = {
-    cart: (safeLoad(K('cart'), []) || []).map(sanitizeLine).filter(Boolean),
+    cart: (safeLoad(K('cart'), []) || []).filter(Boolean),
     orders: (safeLoad(K('orders'), []) || []).filter(o => o && Array.isArray(o.items) && (typeof o.id === 'number' || typeof o.id === 'string')).map(o => ({ ...o, status: clamp(o.status ?? 0, 0, 3), startedAt: o.startedAt || Date.now() })),
     customer: (() => { const c = safeLoad(K('customer'), {}); return c && typeof c === 'object' ? c : {}; })(),
     filter: 'All', subcat: 'All', query: '',
     draft: null,
     reviewStars: 5, reviewName: '', reviewText: '', reviewFormOpen: false,
-    coupon: (() => { const c = safeLoad(K('coupon'), null); if (!c || typeof c.code !== 'string') return null; if (c.type === 'percent' && Number(c.value) > 0) return { code: c.code, type: 'percent', value: Number(c.value), pct: Number(c.value) / 100, max_discount: c.max_discount == null ? null : Number(c.max_discount), min_order: Number(c.min_order || 0) }; if (c.type === 'fixed' && Number(c.value) > 0) return { code: c.code, type: 'fixed', value: Number(c.value), min_order: Number(c.min_order || 0), max_discount: c.max_discount == null ? null : Number(c.max_discount) }; if (COUPONS[c.code]) return { code: c.code, type: 'percent', value: COUPONS[c.code] * 100, pct: COUPONS[c.code] }; return null; })(),
+    coupon: null,
     couponInput: safeLoad(K('coupon'), null)?.code || '',
     couponMsg: '',
     stamps: 0,
@@ -1299,23 +1255,23 @@ body:has(#stickyCart.show) .install-btn{
     notificationsError: false,
     freeBurger: false,
     points: 0,
-    pointsRate: 1,
-    redeemPoints: CONFIG.POINTS_FOR_DISCOUNT,
-    redeemValue: CONFIG.DISCOUNT_VALUE,
-    stampsForReward: CONFIG.STAMPS_FOR_REWARD,
+    pointsRate: 0,
+    redeemPoints: 0,
+    redeemValue: 0,
+    stampsForReward: 0,
     loyaltyEnabled: false,
     achievements: [],
     vouchers: [],
     remoteVouchers: [],
     selectedVoucherId: null,
     stats: (() => { const s = safeLoad(K('stats'), {}); return { burgersOrdered: Math.max(0, Number(s.burgersOrdered) || 0), veggieOrdered: Math.max(0, Number(s.veggieOrdered) || 0), spicyItems: Array.isArray(s.spicyItems) ? s.spicyItems.filter(x => typeof x === 'string') : [], totalOrders: Math.max(0, Number(s.totalOrders) || 0) }; })(),
-    secretUnlocked: !!safeLoad(K('secret_unlocked'), false),
+    secretUnlocked: false,
     birthdayApplied: String(safeLoad(K('birthday_applied'), '') || ''),
     ratings: sanitizeReviews(safeLoad(K('ratings'), {})),
     chefSpecial: (() => { const c = safeLoad(K('chef_special'), null); if (c && typeof c === 'object' && ITEM[c.id] && Number.isFinite(c.discount) && c.discount > 0 && c.discount < 1) return c; return null; })()
   };
 
-  if (state.couponInput === 'BIRTHDAY50' && state.coupon?.code === 'BIRTHDAY50') { state.coupon = null; state.couponInput = ''; safeSave(K('coupon'), null); }
+  // كوبونات العميل تُقبل فقط بعد تحقق الخادم؛ لا توجد أكواد احتياطية محلية.
 
   const app = document.getElementById('app');
   const sheet = document.getElementById('sheet');
@@ -1365,12 +1321,12 @@ body:has(#stickyCart.show) .install-btn{
     const liveSettings = window.SHEEPBURGER_STORE || {};
     const selectedZoneId = document.getElementById('fArea')?.value;
     const selectedZone = (window.SHEEPBURGER_ZONES || []).find(z => String(z.id) === String(selectedZoneId));
-    const freeDeliveryThreshold = Number(liveSettings.free_delivery_threshold ?? CONFIG.FREE_DELIVERY_AT);
+    const freeDeliveryThreshold = Number(liveSettings.free_delivery_threshold ?? 0);
     if (subtotal > 0) {
       if (freeDeliveryThreshold > 0 && subtotal >= freeDeliveryThreshold) freeDeliveryReason = 'threshold';
       else if (cart.some(l => ITEM[l.id]?.freeDelivery)) freeDeliveryReason = 'item';
       else if (vouchers.some(v => v.type === 'delivery')) freeDeliveryReason = 'voucher';
-      else deliveryFee = Number(selectedZone?.fee ?? liveSettings.delivery_fee ?? CONFIG.DELIVERY_FEE);
+      else deliveryFee = Number(selectedZone?.fee ?? liveSettings.delivery_fee ?? 0);
     }
     const appliedVouchers = [];
     let voucherDiscount = 0;
@@ -1440,24 +1396,8 @@ body:has(#stickyCart.show) .install-btn{
   /* ═══════════════════════════════════════════════
      [JS] الولاء والمكافآت
      ═══════════════════════════════════════════════ */
-  const addStamp = () => {
-    state.stamps = Math.min(CONFIG.STAMPS_FOR_REWARD, state.stamps + 1);
-    if (state.stamps >= CONFIG.STAMPS_FOR_REWARD) {
-      state.stamps = 0; state.freeBurger = true;
-      safeSave(K('free_burger'), true);
-      showConfetti();
-      toast('🎉 برجر مجاني اتفعّل!');
-    }
-    safeSave(K('stamps'), state.stamps);
-  };
-
-  const addPoints = (amount) => {
-    const pts = Math.floor(Math.max(0, amount) / CONFIG.POINTS_DIVISOR * CONFIG.POINTS_PER_POUND);
-    if (pts <= 0) return;
-    state.points += pts;
-    safeSave(K('points'), state.points);
-    toast(`+${pts} نقطة مكافآت 🌟`);
-  };
+  const addStamp = () => { /* الولاء يُحتسب من دفتر الخادم فقط بعد التسليم. */ };
+  const addPoints = () => { /* لا يُسمح بحساب نقاط محلي أو ثابت. */ };
 
   const awardAch = (key) => {
     if (!(key in ACHIEVEMENTS) || state.achievements.includes(key)) return;
@@ -1490,11 +1430,7 @@ body:has(#stickyCart.show) .install-btn{
       if (m.spice && !state.stats.spicyItems.includes(m.id)) state.stats.spicyItems.push(m.id);
     });
     safeSave(K('stats'), state.stats);
-    if (!state.secretUnlocked && state.stats.totalOrders >= CONFIG.SECRET_ORDERS_NEEDED) {
-      state.secretUnlocked = true;
-      safeSave(K('secret_unlocked'), true);
-      toast('🤫 المنيو السري اتفعّل!');
-    }
+    // لا يفتح عدد الطلبات المخزّن محليًا المنيو السري؛ يلزم جلسة خادم صالحة.
   };
 
   /* ═══════════════════════════════════════════════
@@ -1504,14 +1440,14 @@ body:has(#stickyCart.show) .install-btn{
   let trackingTimer = null;
 
   const computeStatus = (order) => {
-    if (!CONFIG.DEMO_MODE) return order.status ?? 0;
+    if (!false) return order.status ?? 0;
     if (!order.startedAt) return order.status ?? 3;
     if (order.status === 3) return 3;
     return clamp(Math.floor((Date.now() - order.startedAt) / CONFIG.STATUS_STEP_MS), 0, 3);
   };
 
   const refreshLive = () => {
-    if (!CONFIG.DEMO_MODE) return false;
+    if (!false) return false;
     let changed = false;
     state.orders.forEach(o => {
       if (o.status < 3) {
@@ -1526,7 +1462,7 @@ body:has(#stickyCart.show) .install-btn{
   const startTracking = () => {
     if (trackingTimer) return;
     trackingTimer = setInterval(async () => {
-      let changed = CONFIG.DEMO_MODE ? refreshLive() : false;
+      let changed = false ? refreshLive() : false;
       const tracked = state.orders.filter(o => o.trackingToken && o.id && o.status < 3);
       for (const o of tracked) {
         try {
@@ -1558,7 +1494,7 @@ body:has(#stickyCart.show) .install-btn{
         } catch (e) { console.warn('[Supabase] تعذر تحديث حالة الطلب'); }
       }
       if (changed) { safeSave(K('orders'), state.orders); if (currentRoute() === 'orders') refresh(); }
-      if (!state.orders.some(o => o.status < 3 && o.trackingToken) && (!CONFIG.DEMO_MODE || !state.orders.some(o => o.status < 3))) { clearInterval(trackingTimer); trackingTimer = null; }
+      if (!state.orders.some(o => o.status < 3 && o.trackingToken) && (!false || !state.orders.some(o => o.status < 3))) { clearInterval(trackingTimer); trackingTimer = null; }
     }, 12000);
   };
 
@@ -1639,6 +1575,7 @@ body:has(#stickyCart.show) .install-btn{
         delivery_address: address, zone_id: zone.id,
         notes: '', coupon_code: state.selectedVoucherId ? null : (state.coupon?.code || state.couponInput || null),
         voucher_id: state.selectedVoucherId || null,
+        secret_menu_token: state.cart.some(l => ITEM[l.id]?.secret) ? secretMenuToken : null,
         items: state.cart.map(l => {
           const item = ITEM[l.id];
           const addon_ids = (l.addons || []).map(key => ADDONS[key]?.dbId || liveAddonIds[key]).filter(Boolean);
@@ -1780,26 +1717,26 @@ body:has(#stickyCart.show) .install-btn{
     return `<div class="product-rating">${stars}<span>${avg.toFixed(1)} (${count})</span></div>`;
   };
 
-  const submitReview = (itemId) => {
+  const submitReview = async (itemId) => {
     const nameEl = document.getElementById('reviewName');
     const textEl = document.getElementById('reviewText');
     const text = (textEl?.value || '').trim();
     const name = (nameEl?.value || '').trim();
-    if (text.length < 3) { toast('اكتب على الأقل كلمتين'); return; }
-    const list = state.ratings[itemId] || [];
-    if (list.some(r => r.sessionId === sessionId)) { toast('انت قيمت الحاجة دي قبل كده'); return; }
-    if (!state.ratings[itemId]) state.ratings[itemId] = [];
-    state.ratings[itemId].push({
-      uid: uid(), name: name.slice(0, 30) || 'عميل',
-      stars: clamp(state.reviewStars, 1, 5),
-      text: text.slice(0, 300),
-      date: new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }),
-      sessionId
-    });
-    safeSave(K('ratings'), state.ratings);
-    toast('شكراً على التقييم ⭐');
-    showConfetti();
-    renderSheet();
+    if (text.length < 3) { toast('اكتب تعليقًا من 3 أحرف على الأقل'); return; }
+    if (!customerAuthUser || !sbClient) { toast('سجّل دخولك أولًا عشان نربط تقييمك بحسابك'); location.hash = '#/profile'; return; }
+    try {
+      const { data: orders, error: orderError } = await sbClient.from('orders').select('id,delivered_at').eq('user_id',customerAuthUser.id).eq('status','delivered').order('delivered_at',{ascending:false}).limit(100);
+      if (orderError) throw orderError;
+      const orderIds = (orders || []).map(o=>o.id);
+      if (!orderIds.length) { toast('التقييم متاح بعد استلام طلب مرتبط بحسابك'); return; }
+      const { data: matching, error: itemError } = await sbClient.from('order_items').select('order_id').eq('item_id',itemId).in('order_id',orderIds).limit(1);
+      if (itemError) throw itemError;
+      if (!matching?.length) { toast('لازم تكون استلمت الصنف ده من طلب مرتبط بحسابك قبل تقييمه'); return; }
+      const { error: insertError } = await sbClient.from('reviews').insert({ user_id:customerAuthUser.id, order_id:matching[0].order_id, item_id:itemId, rating:clamp(state.reviewStars,1,5), comment:text.slice(0,300), display_name:(name.slice(0,30)||state.customer.name||'عميل').slice(0,80) });
+      if (insertError) { if (insertError.code === '23505') { toast('سبق وقيّمت الصنف ده'); return; } throw insertError; }
+      await loadLiveMenu();
+      toast('تم حفظ تقييمك في قاعدة البيانات ⭐'); showConfetti(); renderSheet();
+    } catch (e) { console.warn('[Reviews] تعذر حفظ التقييم',e?.message); toast('تعذر حفظ التقييم. تأكد من اتصالك وحاول مرة أخرى.'); }
   };
 
   /* ═══════════════════════════════════════════════
@@ -1827,7 +1764,7 @@ body:has(#stickyCart.show) .install-btn{
       }
       await loadCustomerRewards();
       refresh();
-      toast(`🎉 اتعملت مكافأة بقيمة ${money(Number(result.data?.voucher_value ?? state.redeemValue ?? CONFIG.DISCOUNT_VALUE))}.`);
+      toast(`🎉 اتعملت مكافأة بقيمة ${money(Number(result.data?.voucher_value ?? state.redeemValue ?? Math.max(0, Number(window.SHEEPBURGER_STORE?.loyalty_redeem_value || 0))))}.`);
     } catch (e) { toast(e?.message || 'تعذر استبدال النقاط.'); }
   };
 
@@ -1844,17 +1781,69 @@ body:has(#stickyCart.show) .install-btn{
     location.hash = '#/cart';
   };
 
-  const unlockSecret = () => {
+  const unlockSecret = async () => {
     const input = document.getElementById('secretCode');
-    const code = (input ? input.value : '').trim().toUpperCase();
-    if (code === CONFIG.SECRET_CODE) {
+    const code = (input ? input.value : '').trim();
+    if (!code) { toast('اكتب كود المنيو السري الأول'); return; }
+    if (!sbClient) { toast('الاتصال بقاعدة البيانات غير متاح حاليًا'); return; }
+    const button = document.querySelector('[data-action="unlock-secret"]');
+    if (button) { button.disabled = true; button.textContent = 'بنتحقق…'; }
+    try {
+      const headers = { 'Content-Type':'application/json', apikey:SB_KEY };
+      const { data: authData } = await sbClient.auth.getSession();
+      if (authData?.session?.access_token) headers.Authorization = `Bearer ${authData.session.access_token}`;
+      const unlockResponse = await fetch(`${SB_URL}/functions/v1/secret-menu-api`, { method:'POST', headers, body:JSON.stringify({action:'unlock',code}) });
+      const unlockResult = await unlockResponse.json().catch(()=>({}));
+      if (!unlockResponse.ok || !unlockResult.data?.access_token) {
+        // بعض ردود الخادم ترسل سبب الخطأ في error أو code أو message،
+        // وقد يكون تجاوز المحاولات مصحوبًا بحالة HTTP 429. لا نغيّر حماية الخادم؛
+        // نعرض فقط الرسالة المطابقة للسبب الذي أعاده.
+        const serverError = [
+          unlockResult.error,
+          unlockResult.code,
+          unlockResult.message,
+          unlockResult.details,
+          unlockResult.data?.error,
+          unlockResult.data?.code,
+          unlockResult.data?.message
+        ].filter(Boolean).join(' ').toUpperCase();
+        const tooManyAttempts =
+          unlockResponse.status === 429 ||
+          /TOO[_ -]?MANY|RATE[_ -]?LIMIT|MAX[_ -]?ATTEMPTS?[_ -]?(EXCEEDED|REACHED|LIMIT)|ATTEMPTS?[_ -]EXCEEDED|محاولات كثيرة|تجاوز.*محاول/.test(serverError);
+        if (tooManyAttempts) {
+          throw new Error('وصلت للحد الأقصى من المحاولات. استنى 15 دقيقة قبل ما تجرب تاني');
+        }
+        const errors = {
+          INVALID_SECRET_MENU_CODE:'الكود غير صحيح أو انتهت صلاحيته',
+          SECRET_MENU_TEMPORARILY_UNAVAILABLE:'المنيو السري غير متاح مؤقتًا.',
+          SECRET_REWARD_LOGIN_REQUIRED:'سجّل دخولك بنفس الحساب الذي استحق الكود السري من الإشعارات.',
+          SECRET_REWARD_OWNER_ONLY:'الكود السري ده مرتبط بحساب عميل آخر.'
+        };
+        const errorKey = [unlockResult.error, unlockResult.code, unlockResult.data?.error, unlockResult.data?.code]
+          .find(key => typeof key === 'string' && errors[key]);
+        throw new Error(errors[errorKey] || 'تعذر فتح المنيو السري.');
+      }
+      secretMenuToken = unlockResult.data.access_token;
+      const menuResponse = await fetch(`${SB_URL}/functions/v1/secret-menu-api`, { method:'POST', headers, body:JSON.stringify({action:'get_menu',access_token:secretMenuToken}) });
+      const menuResult = await menuResponse.json().catch(()=>({}));
+      if (!menuResponse.ok || !Array.isArray(menuResult.items)) throw new Error('تم التحقق من الكود لكن تعذر تحميل الأصناف السرية.');
+      const cats = window.SHEEPBURGER_CATEGORIES || {};
+      liveSecretItems = menuResult.items.map(r => {
+        const c = cats[r.category_id]; const cat = c ? categoryKey(c.slug,c.name_ar,c.id) : 'dbcat:uncategorized';
+        const addonKeys = (r.addons || []).map(a => {
+          let key = Object.keys(liveAddonIds).find(k => liveAddonIds[k] === a.id);
+          if (!key) { key = `secret-addon-${a.id}`; liveSecretAddonMap[key] = {name:a.name_ar,price:Number(a.price)||0,dbId:a.id}; liveAddonIds[key] = a.id; ADDONS[key] = {name:a.name_ar,price:Number(a.price)||0,allergens:[],dbId:a.id}; }
+          return key;
+        });
+        return { id:r.id,slug:r.slug,name:r.name_ar,cat:cat||'dbcat:uncategorized',subcat:'all',img:r.image_url||img('photo-1568901346375-23c9450c58cd'),tags:[...(r.tags||[]),...(r.is_vegetarian?['veggie']:[]),...(r.is_spicy?['spicy']:[])],spice:!!r.is_spicy,freeDelivery:false,secret:true,desc:r.description_ar||'',ingr:r.ingredients_ar||[],allergens:r.allergens||[],addons:addonKeys,sizes:(r.sizes||[]).map(z=>({key:z.id,label:z.label_ar,price:Number(z.price)||0}))};
+      }).filter(it => it.sizes.length);
       state.secretUnlocked = true;
-      safeSave(K('secret_unlocked'), true);
-      checkAch();
+      await loadLiveMenu();
       showConfetti();
-      toast('🤫 المنيو السري اتفعّل!');
+      toast(liveSecretItems.length ? '🤫 المنيو السري اتفتح!' : 'الكود صحيح، لكن مفيش أصناف سرية متاحة للكود ده حاليًا.');
       refresh();
-    } else if (code.length > 0) toast('الكود غلط، جرب تاني');
+    } catch (e) { toast(e.message || 'تعذر فتح المنيو السري.'); }
+    finally { if (button) { button.disabled = false; button.textContent = 'افتح'; } }
   };
 
   /* ═══════════════════════════════════════════════
@@ -1972,43 +1961,34 @@ body:has(#stickyCart.show) .install-btn{
      ═══════════════════════════════════════════════ */
   const viewHome = () => {
     const popular = MENU_ITEMS.filter(i => !isSecret(i) && i.tags.includes('popular')).concat(MENU_ITEMS.filter(i => !isSecret(i) && !i.tags.includes('popular'))).slice(0, 6);
-    const freeDelivery = MENU_ITEMS.filter(i => !isSecret(i) && i.freeDelivery).slice(0, 4);
     const pricing = calculatePricing(state.cart, { coupon: state.coupon, vouchers: state.vouchers });
-    const remaining = Math.max(0, CONFIG.FREE_DELIVERY_AT - pricing.subtotal);
-    const pct = Math.min(100, (pricing.subtotal / CONFIG.FREE_DELIVERY_AT) * 100);
 
-    if (!state.chefSpecial) {
-      const candidates = MENU_ITEMS.filter(i => !isSecret(i));
-      const pick = candidates[Math.floor(Math.random() * candidates.length)];
-      state.chefSpecial = { id: pick.id, discount: 0.25 };
-      safeSave(K('chef_special'), state.chefSpecial);
-    }
-    const special = ITEM[state.chefSpecial.id];
+    const special = state.chefSpecial ? ITEM[state.chefSpecial.id] : null;
     const specialPrice = special ? fromPrice(special) : 0;
     const discounted = specialPrice * (1 - (state.chefSpecial?.discount || 0.25));
 
+    const promos = livePromotions;
+    const storeName = window.SHEEPBURGER_STORE?.name_ar || 'Sheep & Burger';
+    const heroIndex = promos.length ? (activePromotionIndex % promos.length) : 0;
+    const promo = promos[heroIndex] || null;
+    const promoItem = promo?.target_item_id ? ITEM[promo.target_item_id] : null;
+    const heroTitle = promo?.name_ar || storeName;
+    const heroDescription = promo?.description_ar || window.SHEEPBURGER_STORE?.address_text || 'اختار من قائمة الطعام واطلب اللي تحبه.';
+    const heroImage = promo?.image_url || promoItem?.img || '';
     return `
       <div class="view-anim">
-        <section class="hero">
-          <img class="hero-img" src="${img('photo-1568901346375-23c9450c58cd')}" alt="" loading="eager">
+        <section class="hero" data-hero-root>
+          ${heroImage ? `<img class="hero-img" data-hero-image src="${esc(heroImage)}" alt="${esc(heroTitle)}" loading="eager">` : ''}
           <div class="hero-content">
-            <div class="hero-eyebrow">مفتوح دلوقتي · 25–35 دقيقة</div>
-            <h1>برجر طازة. <em>توصيل سريع.</em></h1>
-            <p>بيتحضرلك على الطلب. مكونات طازة، طعم جبار، وبيوصلك سخن.</p>
-            <a href="#/menu" class="hero-cta">
-              اطلب دلوقتي
+            <div class="hero-eyebrow" data-hero-eyebrow>${promo ? 'عرض من عروض المطعم' : esc(storeName)}</div>
+            <h1 data-hero-title>${esc(heroTitle)}</h1>
+            <p data-hero-description>${esc(heroDescription)}</p>
+            <a href="#/menu" class="hero-cta" data-hero-cta>${promo ? 'اكتشف العرض' : 'افتح قائمة الطعام'}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;transform:scaleX(-1)" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
+            ${promos.length > 1 ? `<div class="hero-slider-controls" aria-label="التنقل بين العروض"><button type="button" data-hero-prev aria-label="العرض السابق">‹</button><span data-hero-count>${heroIndex+1} / ${promos.length}</span><button type="button" data-hero-next aria-label="العرض التالي">›</button></div>` : ''}
           </div>
         </section>
-
-        <div class="free-bar ${remaining === 0 && pricing.subtotal > 0 ? 'unlocked' : ''}">
-          <div class="free-bar-row">
-            <span>${remaining > 0 ? (pricing.subtotal > 0 ? `ضيف <strong>${money(remaining)}</strong> كمان وتاخد توصيل مجاني` : `توصيل مجاني للطلبات فوق ${money(CONFIG.FREE_DELIVERY_AT)}`) : '🎉 <strong>التوصيل المجاني اتفعّل</strong>'}</span>
-            <span class="price-ltr" style="color:var(--ink-2);font-weight:600">${money(Math.min(pricing.subtotal, CONFIG.FREE_DELIVERY_AT))} / ${money(CONFIG.FREE_DELIVERY_AT)}</span>
-          </div>
-          <div class="free-bar-track"><div class="free-bar-fill" style="width:${pct}%"></div></div>
-        </div>
 
         <div class="sec-head"><h2>اتفرج على <em>المنيو</em></h2></div>
         <div class="cats">
@@ -2042,23 +2022,17 @@ body:has(#stickyCart.show) .install-btn{
           </div>
         ` : ''}
 
-        ${freeDelivery.length ? `
-          <div class="sec-head">
-            <h2>أكل <em>بتوصيل مجاني</em></h2>
-            <a href="#/menu" class="more">شوف الكل <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></a>
-          </div>
-          <div class="product-grid horizontal">
-            ${freeDelivery.map(productCard).join('')}
-          </div>
-        ` : ''}
+
+
+
 
         ${!state.secretUnlocked ? `
           <div class="card-block" style="text-align:center;border-style:dashed">
             <div style="font-size:32px;margin-bottom:8px">🤫</div>
             <h3 style="justify-content:center">المنيو السري</h3>
-            <p style="font-size:13.5px;color:var(--ink-2);margin-bottom:14px">ادخل الكود أو اعمل ${CONFIG.SECRET_ORDERS_NEEDED} طلبات عشان تفتحه</p>
+            <p style="font-size:13.5px;color:var(--ink-2);margin-bottom:14px">ادخل كود صالح من الإدارة لفتح الأصناف السرية</p>
             <div class="name-input-row">
-              <input type="text" id="secretCode" placeholder="الكود السري" maxlength="20" autocomplete="off" aria-label="الكود السري">
+              <input type="text" id="secretCode" placeholder="الكود السري" maxlength="128" autocomplete="off" aria-label="الكود السري">
               <button class="btn btn-dark" data-action="unlock-secret">افتح</button>
             </div>
           </div>
@@ -2068,13 +2042,33 @@ body:has(#stickyCart.show) .install-btn{
       </div>`;
   };
 
+  const updateHeroSlide = () => {
+    const root = document.querySelector('[data-hero-root]');
+    if (!root || !livePromotions.length) return;
+    activePromotionIndex = (activePromotionIndex + livePromotions.length) % livePromotions.length;
+    const p = livePromotions[activePromotionIndex];
+    const item = p?.target_item_id ? ITEM[p.target_item_id] : null;
+    const title = p?.name_ar || window.SHEEPBURGER_STORE?.name_ar || 'Sheep & Burger';
+    const description = p?.description_ar || window.SHEEPBURGER_STORE?.address_text || 'اختار من قائمة الطعام واطلب اللي تحبه.';
+    const image = p?.image_url || item?.img || '';
+    const titleEl=root.querySelector('[data-hero-title]'), descEl=root.querySelector('[data-hero-description]'), eyebrow=root.querySelector('[data-hero-eyebrow]'), count=root.querySelector('[data-hero-count]'), cta=root.querySelector('[data-hero-cta]');
+    if(titleEl) titleEl.textContent=title;
+    if(descEl) descEl.textContent=description;
+    if(eyebrow) eyebrow.textContent='عرض من عروض المطعم';
+    if(cta) cta.textContent='اكتشف العرض';
+    let imgEl=root.querySelector('[data-hero-image]');
+    if(image && !imgEl){imgEl=document.createElement('img');imgEl.className='hero-img';imgEl.setAttribute('data-hero-image','');imgEl.alt='';root.prepend(imgEl);}
+    if(imgEl){imgEl.hidden=!image;if(image)imgEl.src=image;imgEl.alt=title;}
+    if(count) count.textContent=`${activePromotionIndex+1} / ${livePromotions.length}`;
+  };
+
   const filteredItems = () => {
     const q = state.query.trim().toLowerCase();
     const isCat = state.filter !== 'All' && !state.filter.startsWith('tag:');
     return MENU_ITEMS.filter(it => {
       if (isSecret(it) && !state.secretUnlocked) return false;
       const f = state.filter;
-      const okF = f === 'All' || it.cat === f || (f.startsWith('tag:') && it.tags.includes(f.slice(4)));
+      const okF = f === 'All' || it.cat === f || it.categoryId === f || (f.startsWith('tag:') && it.tags.includes(f.slice(4)));
       const okS = !isCat || state.subcat === 'All' || it.subcat === state.subcat;
       const okQ = !q || it.name.toLowerCase().includes(q) || it.ingr.some(x => x.toLowerCase().includes(q));
       return okF && okS && okQ;
@@ -2094,9 +2088,10 @@ body:has(#stickyCart.show) .install-btn{
         <div class="cats">
           <button class="cat-pill ${state.filter === 'All' ? 'active' : ''}" data-action="filter" data-val="All">🍽️ الكل</button>
           ${CATS.map(c => `<button class="cat-pill ${state.filter === c.id ? 'active' : ''}" data-action="filter" data-val="${esc(c.id)}"><span class="emoji">${c.emoji}</span>${esc(c.label)}</button>`).join('')}
-          <button class="cat-pill ${state.filter === 'tag:popular' ? 'active' : ''}" data-action="filter" data-val="tag:popular">🔥 الأكثر طلباً</button>
-          <button class="cat-pill ${state.filter === 'tag:spicy' ? 'active' : ''}" data-action="filter" data-val="tag:spicy">🌶 حار</button>
-          <button class="cat-pill ${state.filter === 'tag:veggie' ? 'active' : ''}" data-action="filter" data-val="tag:veggie">🥬 نباتي</button>
+          ${window.SHEEPBURGER_STORE?.show_popular_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:popular' ? 'active' : ''}" data-action="filter" data-val="tag:popular">🔥 الأكثر طلباً</button>` : ''}
+          ${window.SHEEPBURGER_STORE?.show_spicy_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:spicy' ? 'active' : ''}" data-action="filter" data-val="tag:spicy">🌶 حار</button>` : ''}
+          ${window.SHEEPBURGER_STORE?.show_vegetarian_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:veggie' ? 'active' : ''}" data-action="filter" data-val="tag:veggie">🥬 نباتي</button>` : ''}
+          ${window.SHEEPBURGER_STORE?.show_free_delivery_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:free_delivery' ? 'active' : ''}" data-action="filter" data-val="tag:free_delivery">🛵 توصيل مجاني</button>` : ''}
         </div>
         ${subs.length ? `<div class="cats" style="padding-top:0">
           <button class="cat-pill ${state.subcat === 'All' ? 'active' : ''}" data-action="subfilter" data-val="All" style="padding:7px 14px;font-size:12.5px">الكل</button>
@@ -2164,7 +2159,7 @@ body:has(#stickyCart.show) .install-btn{
             <div class="summary-row"><span>التوصيل</span><span class="num">${pricing.deliveryFee ? money(pricing.deliveryFee) : '<b class="free">مجاني</b>'}</span></div>
             ${pricing.voucherDiscount > 0 ? `<div class="summary-row discount"><span>كوبونات</span><span class="num">−${money(pricing.voucherDiscount)}</span></div>` : ''}
             <div class="summary-row total"><span>الإجمالي</span><span class="num">${money(pricing.total)}</span></div>
-            ${pricing.deliveryFee && pricing.subtotal < CONFIG.FREE_DELIVERY_AT ? `<div class="upsell-note">💡 ضيف ${money(CONFIG.FREE_DELIVERY_AT - pricing.subtotal)} كمان وتاخد توصيل مجاني</div>` : ''}
+            ${pricing.deliveryFee && Number(window.SHEEPBURGER_STORE?.free_delivery_threshold || 0) > 0 && pricing.subtotal < Number(window.SHEEPBURGER_STORE?.free_delivery_threshold || 0) ? `<div class="upsell-note">💡 ضيف ${money(Number(window.SHEEPBURGER_STORE?.free_delivery_threshold || 0) - pricing.subtotal)} كمان وتاخد توصيل مجاني</div>` : ''}
 
             <div class="sec-label">بيانات التوصيل</div>
             <div class="form-grid">
@@ -2318,8 +2313,9 @@ body:has(#stickyCart.show) .install-btn{
 
         <div class="card-block">
           <h3>🏆 الإنجازات</h3>
+          ${!customerAuthUser ? '<p class="points-sub">اربط الطلبات بحسابك بتسجيل الدخول حتى تُحتسب الإنجازات من الطلبات التي تم استلامها فعلًا. لا يمكن تأكيد إنجازات الضيف من دون حساب مرتبط بالطلب.</p>' : ''}
           <div class="achievements-grid">
-            ${Object.entries(ACHIEVEMENTS).map(([k, a]) => `<div class="ach ${state.achievements.includes(k) ? '' : 'locked'}" title="${esc(a.desc)}">
+            ${Object.entries(ACHIEVEMENTS).map(([k, a], i) => `<div class="ach ${customerAuthUser && state.achievements.includes(k) ? '' : 'locked'}" style="${achievementStyle(i)}" title="${esc(a.desc)}" data-achievement="${esc(k)}">
               <div class="ach-icon">${a.icon}</div>
               <div class="ach-name">${esc(a.name)}</div>
             </div>`).join('')}
@@ -2342,7 +2338,7 @@ body:has(#stickyCart.show) .install-btn{
       <div class="sec-head"><div><span class="eyebrow">SHEEP & BURGER</span><h1>🔔 الإشعارات</h1><p class="muted">آخر أخبار طلباتك ونقاط الولاء</p></div></div>
       ${!customerAuthUser ? `<div class="card-block"><h3>سجّل دخولك لمتابعة إشعاراتك</h3><p class="muted" style="margin:8px 0 14px">الإشعارات محفوظة على حسابك عشان تقدر ترجع لها في أي وقت.</p><button class="btn btn-primary btn-block" data-action="go" data-to="#/profile">تسجيل الدخول / حسابي</button></div>` : `
         <div class="card-block" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px"><span>عندك <strong>${unread}</strong> إشعار غير مقروء</span>${unread ? `<button class="btn btn-outline btn-sm" data-action="notifications-read-all">تعليم الكل كمقروء</button>` : ''}</div>
-        ${state.notificationsError ? `<div class="card-block" style="text-align:center;padding:24px 18px"><h3>تعذر تحميل الإشعارات</h3><p class="muted" style="margin-top:6px">اتأكد إن الإنترنت شغال، وبعدها افتح الصفحة تاني.</p><button class="btn btn-outline" style="margin-top:12px" data-action="refresh-notifications">إعادة المحاولة</button></div>` : notes.length ? `<div class="notification-list">${notes.map(n => `<article class="card-block" style="margin-bottom:10px;border-color:${n.read_at ? 'var(--line)' : 'var(--accent)'};background:${n.read_at ? 'var(--surface)' : 'var(--primary-soft)'}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:23px;line-height:1.2">${n.kind === 'reward' ? '⭐' : n.kind === 'order_update' ? '🍔' : n.kind === 'promotion' ? '🎁' : '🔔'}</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><strong>${esc(n.title || 'إشعار')}</strong>${!n.read_at ? '<span class="badge" style="position:static;min-width:10px;width:10px;height:10px;padding:0"> </span>' : ''}</div><p style="font-size:14px;margin:5px 0;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:anywhere">${esc(n.body || '')}</p><small class="muted">${esc(dateLabel(n.created_at))}</small>${!n.read_at ? `<div style="margin-top:9px"><button class="btn btn-outline btn-sm" data-action="notification-read" data-notification-id="${esc(n.id)}">تعليم كمقروء</button></div>` : ''}</div></div></article>`).join('')}</div>` : `<div class="card-block" style="text-align:center;padding:32px 20px"><div style="font-size:36px;margin-bottom:8px">🔕</div><h3>مفيش إشعارات لحد دلوقتي</h3><p class="muted" style="margin-top:6px">لما يتحدث طلبك أو تكسب نقاط ولاء، هتلاقي الرسالة هنا.</p></div>`}
+        ${state.notificationsError ? `<div class="card-block" style="text-align:center;padding:24px 18px"><h3>تعذر تحميل الإشعارات</h3><p class="muted" style="margin-top:6px">اتأكد إن الإنترنت شغال، وبعدها افتح الصفحة تاني.</p><button class="btn btn-outline" style="margin-top:12px" data-action="refresh-notifications">إعادة المحاولة</button></div>` : notes.length ? `<div class="notification-list">${notes.map(n => `<article class="card-block" style="margin-bottom:10px;border-color:${n.read_at ? 'var(--line)' : 'var(--accent)'};background:${n.read_at ? 'var(--surface)' : 'var(--primary-soft)'}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:23px;line-height:1.2">${n.kind === 'reward' ? '⭐' : n.kind === 'order_update' ? '🍔' : n.kind === 'promotion' ? '🎁' : '🔔'}</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><strong>${esc(n.title || 'إشعار')}</strong>${!n.read_at ? '<span class="badge" style="position:static;min-width:10px;width:10px;height:10px;padding:0"> </span>' : ''}</div><p style="font-size:14px;margin:5px 0;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:anywhere">${esc(n.body || '')}</p><small class="muted">${esc(dateLabel(n.created_at))}</small>${!n.read_at ? `<div style="margin-top:9px"><button class="btn btn-outline btn-sm" data-action="notification-read" data-notification-id="${esc(n.id)}">تعليم كمقروء</button></div>` : ''}</div></div></article>`).join('')}</div>` : `<div class="card-block" style="text-align:center;padding:32px 20px"><div style="font-size:36px;margin-bottom:8px">🔕</div><h3>مفيش إشعارات لحد دلوقتي</h3><p class="muted" style="margin-top:6px">لما يتحدث طلبك أو تكسب نقاط ولاء، هتلاقي الرسالة هنا. وعند استلام 4 طلبات، قيمة كل واحد منها 200 جنيه أو أكثر، هيوصلك هنا كود المنيو السري الخاص بحسابك.</p></div>`}
       `}
     </div>`;
   };
@@ -2713,9 +2709,9 @@ body:has(#stickyCart.show) .install-btn{
       state.points = Math.max(0, ledger.reduce((sum, row) => sum + (Number(row.points) || 0), 0));
       state.stamps = Math.max(0, stamps.reduce((sum, row) => sum + (Number(row.stamps_delta) || 0), 0));
       state.pointsRate = Math.max(0, Number(settings.loyalty_points_per_currency) || 0);
-      state.redeemPoints = Math.max(1, Number(settings.loyalty_redeem_points) || CONFIG.POINTS_FOR_DISCOUNT);
+      state.redeemPoints = Math.max(1, Number(settings.loyalty_redeem_points) || Math.max(1, Number(window.SHEEPBURGER_STORE?.loyalty_redeem_points || 1)));
       state.redeemValue = Math.max(0, Number(settings.loyalty_redeem_value) || 0);
-      state.stampsForReward = Math.max(1, Number(settings.loyalty_stamps_for_reward) || CONFIG.STAMPS_FOR_REWARD);
+      state.stampsForReward = Math.max(1, Number(settings.loyalty_stamps_for_reward) || Math.max(1, Number(window.SHEEPBURGER_STORE?.loyalty_stamps_for_reward || 1)));
       state.loyaltyEnabled = !!settings.loyalty_enabled;
       await loadCustomerNotifications();
       state.remoteVouchers = Array.isArray(result.vouchers) ? result.vouchers : [];
@@ -2810,7 +2806,7 @@ body:has(#stickyCart.show) .install-btn{
 
     reveal(animate) {
       if (this.io) this.io.disconnect();
-      const els = [...app.querySelectorAll('.product,.card-block,.featured-deal,.sec-head,.summary,.free-bar,.profile-head')].filter(e => !e.closest('.stagger') && !e.closest('.horizontal'));
+      const els = [...app.querySelectorAll('.product,.card-block,.featured-deal,.sec-head,.summary,.profile-head')].filter(e => !e.closest('.stagger') && !e.closest('.horizontal'));
       if (reduceMotion.matches || !animate || !('IntersectionObserver' in window)) return;
       let n = 0;
       this.io = new IntersectionObserver(es => es.forEach(en => {
@@ -2885,6 +2881,14 @@ body:has(#stickyCart.show) .install-btn{
      [JS] الأحداث
      ═══════════════════════════════════════════════ */
   document.addEventListener('click', e => {
+    const heroButton = e.target.closest('[data-hero-next],[data-hero-prev]');
+    if (heroButton && livePromotions.length > 1) {
+      activePromotionIndex = (activePromotionIndex + (heroButton.hasAttribute('data-hero-next') ? 1 : -1) + livePromotions.length) % livePromotions.length;
+      // updateHeroSlide advances one step, so offset by one to land on the requested slide.
+      activePromotionIndex = (activePromotionIndex - 1 + livePromotions.length) % livePromotions.length;
+      updateHeroSlide();
+      return;
+    }
     const catLink = e.target.closest('a[data-cat]');
     if (catLink) { state.filter = catLink.dataset.cat; state.subcat = 'All'; return; }
 
@@ -3046,10 +3050,8 @@ body:has(#stickyCart.show) .install-btn{
     loadAchievementDefinitions().then(() => { if (currentRoute() === 'profile') refresh(); }).catch(() => {});
     startLiveMenu();
     if (!location.hash) location.hash = '#/home';
-    if (!state.secretUnlocked && state.stats.totalOrders >= CONFIG.SECRET_ORDERS_NEEDED) {
-      state.secretUnlocked = true;
-      safeSave(K('secret_unlocked'), true);
-    }
+    // لا نعتمد على علامة محلية لفتح المنيو السري؛ التحقق يتم من الخادم بكود صالح.
+    state.secretUnlocked = false;
     if (sbClient) {
       sbClient.auth.getSession().then(async ({ data }) => {
         customerAuthUser = data?.session?.user || null;
