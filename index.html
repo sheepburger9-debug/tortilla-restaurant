@@ -375,14 +375,17 @@ svg{width:20px;height:20px;flex-shrink:0}
 .status-pill .pulse{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse-dot 1.4s infinite}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
 
-.progress-steps{display:flex;margin:14px 0 16px;position:relative}
-.step{flex:1;text-align:center;font-size:10.5px;font-weight:700;color:var(--ink-3);position:relative;padding-top:16px}
-.step::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;background:var(--bg-2);border:2px solid var(--line);z-index:2}
-.step::after{content:'';position:absolute;top:5px;left:50%;right:-50%;height:2px;background:var(--line);z-index:1}
-.step:last-child::after{display:none}
-.step.on{color:var(--primary)}
-.step.on::before{background:var(--primary);border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-soft)}
-.step.on::after{background:var(--primary)}
+/* شريط تتبع الطلب: متوازن على الموبايل والكمبيوتر، واتجاهه من اليمين لليسار */
+.progress-steps{display:flex;direction:rtl;align-items:flex-start;position:relative;margin:18px 0 20px;padding:0 2px;min-width:0;isolation:isolate}
+.progress-steps .step{flex:1 1 0;min-width:0;text-align:center;font-size:clamp(10px,2.7vw,12px);line-height:1.35;font-weight:800;color:var(--ink-3);position:relative;padding:27px 3px 0;min-height:49px;overflow-wrap:anywhere;word-break:normal;z-index:2}
+.progress-steps .step::before{content:'';position:absolute;top:1px;left:50%;transform:translateX(-50%);width:13px;height:13px;box-sizing:border-box;border-radius:50%;background:var(--surface);border:2px solid var(--line);z-index:3;box-shadow:0 0 0 3px var(--surface)}
+.progress-steps .step::after{content:'';position:absolute;top:6px;left:-50%;right:50%;height:3px;border-radius:4px;background:var(--line);z-index:1;transition:background .3s ease}
+.progress-steps .step:last-child::after{display:none}
+.progress-steps .step.on{color:var(--primary)}
+.progress-steps .step.on::before{background:var(--primary);border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-soft)}
+.progress-steps .step.on::after{background:var(--primary)}
+@media(max-width:380px){.progress-steps{margin:16px -4px 18px}.progress-steps .step{font-size:9.5px;padding-left:1px;padding-right:1px;padding-top:25px;min-height:46px}.progress-steps .step::before{width:12px;height:12px}.progress-steps .step::after{top:5px;height:2px}}
+@media(min-width:600px){.progress-steps{max-width:560px;margin:20px auto 22px}.progress-steps .step{font-size:12px;padding-top:29px}.progress-steps .step::before{width:14px;height:14px}.progress-steps .step::after{top:6px}}
 
 .order-items{background:var(--bg-2);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:12px}
 .order-item-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;gap:10px}
@@ -809,6 +812,10 @@ body:has(#stickyCart.show) .install-btn{
       <a href="#/profile" data-nav="profile">مكافآتي</a>
     </nav>
     <div class="actions">
+      <a href="#/notifications" class="icon-btn" aria-label="الإشعارات" title="الإشعارات" data-notification-link>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+        <span class="badge" data-notification-badge style="display:none">0</span>
+      </a>
       <a href="#/menu" class="icon-btn" aria-label="تصفح المنيو">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </a>
@@ -874,6 +881,7 @@ body:has(#stickyCart.show) .install-btn{
   ثبّت التطبيق
 </button>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
   'use strict';
@@ -893,13 +901,13 @@ body:has(#stickyCart.show) .install-btn{
     DISCOUNT_VALUE: 50,
     SECRET_CODE: 'SHEEP2024',
     SECRET_ORDERS_NEEDED: 3,
-    DEMO_MODE: true,
+    DEMO_MODE: false,
     STATUS_STEP_MS: 6000,
     STORAGE_SCHEMA: 5,
     STORAGE_PREFIX: 'sheepburger_v5_'
   });
 
-  const COUPONS = Object.freeze({ SHEEP10: 0.10, WELCOME20: 0.20, BIRTHDAY50: 0.50 });
+  const COUPONS = Object.freeze({ SHEEP10: 0.10, WELCOME20: 0.20, BIRTHDAY50: 0.50 }); // أكواد قديمة احتياطية فقط
 
   const STATUSES = ['تم الاستلام', 'بيتحضر', 'في الطريق', 'تم التوصيل'];
   const SPICE_LEVELS = ['هادي', 'وسط', 'حار'];
@@ -930,15 +938,29 @@ body:has(#stickyCart.show) .install-btn{
     onions:   { name: 'بصل مقرمش', price: 6,  allergens: ['gluten'] }
   };
 
-  const ACHIEVEMENTS = {
+  let ACHIEVEMENTS = {
     first_order:    { name: 'أول لقمة', icon: '🍔', desc: 'أول طلب ليك' },
     night_owl:      { name: 'سهران', icon: '🌙', desc: 'طلبت بعد 10 بالليل' },
-    burger_master:  { name: 'سيد البرجر', icon: '👑', desc: 'طلبت 10 برجر' },
+    guac_master:    { name: 'سيد البرجر', icon: '👑', desc: 'طلبت 10 برجر' },
     spice_king:     { name: 'ملك الحار', icon: '🔥', desc: 'جربت كل الحار' },
     loyal_customer: { name: 'عميل مخلص', icon: '⭐', desc: '10 طلبات' },
     healthy_choice: { name: 'صحي', icon: '🥗', desc: '5 طلبات نباتي' },
     secret_finder:  { name: 'مكتشف الأسرار', icon: '🤫', desc: 'فتحت المنيو السري' }
   };
+
+  // Achievement definitions are managed in the admin panel and loaded from Supabase.
+  async function loadAchievementDefinitions() {
+    if (!sbClient) return false;
+    const { data, error } = await sbClient.from('achievements')
+      .select('achievement_key,name_ar,description_ar,icon,is_active')
+      .eq('is_active', true).order('sort_order').order('created_at');
+    if (error) { console.warn('[Achievements] تعذر تحميل إعدادات الإنجازات'); return false; }
+    ACHIEVEMENTS = Object.fromEntries((data || []).map(a => [a.achievement_key, {
+      name: a.name_ar, icon: a.icon || '🏆', desc: a.description_ar || ''
+    }]));
+    state.achievements = (Array.isArray(state.achievements) ? state.achievements : []).filter(k => k in ACHIEVEMENTS);
+    return true;
+  }
 
   /* ═══════════════════════════════════════════════
      [JS] بيانات المنيو
@@ -1020,6 +1042,150 @@ body:has(#stickyCart.show) .install-btn{
   ];
   const ITEM = Object.fromEntries(MENU_ITEMS.map(i => [i.id, i]));
   const isSecret = it => it.secret === true;
+
+  /* ═══════════════════════════════════════════════════════════════
+     [LIVE] ربط منيو العميل بـ Supabase — تحديثات لحظية من لوحة الأدمن
+     لا يتم استخدام service_role داخل المتصفح؛ المفتاح هنا publishable فقط.
+     ═══════════════════════════════════════════════════════════════ */
+  const SB_URL = 'https://gwufhitzmupyumdjabnj.supabase.co';
+  const SB_KEY = 'sb_publishable_oTZFsXGeGb_PAhI7A-eTAw_MGwsBTGG';
+  const sbClient = window.supabase?.createClient
+    ? window.supabase.createClient(SB_URL, SB_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'sheepburger-customer-auth-v1' }
+      })
+    : null;
+  let customerAuthUser = null;
+  let customerOtpSent = false;
+  let checkoutLoginRequired = false;
+  let customerAuthBusy = false;
+  let liveMenuChannel = null;
+  let liveMenuReady = false;
+
+  const categoryKey = (slug, name) => {
+    const value = String(slug || '').toLowerCase();
+    const label = String(name || '').toLowerCase();
+    if (value.includes('burger') || label.includes('برجر')) return 'Burgers';
+    if (value.includes('chicken') || value.includes('meal') || label.includes('فراخ')) return 'Chicken';
+    if (value.includes('side') || value.includes('add') || label.includes('جانبي')) return 'Sides';
+    if (value.includes('drink') || label.includes('مشروب')) return 'Drinks';
+    if (value.includes('dessert') || value.includes('sweet') || label.includes('حلويات')) return 'Desserts';
+    return null;
+  };
+  const liveAddonIds = Object.create(null);
+
+  const loadLiveMenu = async () => {
+    if (!sbClient) return;
+    try {
+      const [{ data: cats, error: catsError }, { data: rows, error: itemsError }, { data: sizes, error: sizesError }, { data: settings, error: settingsError }, { data: zones, error: zonesError }, addonResult, itemAddonResult] = await Promise.all([
+        sbClient.from('categories').select('id,slug,name_ar,sort_order,is_active').eq('is_active', true).order('sort_order'),
+        sbClient.from('menu_items').select('id,slug,category_id,name_ar,description_ar,image_url,tags,is_spicy,is_available,is_secret,sort_order,subcategory_ar,ingredients_ar,allergens,is_vegetarian,display_badge,is_popular,free_delivery').eq('is_available', true).order('sort_order'),
+        sbClient.from('item_sizes').select('id,item_id,label_ar,price,sort_order,is_available').eq('is_available', true).order('sort_order'),
+        sbClient.from('store_settings').select('is_open,accepting_orders,min_order,free_delivery_threshold,delivery_fee,avg_prep_minutes,cash_enabled,visa_enabled').eq('id', 1).maybeSingle(),
+        sbClient.from('delivery_zones').select('id,name_ar,fee,min_order,sort_order,is_active').eq('is_active', true).order('sort_order'),
+        sbClient.from('addons').select('id,slug,name_ar,price,is_available,sort_order').eq('is_available', true).order('sort_order'),
+        sbClient.from('item_addons').select('item_id,addon_id')
+      ]);
+      if (catsError) throw catsError;
+      if (itemsError) throw itemsError;
+      if (sizesError) throw sizesError;
+      if (settingsError) throw settingsError;
+      if (zonesError) throw zonesError;
+      window.SHEEPBURGER_ZONES = zones || [];
+
+      // الإضافات تُحمّل من نفس قاعدة البيانات، مع ربط كل إضافة بمعرّفها الحقيقي.
+      if (!addonResult.error && !itemAddonResult.error) {
+        Object.keys(ADDONS).forEach(k => delete ADDONS[k]);
+        Object.keys(liveAddonIds).forEach(k => delete liveAddonIds[k]);
+        (addonResult.data || []).forEach(a => {
+          const key = String(a.slug || a.id);
+          liveAddonIds[key] = a.id;
+          ADDONS[key] = { name: a.name_ar, price: Number(a.price) || 0, allergens: [], dbId: a.id };
+        });
+        window.SHEEPBURGER_ITEM_ADDONS = itemAddonResult.data || [];
+      } else {
+        console.warn('[Supabase] تعذر تحميل الإضافات:', addonResult.error?.message || itemAddonResult.error?.message);
+      }
+
+      const categoryById = Object.fromEntries((cats || []).map(c => [c.id, c]));
+      const mappedCategories = (cats || []).map(c => ({ row: c, key: categoryKey(c.slug, c.name_ar) })).filter(x => x.key);
+      if (mappedCategories.length) {
+        CATS.splice(0, CATS.length, ...mappedCategories.map(x => ({
+          id: x.key, label: x.row.name_ar || x.key,
+          emoji: ({ Burgers:'🍔', Chicken:'🍗', Sides:'🍟', Drinks:'🥤', Desserts:'🍦' })[x.key] || '🍽️'
+        })).filter((x, i, all) => all.findIndex(y => y.id === x.id) === i));
+      }
+      const sizesByItem = {};
+      (sizes || []).forEach(z => {
+        (sizesByItem[z.item_id] ||= []).push({ key: z.id, label: z.label_ar, price: Number(z.price) || 0 });
+      });
+      const itemAddonSet = {};
+      (window.SHEEPBURGER_ITEM_ADDONS || []).forEach(x => (itemAddonSet[x.item_id] ||= new Set()).add(x.addon_id));
+      const liveItems = (rows || []).filter(r => categoryById[r.category_id] && categoryKey(categoryById[r.category_id].slug, categoryById[r.category_id].name_ar) && (sizesByItem[r.id] || []).length)
+        .map(r => {
+          const c = categoryById[r.category_id];
+          const cat = categoryKey(c.slug, c.name_ar);
+          const tags = Array.isArray(r.tags) ? r.tags : [];
+          const availableAddonIds = itemAddonSet[r.id] || new Set();
+          const addonKeys = Object.keys(liveAddonIds).filter(key => availableAddonIds.has(liveAddonIds[key]));
+          return {
+            id: r.id, slug: r.slug, name: r.name_ar, cat,
+            subcat: r.subcategory_ar || 'all',
+            img: r.image_url || img('photo-1568901346375-23c9450c58cd'),
+            tags: [...tags, ...(r.is_popular ? ['popular'] : []), ...(r.is_vegetarian ? ['veggie'] : []), ...(r.is_spicy ? ['spicy'] : [])],
+            spice: !!r.is_spicy, freeDelivery: !!r.free_delivery, secret: !!r.is_secret,
+            desc: r.description_ar || '', ingr: Array.isArray(r.ingredients_ar) ? r.ingredients_ar : [],
+            allergens: Array.isArray(r.allergens) ? r.allergens : [],
+            addons: addonKeys, sizes: sizesByItem[r.id],
+            displayBadge: r.display_badge || ''
+          };
+        });
+      if (!liveItems.length) {
+        MENU_ITEMS.splice(0, MENU_ITEMS.length);
+        Object.keys(ITEM).forEach(k => delete ITEM[k]);
+        liveMenuReady = true;
+        refresh();
+        console.warn('[Supabase] لا توجد منتجات منشورة بأسعار متاحة.');
+        return;
+      }
+
+      MENU_ITEMS.splice(0, MENU_ITEMS.length, ...liveItems);
+      Object.keys(ITEM).forEach(k => delete ITEM[k]);
+      liveItems.forEach(it => { ITEM[it.id] = it; });
+      // يمنع استخدام عناصر قديمة من التخزين المحلي بمعرّفات لم تعد موجودة في المنيو.
+      state.cart = state.cart.filter(line => ITEM[line.id]).map(line => ({
+        ...line, addons: (line.addons || []).filter(key => ITEM[line.id].addons.includes(key) && ADDONS[key])
+      }));
+      safeSave(K('cart'), state.cart);
+      if (settings) {
+        window.SHEEPBURGER_STORE = settings;
+        const closed = !settings.is_open || !settings.accepting_orders;
+        document.documentElement.dataset.storeClosed = closed ? 'true' : 'false';
+      }
+      liveMenuReady = true;
+      refresh();
+      console.info('[Supabase] تم تحديث منيو العميل', { products: liveItems.length, categories: (cats || []).length });
+    } catch (err) {
+      console.error('[Supabase] تعذر تحميل المنيو الحي:', err?.message || err);
+      // عند تعذر الاتصال، يستمر التطبيق بالمنيو المحلي بدل تعطيل الصفحة.
+    }
+  };
+
+  const startLiveMenu = () => {
+    if (!sbClient || liveMenuChannel) return;
+    liveMenuChannel = sbClient.channel('customer-live-menu')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, loadLiveMenu)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'item_sizes' }, loadLiveMenu)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, loadLiveMenu)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'store_settings' }, loadLiveMenu)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'delivery_zones' }, loadLiveMenu)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'addons' }, loadLiveMenu)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'item_addons' }, loadLiveMenu)
+      .subscribe(status => {
+        if (status === 'SUBSCRIBED') console.info('[Supabase] التحديثات اللحظية مفعلة');
+      });
+  };
+  window.addEventListener('online', loadLiveMenu);
+
 
   /* ═══════════════════════════════════════════════
      [JS] الأدوات المساعدة
@@ -1119,25 +1285,37 @@ body:has(#stickyCart.show) .install-btn{
 
   const state = {
     cart: (safeLoad(K('cart'), []) || []).map(sanitizeLine).filter(Boolean),
-    orders: (safeLoad(K('orders'), []) || []).filter(o => o && Array.isArray(o.items) && typeof o.id === 'number').map(o => ({ ...o, status: clamp(o.status ?? 3, 0, 3), startedAt: o.startedAt || Date.now() })),
+    orders: (safeLoad(K('orders'), []) || []).filter(o => o && Array.isArray(o.items) && (typeof o.id === 'number' || typeof o.id === 'string')).map(o => ({ ...o, status: clamp(o.status ?? 0, 0, 3), startedAt: o.startedAt || Date.now() })),
     customer: (() => { const c = safeLoad(K('customer'), {}); return c && typeof c === 'object' ? c : {}; })(),
     filter: 'All', subcat: 'All', query: '',
     draft: null,
     reviewStars: 5, reviewName: '', reviewText: '', reviewFormOpen: false,
-    coupon: (() => { const c = safeLoad(K('coupon'), null); if (c && typeof c.code === 'string' && COUPONS[c.code]) return { code: c.code, pct: COUPONS[c.code] }; return null; })(),
+    coupon: (() => { const c = safeLoad(K('coupon'), null); if (!c || typeof c.code !== 'string') return null; if (c.type === 'percent' && Number(c.value) > 0) return { code: c.code, type: 'percent', value: Number(c.value), pct: Number(c.value) / 100, max_discount: c.max_discount == null ? null : Number(c.max_discount), min_order: Number(c.min_order || 0) }; if (c.type === 'fixed' && Number(c.value) > 0) return { code: c.code, type: 'fixed', value: Number(c.value), min_order: Number(c.min_order || 0), max_discount: c.max_discount == null ? null : Number(c.max_discount) }; if (COUPONS[c.code]) return { code: c.code, type: 'percent', value: COUPONS[c.code] * 100, pct: COUPONS[c.code] }; return null; })(),
     couponInput: safeLoad(K('coupon'), null)?.code || '',
     couponMsg: '',
-    stamps: clamp(Number(safeLoad(K('stamps'), 0)) || 0, 0, CONFIG.STAMPS_FOR_REWARD),
-    freeBurger: !!safeLoad(K('free_burger'), false),
-    points: Math.max(0, Number(safeLoad(K('points'), 0)) || 0),
-    achievements: (Array.isArray(safeLoad(K('achievements'), [])) ? safeLoad(K('achievements'), []) : []).filter(a => a in ACHIEVEMENTS),
-    vouchers: (Array.isArray(safeLoad(K('vouchers'), [])) ? safeLoad(K('vouchers'), []) : []).map(sanitizeVoucher).filter(Boolean),
+    stamps: 0,
+    customerNotifications: [],
+    notificationsLoadedAt: 0,
+    notificationsError: false,
+    freeBurger: false,
+    points: 0,
+    pointsRate: 1,
+    redeemPoints: CONFIG.POINTS_FOR_DISCOUNT,
+    redeemValue: CONFIG.DISCOUNT_VALUE,
+    stampsForReward: CONFIG.STAMPS_FOR_REWARD,
+    loyaltyEnabled: false,
+    achievements: [],
+    vouchers: [],
+    remoteVouchers: [],
+    selectedVoucherId: null,
     stats: (() => { const s = safeLoad(K('stats'), {}); return { burgersOrdered: Math.max(0, Number(s.burgersOrdered) || 0), veggieOrdered: Math.max(0, Number(s.veggieOrdered) || 0), spicyItems: Array.isArray(s.spicyItems) ? s.spicyItems.filter(x => typeof x === 'string') : [], totalOrders: Math.max(0, Number(s.totalOrders) || 0) }; })(),
     secretUnlocked: !!safeLoad(K('secret_unlocked'), false),
     birthdayApplied: String(safeLoad(K('birthday_applied'), '') || ''),
     ratings: sanitizeReviews(safeLoad(K('ratings'), {})),
     chefSpecial: (() => { const c = safeLoad(K('chef_special'), null); if (c && typeof c === 'object' && ITEM[c.id] && Number.isFinite(c.discount) && c.discount > 0 && c.discount < 1) return c; return null; })()
   };
+
+  if (state.couponInput === 'BIRTHDAY50' && state.coupon?.code === 'BIRTHDAY50') { state.coupon = null; state.couponInput = ''; safeSave(K('coupon'), null); }
 
   const app = document.getElementById('app');
   const sheet = document.getElementById('sheet');
@@ -1178,23 +1356,42 @@ body:has(#stickyCart.show) .install-btn{
     const vouchers = (ctx.vouchers || []).filter(v => !v.used);
     const itemLines = cart.map(line => {
       const base = baseUnitPrice(line);
-      const unit = unitPrice(line, { coupon });
+      const unit = unitPrice(line, {});
       return { line, base, unit, total: round2(unit * line.qty) };
     });
     const subtotal = round2(itemLines.reduce((s, x) => s + x.total, 0));
     const itemDiscounts = round2(itemLines.reduce((s, x) => s + (x.base - x.unit) * x.line.qty, 0));
     let deliveryFee = 0, freeDeliveryReason = null;
+    const liveSettings = window.SHEEPBURGER_STORE || {};
+    const selectedZoneId = document.getElementById('fArea')?.value;
+    const selectedZone = (window.SHEEPBURGER_ZONES || []).find(z => String(z.id) === String(selectedZoneId));
+    const freeDeliveryThreshold = Number(liveSettings.free_delivery_threshold ?? CONFIG.FREE_DELIVERY_AT);
     if (subtotal > 0) {
-      if (subtotal >= CONFIG.FREE_DELIVERY_AT) freeDeliveryReason = 'threshold';
+      if (freeDeliveryThreshold > 0 && subtotal >= freeDeliveryThreshold) freeDeliveryReason = 'threshold';
       else if (cart.some(l => ITEM[l.id]?.freeDelivery)) freeDeliveryReason = 'item';
       else if (vouchers.some(v => v.type === 'delivery')) freeDeliveryReason = 'voucher';
-      else deliveryFee = CONFIG.DELIVERY_FEE;
+      else deliveryFee = Number(selectedZone?.fee ?? liveSettings.delivery_fee ?? CONFIG.DELIVERY_FEE);
     }
     const appliedVouchers = [];
     let voucherDiscount = 0;
-    let running = subtotal + deliveryFee;
+    // كوبون قاعدة البيانات يطبق على إجمالي المنتجات، مع احترام الحد الأقصى للخصم.
+    if (coupon && (coupon.type === 'percent' || coupon.type === 'fixed')) {
+      let couponApply = coupon.type === 'percent' ? round2(subtotal * Math.max(0, Number(coupon.value || 0)) / 100) : Math.max(0, Number(coupon.value || 0));
+      if (coupon.max_discount != null) couponApply = Math.min(couponApply, Number(coupon.max_discount));
+      couponApply = Math.min(couponApply, subtotal);
+      if (couponApply > 0) voucherDiscount += round2(couponApply);
+    }
+    // تطبيق قسائم النسبة المئوية أولاً على قيمة المنتجات فقط، ثم القسائم الثابتة.
+    // كان نوع percent مقبولاً عند حفظ القسيمة لكنه لا يدخل في الحساب النهائي.
+    for (const v of vouchers.filter(x => x.type === 'percent')) {
+      const pct = Math.max(0, Math.min(1, Number(v.pct) || 0));
+      const remainingSubtotal = Math.max(0, subtotal - voucherDiscount);
+      const apply = round2(remainingSubtotal * pct);
+      if (apply > 0) { voucherDiscount += apply; appliedVouchers.push(v); }
+    }
+    const running = subtotal + deliveryFee;
     for (const v of vouchers.filter(x => x.type === 'flat')) {
-      const apply = round2(Math.min(v.amount, Math.max(0, running - voucherDiscount)));
+      const apply = round2(Math.min(Number(v.amount) || 0, Math.max(0, running - voucherDiscount)));
       if (apply > 0) { voucherDiscount += apply; appliedVouchers.push(v); }
     }
     const cheeseCount = cart.reduce((n, l) => n + (l.addons.includes('cheese') ? l.qty : 0), 0);
@@ -1271,10 +1468,12 @@ body:has(#stickyCart.show) .install-btn{
   };
 
   const checkAch = () => {
+    // Authenticated customers receive achievements only from the database after delivery.
+    if (customerAuthUser) return;
     if (state.stats.totalOrders >= 1) awardAch('first_order');
     if (isNight()) awardAch('night_owl');
     if (state.stats.totalOrders >= 10) awardAch('loyal_customer');
-    if (state.stats.burgersOrdered >= 10) awardAch('burger_master');
+    if (state.stats.burgersOrdered >= 10) awardAch('guac_master');
     if (state.stats.veggieOrdered >= 5) awardAch('healthy_choice');
     const spicyIds = MENU_ITEMS.filter(i => i.spice).map(i => i.id);
     if (spicyIds.length && spicyIds.every(id => state.stats.spicyItems.includes(id))) awardAch('spice_king');
@@ -1325,12 +1524,42 @@ body:has(#stickyCart.show) .install-btn{
   };
 
   const startTracking = () => {
-    if (!CONFIG.DEMO_MODE || trackingTimer) return;
-    trackingTimer = setInterval(() => {
-      const changed = refreshLive();
-      if (changed && currentRoute() === 'orders') refresh();
-      if (!state.orders.some(o => o.status < 3)) { clearInterval(trackingTimer); trackingTimer = null; }
-    }, CONFIG.STATUS_STEP_MS);
+    if (trackingTimer) return;
+    trackingTimer = setInterval(async () => {
+      let changed = CONFIG.DEMO_MODE ? refreshLive() : false;
+      const tracked = state.orders.filter(o => o.trackingToken && o.id && o.status < 3);
+      for (const o of tracked) {
+        try {
+          const res = await fetch(`${SB_URL}/functions/v1/track-order`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
+            body: JSON.stringify({ order_number: String(o.id), tracking_token: o.trackingToken })
+          });
+          if (!res.ok) continue;
+          const payload = await res.json();
+          const remote = payload.order || {};
+          const statusMap = { pending: 0, confirmed: 1, preparing: 1, ready: 2, out_for_delivery: 2, delivered: 3, cancelled: 3 };
+          const next = statusMap[String(remote.status)] ?? o.status;
+          if (next !== o.status || remote.total != null) {
+            o.status = next; o.statusLabel = remote.status === 'cancelled' ? 'تم إلغاء الطلب' : null;
+            o.total = Number(remote.total ?? o.total); o.subtotal = Number(remote.subtotal ?? o.subtotal);
+            o.deliveryFee = Number(remote.delivery_fee ?? o.deliveryFee); o.discountTotal = Number(remote.discount_total ?? 0);
+            o.remoteItems = payload.items || []; o.statusHistory = payload.history || [];
+            // بيانات المندوب تُرسل فقط بعد تحقق رمز تتبع الطلب من الخادم.
+            const nextDriver = payload.driver && payload.driver.phone ? {
+              name: String(payload.driver.full_name || 'مندوب التوصيل'),
+              phone: String(payload.driver.phone)
+            } : null;
+            if (JSON.stringify(o.driver || null) !== JSON.stringify(nextDriver)) {
+              o.driver = nextDriver;
+              changed = true;
+            }
+            changed = true;
+          }
+        } catch (e) { console.warn('[Supabase] تعذر تحديث حالة الطلب'); }
+      }
+      if (changed) { safeSave(K('orders'), state.orders); if (currentRoute() === 'orders') refresh(); }
+      if (!state.orders.some(o => o.status < 3 && o.trackingToken) && (!CONFIG.DEMO_MODE || !state.orders.some(o => o.status < 3))) { clearInterval(trackingTimer); trackingTimer = null; }
+    }, 12000);
   };
 
   const readForm = () => {
@@ -1354,8 +1583,23 @@ body:has(#stickyCart.show) .install-btn{
     return { ok: true };
   };
 
+  const normalizeEgyptPhone = raw => {
+    let p = String(raw || '').replace(/[\s()-]/g, '');
+    if (p.startsWith('+20')) p = '0' + p.slice(3);
+    else if (p.startsWith('20')) p = '0' + p.slice(2);
+    return /^01[0125][0-9]{8}$/.test(p) ? p : null;
+  };
+
   const checkout = async () => {
     if (checkingOut || !state.cart.length) return;
+    if (!customerAuthUser) {
+      checkoutLoginRequired = true;
+      location.hash = '#/profile';
+      refresh();
+      toast('سجّل دخولك أو أنشئ حسابًا لإتمام الطلب.');
+      return;
+    }
+    checkoutLoginRequired = false;
     readForm();
     maybeApplyBirthday();
     const v = validateForm();
@@ -1372,43 +1616,96 @@ body:has(#stickyCart.show) .install-btn{
     const btn = document.querySelector('[data-action="checkout"]');
     if (btn) { btn.disabled = true; btn.textContent = 'بنأكد طلبك…'; }
     try {
-      const pricing = calculatePricing(state.cart, { coupon: state.coupon, vouchers: state.vouchers });
-      const items = state.cart.map(l => ({
-        name: ITEM[l.id].name, qty: l.qty, price: unitPrice(l, { coupon: state.coupon }),
-        basePrice: baseUnitPrice(l),
+      if (!sbClient || !liveMenuReady) throw new Error('MENU_NOT_READY');
+      const settings = window.SHEEPBURGER_STORE || {};
+      if (!settings.is_open || !settings.accepting_orders) throw new Error('STORE_CLOSED');
+      if (settings.cash_enabled === false) throw new Error('CASH_PAYMENT_DISABLED');
+      const zoneSelect = document.getElementById('fArea');
+      const zoneId = zoneSelect?.value;
+      const zone = (window.SHEEPBURGER_ZONES || []).find(z => String(z.id) === String(zoneId));
+      if (!zone) throw new Error('INVALID_DELIVERY_ZONE');
+      const clientSubtotal = calculatePricing(state.cart, { coupon: state.coupon, vouchers: state.vouchers }).subtotal;
+      const minimumOrder = Math.max(Number(settings.min_order || 0), Number(zone.min_order || 0));
+      if (clientSubtotal < minimumOrder) throw new Error('MINIMUM_ORDER_NOT_MET');
+      const phone = normalizeEgyptPhone(state.customer.phone);
+      if (!phone) throw new Error('INVALID_CUSTOMER_PHONE');
+      state.customer.phone = phone;
+      const address = [zone.name_ar, state.customer.street, `عمارة ${state.customer.building}`, `الدور ${state.customer.floor}`, `شقة ${state.customer.apt}`].filter(Boolean).join('، ');
+      const idempotencyKey = crypto.randomUUID();
+      const trackingToken = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x => x.toString(16).padStart(2, '0')).join('');
+      const payload = {
+        idempotency_key: idempotencyKey, tracking_token: trackingToken,
+        customer_name: state.customer.name.trim(), customer_phone: phone,
+        delivery_address: address, zone_id: zone.id,
+        notes: '', coupon_code: state.selectedVoucherId ? null : (state.coupon?.code || state.couponInput || null),
+        voucher_id: state.selectedVoucherId || null,
+        items: state.cart.map(l => {
+          const item = ITEM[l.id];
+          const addon_ids = (l.addons || []).map(key => ADDONS[key]?.dbId || liveAddonIds[key]).filter(Boolean);
+          if ((l.addons || []).length !== addon_ids.length) throw new Error('ADDON_NOT_READY');
+          if (!item || !item.sizes.some(z => String(z.key) === String(l.size))) throw new Error('ITEM_OR_SIZE_UNAVAILABLE');
+          return { item_id: l.id, size_id: l.size, quantity: l.qty, addon_ids, notes: l.note || null };
+        })
+      };
+      const { data: authSessionData } = sbClient ? await sbClient.auth.getSession() : { data: { session: null } };
+      const authHeaders = { 'Content-Type': 'application/json', apikey: SB_KEY };
+      if (authSessionData?.session?.access_token) authHeaders.Authorization = `Bearer ${authSessionData.session.access_token}`;
+      const response = await fetch(`${SB_URL}/functions/v1/create-order`, {
+        method: 'POST', headers: authHeaders, body: JSON.stringify(payload)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.order) {
+        const messages = {
+          VOUCHER_REQUIRES_ACCOUNT: 'لازم تسجل دخولك عشان تستخدم المكافأة.', VOUCHER_NOT_FOUND: 'المكافأة مش موجودة على حسابك.', VOUCHER_EXPIRED: 'صلاحية المكافأة انتهت.', VOUCHER_ALREADY_REDEEMED: 'المكافأة دي اتستخدمت قبل كده.', VOUCHER_MINIMUM_NOT_MET: 'الطلب أقل من الحد الأدنى للمكافأة.', VOUCHER_REWARD_UNAVAILABLE: 'الصنف المجاني مش متاح حاليًا.', INVALID_OR_EXPIRED_COUPON: 'كود الخصم غير صحيح أو انتهت صلاحيته.', COUPON_LIMIT_REACHED: 'الكود وصل للحد الأقصى للاستخدام.', COUPON_MINIMUM_NOT_MET: 'قيمة المنتجات أقل من الحد الأدنى المطلوب للكوبون.', COUPON_ALREADY_USED_BY_CUSTOMER: 'الكوبون تم استخدامه من قبل على نفس رقم الموبايل.', COUPON_INVALID: 'كود الخصم غير صحيح أو غير مفعّل.', COUPON_EXPIRED: 'صلاحية كود الخصم انتهت.', COUPON_NOT_STARTED: 'كود الخصم لم يبدأ تفعيله بعد.', COUPON_EXHAUSTED: 'كود الخصم وصل للحد الأقصى للاستخدام.',
+          STORE_CLOSED: 'المطعم مغلق أو متوقف عن استقبال الطلبات حالياً.',
+          MINIMUM_ORDER_NOT_MET: 'قيمة الطلب أقل من الحد الأدنى للمنطقة.',
+          INVALID_CUSTOMER_PHONE: 'اكتب رقم موبايل مصري صحيح يبدأ بـ 010 أو 011 أو 012 أو 015.',
+          INVALID_DELIVERY_ZONE: 'منطقة التوصيل غير متاحة حالياً.',
+          ITEM_OR_SIZE_UNAVAILABLE: 'فيه منتج أو حجم اتوقف من المنيو. حدّث الصفحة وراجع السلة.',
+          CASH_PAYMENT_DISABLED: 'الدفع عند الاستلام غير متاح حالياً.',
+          ADDON_NOT_READY: 'الإضافات لسه بتتحمّل. حدّث المنيو وجرب تاني.',
+          INVALID_OR_UNAVAILABLE_ADDON: 'إحدى الإضافات لم تعد متاحة. راجع السلة.',
+          INVALID_OR_EXPIRED_COUPON: 'كود الخصم غير صحيح أو انتهت صلاحيته.',
+          COUPON_MINIMUM_NOT_MET: 'الطلب لا يحقق الحد الأدنى لكود الخصم.',
+          COUPON_LIMIT_REACHED: 'تم استخدام كود الخصم بالكامل.'
+        };
+        throw new Error(messages[result.error] || `تعذر إنشاء الطلب (${result.error || response.status}).`);
+      }
+      const remote = result.order;
+      const itemSnapshot = state.cart.map(l => ({
+        itemId: l.id, slug: ITEM[l.id]?.slug || '',
+        name: ITEM[l.id]?.name || 'منتج', qty: l.qty,
+        price: baseUnitPrice(l), basePrice: baseUnitPrice(l),
         details: [lineOptions(l), l.note ? `ملاحظة: ${l.note}` : ''].filter(Boolean).join(' · '),
-        special: l.special || null, addons: [...l.addons], size: l.size
+        addons: [...l.addons], size: l.size, spice: l.spice || null,
+        note: l.note || '', special: l.special ? { ...l.special } : null
       }));
-      let orderId;
-      do { orderId = Math.floor(100000 + Math.random() * 900000); } while (state.orders.some(o => o.id === orderId));
       const order = {
-        id: orderId, date: new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }),
-        startedAt: Date.now(), items,
-        subtotal: pricing.subtotal, deliveryFee: pricing.deliveryFee,
-        voucherDiscount: pricing.voucherDiscount, total: pricing.total,
-        payment: 'الدفع عند الاستلام',
-        name: state.customer.name, phone: state.customer.phone,
-        address: { area: state.customer.area, street: state.customer.street, building: state.customer.building, floor: state.customer.floor, apt: state.customer.apt },
-        coupon: state.coupon ? state.coupon.code : null,
-        appliedVouchers: pricing.appliedVouchers.map(vv => ({ ...vv, used: true })),
-        status: 0
+        id: remote.order_number, dbId: remote.order_id, trackingToken,
+        date: new Date(remote.created_at || Date.now()).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }),
+        startedAt: Date.now(), items: itemSnapshot,
+        subtotal: Number(remote.subtotal || 0), deliveryFee: Number(remote.delivery_fee || 0),
+        voucherDiscount: Number(remote.discount_total || 0), discountTotal: Number(remote.discount_total || 0),
+        total: Number(remote.total || 0), payment: 'الدفع عند الاستلام',
+        name: state.customer.name, phone,
+        address: { area: zone.name_ar, street: state.customer.street, building: state.customer.building, floor: state.customer.floor, apt: state.customer.apt },
+        coupon: payload.coupon_code, status: 0
       };
       state.orders.unshift(order);
       safeSave(K('orders'), state.orders);
-      const used = new Set(pricing.appliedVouchers.map(x => x.id));
-      state.vouchers = state.vouchers.map(vv => used.has(vv.id) ? { ...vv, used: true } : vv);
-      safeSave(K('vouchers'), state.vouchers);
-      state.cart = []; state.coupon = null; state.couponInput = ''; state.couponMsg = '';
-      safeSave(K('coupon'), null);
-      commitCart();
-      addStamp(); addPoints(pricing.subtotal); updateStats(order); checkAch();
+      state.cart = []; state.coupon = null; state.couponInput = ''; state.couponMsg = ''; state.selectedVoucherId = null;
+      safeSave(K('coupon'), null); commitCart();
+      if (customerAuthUser) {
+        await loadCustomerRewards();
+        await loadCustomerNotifications({ quiet: true, notifyNew: false });
+      }
       showConfetti();
-      toast('تم استلام طلبك 🎉');
+      toast(`تم تسجيل طلبك بنجاح — ${remote.order_number} 🎉`);
       setTimeout(() => { location.hash = '#/orders'; }, 700);
       startTracking();
     } catch (e) {
       console.warn('Checkout error:', e);
-      if (err) err.textContent = 'حصلت مشكلة. جرب تاني.';
+      if (err) err.textContent = e?.message && !['MENU_NOT_READY','INVALID_CUSTOMER_PHONE','INVALID_DELIVERY_ZONE','STORE_CLOSED','CASH_PAYMENT_DISABLED','ADDON_NOT_READY','MINIMUM_ORDER_NOT_MET'].includes(e.message) ? e.message : ({ MINIMUM_ORDER_NOT_MET: 'قيمة الطلب أقل من الحد الأدنى للمتجر أو منطقة التوصيل.', ADDON_NOT_READY: 'الإضافات لسه بتتحمّل. حدّث المنيو وجرب تاني.', MENU_NOT_READY: 'لسه بنحمّل المنيو من النظام، استنى لحظة وجرب تاني.', INVALID_CUSTOMER_PHONE: 'اكتب رقم موبايل مصري صحيح يبدأ بـ 010 أو 011 أو 012 أو 015.', INVALID_DELIVERY_ZONE: 'اختار منطقة توصيل متاحة.', STORE_CLOSED: 'المطعم مغلق أو متوقف عن استقبال الطلبات حالياً.', CASH_PAYMENT_DISABLED: 'الدفع عند الاستلام غير متاح حالياً.' }[e?.message] || 'حصلت مشكلة في الاتصال. جرب تاني.');
     } finally {
       checkingOut = false;
       const b = document.querySelector('[data-action="checkout"]');
@@ -1418,16 +1715,51 @@ body:has(#stickyCart.show) .install-btn{
 
   const reorder = (orderId) => {
     const order = state.orders.find(o => String(o.id) === String(orderId));
-    if (!order) return;
+    if (!order || !Array.isArray(order.items) || !order.items.length) {
+      toast('مش قادرين نلاقي تفاصيل الطلب. جرّب تحديث المنيو.');
+      return;
+    }
+    if (!liveMenuReady) {
+      toast('المنيو لسه بتتحمّل، استنى لحظة وجرب تاني.');
+      return;
+    }
+    let added = 0;
+    const missing = [];
     order.items.forEach(item => {
-      const m = MENU_ITEMS.find(x => x.name === item.name);
-      if (!m) return;
-      const size = m.sizes.find(s => s.key === item.size)?.key || m.sizes[0].key;
-      const addons = (item.addons || []).filter(a => m.addons.includes(a));
-      addLineToCart({ id: m.id, size, spice: null, addons, note: '', qty: clamp(Number(item.qty) || 1, 1, CONFIG.MAX_QTY), special: item.special ? sanitizeSpecial(item.special) : null });
+      // الاعتماد على معرّف المنتج أولاً، ثم slug، ثم الاسم للطلبات القديمة.
+      const normalizedName = String(item.name || '').trim().toLocaleLowerCase('ar');
+      const m = MENU_ITEMS.find(x => String(x.id) === String(item.itemId || item.item_id || ''))
+        || MENU_ITEMS.find(x => item.slug && String(x.slug || '') === String(item.slug))
+        || MENU_ITEMS.find(x => String(x.name || '').trim().toLocaleLowerCase('ar') === normalizedName);
+      if (!m || !Array.isArray(m.sizes) || !m.sizes.length) {
+        missing.push(item.name || 'منتج غير متاح');
+        return;
+      }
+      const matchedSize = m.sizes.find(z => String(z.key) === String(item.size))
+        || m.sizes.find(z => String(z.label || '').trim() === String(item.size || '').trim())
+        || m.sizes[0];
+      const requestedAddons = Array.isArray(item.addons) ? item.addons : [];
+      const addons = requestedAddons.map(a => {
+        if (m.addons.includes(a) && ADDONS[a]) return a;
+        const match = m.addons.find(key => String(ADDONS[key]?.dbId || liveAddonIds[key] || key) === String(a));
+        return match || null;
+      }).filter(Boolean);
+      addLineToCart({
+        id: m.id, size: matchedSize.key,
+        spice: m.spice ? (item.spice || 'وسط') : null,
+        addons, note: String(item.note || '').slice(0, 80),
+        qty: clamp(Math.trunc(Number(item.qty) || 1), 1, CONFIG.MAX_QTY),
+        special: item.special ? sanitizeSpecial(item.special) : null
+      });
+      added++;
     });
-    toast('الطلبات اتضافت للسلة ⚡');
-    location.hash = '#/cart';
+    if (added) {
+      toast(missing.length ? `اتضاف ${added} صنف، وفيه ${missing.length} صنف لم يعد متاحًا.` : 'الطلب اتضاف للسلة بنجاح ⚡');
+      location.hash = '#/cart';
+      refresh();
+    } else {
+      toast('منتجات الطلب القديم مش متاحة حاليًا في المنيو.');
+    }
   };
 
   /* ═══════════════════════════════════════════════
@@ -1479,14 +1811,24 @@ body:has(#stickyCart.show) .install-btn{
     refresh();
   };
 
-  const redeemPoints = () => {
-    if (state.points < CONFIG.POINTS_FOR_DISCOUNT) { toast('مش معاك نقاط كفاية'); return; }
+  const redeemPoints = async () => {
+    if (!customerAuthUser || !sbClient) { toast('وثّق إيميلك الأول عشان تستخدم نقاط الولاء 📧'); location.hash = '#/profile'; return; }
     if (state.cart.length === 0) { toast('ضيف حاجة للسلة الأول'); return; }
-    state.points -= CONFIG.POINTS_FOR_DISCOUNT;
-    safeSave(K('points'), state.points);
-    addVoucher({ type: 'flat', amount: CONFIG.DISCOUNT_VALUE });
-    toast(`🎉 كوبون ${money(CONFIG.DISCOUNT_VALUE)} اتفعّل!`);
-    refresh();
+    try {
+      const { data: sessionData } = await sbClient.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) throw new Error('AUTH_REQUIRED');
+      const response = await fetch(`${SB_URL}/functions/v1/rewards-api`, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${token}` }, body: JSON.stringify({ action: 'redeem_loyalty_points' }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (result.error === 'INSUFFICIENT_LOYALTY_POINTS') throw new Error('لسه نقاطك مش كفاية للاستبدال.');
+        if (result.error === 'LOYALTY_DISABLED') throw new Error('نظام نقاط الولاء متوقف حاليًا.');
+        throw new Error('تعذر استبدال النقاط. جرب تاني.');
+      }
+      await loadCustomerRewards();
+      refresh();
+      toast(`🎉 اتعملت مكافأة بقيمة ${money(Number(result.data?.voucher_value ?? state.redeemValue ?? CONFIG.DISCOUNT_VALUE))}.`);
+    } catch (e) { toast(e?.message || 'تعذر استبدال النقاط.'); }
   };
 
   const claimFreeBurger = () => {
@@ -1528,6 +1870,12 @@ body:has(#stickyCart.show) .install-btn{
   };
 
   const updateBadges = () => {
+    const unreadNotifications = (state.customerNotifications || []).filter(n => !n.read_at).length;
+    document.querySelectorAll('[data-notification-badge]').forEach(b => {
+      b.textContent = unreadNotifications > 99 ? '99+' : String(unreadNotifications);
+      b.style.display = unreadNotifications ? 'grid' : 'none';
+      b.setAttribute('aria-label', `${unreadNotifications} إشعار غير مقروء`);
+    });
     const n = cartCount();
     document.querySelectorAll('[data-badge]').forEach(b => {
       b.textContent = n;
@@ -1780,7 +2128,7 @@ body:has(#stickyCart.show) .install-btn{
           <div class="cart-items">
             ${state.cart.map(l => {
               const it = ITEM[l.id];
-              const unit = unitPrice(l, { coupon: state.coupon });
+              const unit = unitPrice(l, {});
               const base = baseUnitPrice(l);
               const total = round2(unit * l.qty);
               const showOld = base > unit + 0.001;
@@ -1805,11 +2153,12 @@ body:has(#stickyCart.show) .install-btn{
           </div>
           <aside class="summary">
             <h3>الفاتورة</h3>
+            ${state.selectedVoucherId ? `<div class="voucher-row" style="margin-bottom:12px"><div class="voucher-icon">🎁</div><div class="voucher-info"><strong>المكافأة مختارة للطلب ده</strong><small>هيتم التحقق منها وتطبيقها عند تأكيد الطلب.</small><button class="btn btn-dark btn-sm" data-action="clear-reward-voucher" style="margin-top:6px">إلغاء اختيار المكافأة</button></div></div>` : ''}
             <div class="coupon-row">
               <input type="text" id="coupon" placeholder="كود الخصم" value="${esc(state.couponInput)}" aria-label="كود الخصم" maxlength="30">
               <button class="btn btn-dark btn-sm" data-action="apply-coupon">تطبيق</button>
             </div>
-            <p class="coupon-msg ${state.coupon ? 'ok' : ''}">${state.coupon ? `كوبون ${esc(state.coupon.code)} · خصم ${Math.round(state.coupon.pct * 100)}%` : esc(state.couponMsg || '')}</p>
+            <p class="coupon-msg ${state.coupon ? 'ok' : ''}">${state.coupon ? `كوبون ${esc(state.coupon.code)} · ${state.coupon.type === 'fixed' ? `خصم ${money(state.coupon.value)}` : `خصم ${Math.round((state.coupon.pct ?? Number(state.coupon.value || 0) / 100) * 100)}%`}` : esc(state.couponMsg || '')}</p>
             <div class="summary-row"><span>المجموع الفرعي</span><span class="num">${money(original)}</span></div>
             ${pricing.itemDiscounts > 0.001 ? `<div class="summary-row discount"><span>خصومات</span><span class="num">−${money(pricing.itemDiscounts)}</span></div>` : ''}
             <div class="summary-row"><span>التوصيل</span><span class="num">${pricing.deliveryFee ? money(pricing.deliveryFee) : '<b class="free">مجاني</b>'}</span></div>
@@ -1821,7 +2170,7 @@ body:has(#stickyCart.show) .install-btn{
             <div class="form-grid">
               <div><label for="fName">الاسم بالكامل *</label><input type="text" id="fName" autocomplete="name" value="${cv('name')}" maxlength="60" required></div>
               <div><label for="fPhone">رقم الموبايل *</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" value="${cv('phone')}" maxlength="20" required></div>
-              <div><label for="fArea">المنطقة *</label><input type="text" id="fArea" value="${cv('area')}" maxlength="60" required></div>
+              <div><label for="fArea">منطقة التوصيل *</label><select id="fArea" required><option value="">اختار منطقة التوصيل</option>${(window.SHEEPBURGER_ZONES || []).map(z => `<option value="${esc(z.id)}" data-zone-name="${esc(z.name_ar)}" ${String(cv('area')) === String(z.id) || String(cv('area')) === String(z.name_ar) ? 'selected' : ''}>${esc(z.name_ar)} — ${money(z.fee)}</option>`).join('')}</select></div>
               <div><label for="fStreet">الشارع *</label><input type="text" id="fStreet" value="${cv('street')}" maxlength="60" required></div>
               <div class="form-row-3">
                 <div><label for="fBuilding">رقم العمارة *</label><input type="text" id="fBuilding" value="${cv('building')}" maxlength="20" required></div>
@@ -1856,15 +2205,19 @@ body:has(#stickyCart.show) .install-btn{
         <div class="stagger">
           ${state.orders.map(o => {
             const live = o.status < 3;
-            const canReorder = o.status === 3;
+            const canReorder = o.status === 3 && o.statusLabel !== 'تم إلغاء الطلب';
             return `<div class="order-card">
               <div class="order-head">
                 <div><h4>طلب رقم ${esc(String(o.id))}</h4><small>${esc(o.date || '')}</small></div>
-                <span class="status-pill ${live ? 'pending' : 'done'}">${live ? '<span class="pulse"></span>' : ''}${esc(STATUSES[o.status] || '')}</span>
+                <span class="status-pill ${live ? 'pending' : 'done'}">${live ? '<span class="pulse"></span>' : ''}${esc(o.statusLabel || STATUSES[o.status] || '')}</span>
               </div>
               <div class="progress-steps">
                 ${STATUSES.map((s, i) => `<div class="step ${i <= o.status ? 'on' : ''}">${esc(s)}</div>`).join('')}
               </div>
+              ${o.driver && o.driver.phone ? `<div class="driver-contact" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2,var(--surface))">
+                <div><strong>🛵 مندوب التوصيل</strong><div style="margin-top:4px">${esc(o.driver.name || 'مندوب التوصيل')}</div><small dir="ltr" style="display:inline-block;margin-top:3px">${esc(o.driver.phone)}</small></div>
+                <a class="btn btn-primary btn-sm" href="tel:${esc(String(o.driver.phone).replace(/[^0-9+]/g,''))}">اتصل بالمندوب</a>
+              </div>` : ''}
               <div class="order-items">
                 ${o.items.map(it => `<div class="order-item-row">
                   <span>${it.qty}× ${esc(it.name)}${it.details ? `<small>${esc(it.details)}</small>` : ''}</span>
@@ -1884,15 +2237,18 @@ body:has(#stickyCart.show) .install-btn{
     const next = lvl === 'mild' ? 100 : lvl === 'medium' ? 300 : 500;
     const progress = Math.min(100, (state.points / Math.max(next, 1)) * 100);
     const lvlName = { mild: '🌶 هادي', medium: '🌶🌶 وسط', hot: '🌶🌶🌶 حار' }[lvl];
-    const active = state.vouchers.filter(v => !v.used);
+    const nowMs = Date.now();
+    const allRemoteVouchers = Array.isArray(state.remoteVouchers) ? state.remoteVouchers : [];
+    const activeRemoteVouchers = allRemoteVouchers.filter(v => !v.redeemed_at && !v.redeemed_order_id && (!v.expires_at || Date.parse(v.expires_at) > nowMs));
     const vouchersLabel = v => {
-      if (v.type === 'percent') return `خصم ${Math.round(v.pct * 100)}%`;
-      if (v.type === 'delivery') return 'توصيل مجاني';
-      if (v.type === 'free_item') return 'إضافة مجانية';
-      if (v.type === 'flat') return `خصم ${money(v.amount)}`;
-      return 'كوبون';
+      if (v.voucher_type === 'percent') return `خصم ${Math.round(Number(v.value) || 0)}%`;
+      if (v.voucher_type === 'free_delivery') return 'توصيل مجاني';
+      if (v.voucher_type === 'free_item') return 'برجر مجاني';
+      if (v.voucher_type === 'free_addon') return 'إضافة مجانية';
+      if (v.voucher_type === 'fixed') return `خصم ${money(Number(v.value) || 0)}`;
+      return 'مكافأة';
     };
-    const vIcon = v => v.type === 'delivery' ? '🛵' : v.type === 'free_item' ? '🍟' : v.type === 'flat' ? '💷' : '🎟️';
+    const vIcon = v => v.voucher_type === 'free_delivery' ? '🛵' : v.voucher_type === 'free_item' ? '🍔' : v.voucher_type === 'free_addon' ? '🍟' : '🎟️';
 
     return `
       <div class="profile-wrap view-anim">
@@ -1900,39 +2256,65 @@ body:has(#stickyCart.show) .install-btn{
           <div class="profile-avatar">${state.customer.name ? esc(state.customer.name.charAt(0).toUpperCase()) : '👤'}</div>
           <h2>${state.customer.name ? esc(state.customer.name) : 'أهلاً بيك'}</h2>
           <p>${state.customer.name ? 'نورتنا تاني' : 'احفظ اسمك عشان نسلم عليك'}</p>
-          <div class="name-input-row">
-            <input type="text" id="pName" placeholder="اسمك" maxlength="40" value="${esc(state.customer.name || '')}">
-            <button class="btn btn-dark btn-sm" data-action="save-name">حفظ</button>
-          </div>
+          ${!customerAuthUser ? `
+            <div class="name-input-row">
+              <input type="text" id="pName" placeholder="اسمك" maxlength="40" value="${esc(state.customer.name || '')}">
+              <button class="btn btn-dark btn-sm" data-action="save-name">حفظ</button>
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="card-block" id="customerAccountCard">
+          <h3>📧 حسابك ونقاط الولاء</h3>
+          <p style="font-size:13px;color:var(--ink-2);margin-bottom:12px">تقدر تتصفح وتضيف للسلة من غير تسجيل دخول. تسجيل الدخول أو إنشاء حساب مطلوب فقط عند إتمام الطلب، ويساعدنا نحفظ نقاط الولاء والإشعارات على حسابك.</p>
+          ${checkoutLoginRequired && !customerAuthUser ? '<p class="form-error" role="status" style="margin-bottom:12px">علشان تكمل طلبك، سجّل دخولك أو أنشئ حسابًا جديدًا. بعد الدخول ارجع للسلة واضغط إتمام الطلب مرة تانية.</p>' : ''}
+          ${customerAuthUser ? `
+            <p style="font-size:13px;margin-bottom:10px">تم تسجيل الدخول بنجاح.</p>
+            <button class="btn btn-dark btn-block" data-action="customer-signout" style="margin-top:8px">تسجيل الخروج</button>
+          ` : `
+            <div class="form-grid">
+              <div><label for="customerAuthEmail">الإيميل</label><input type="email" id="customerAuthEmail" autocomplete="email" inputmode="email" dir="ltr" placeholder="name@example.com" value="${esc(state.customer.email || '')}" maxlength="254" required></div>
+              <div><label for="customerAuthPassword">كلمة المرور</label><input type="password" id="customerAuthPassword" autocomplete="current-password" dir="ltr" minlength="6" placeholder="6 أحرف أو أكثر" required></div>
+              <div style="grid-column:1/-1"><label for="customerAuthPhone">رقم الموبايل (مطلوب عند إنشاء حساب جديد)</label><input type="tel" id="customerAuthPhone" autocomplete="tel" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" value="${esc(state.customer.phone || '')}" maxlength="20"></div>
+            </div>
+            <button class="btn btn-primary btn-block" data-action="customer-signin" style="margin-top:10px">تسجيل الدخول</button>
+            <button class="btn btn-dark btn-block" data-action="customer-signup" style="margin-top:8px">إنشاء حساب جديد</button>
+            <p class="points-sub" style="margin-top:8px">لن نرسل كود تحقق بالبريد. يلزم تعطيل تأكيد البريد الإلكتروني من إعدادات Supabase حتى يعمل إنشاء الحساب مباشرة.</p>
+          `}
+          <p id="customerAuthMessage" class="form-error" role="status" aria-live="polite" style="margin-top:8px"></p>
         </div>
 
         <div class="card-block">
           <h3>🍔 كارت الولاء</h3>
-          <p style="font-size:13px;color:var(--ink-2);margin-bottom:12px">اجمع ${CONFIG.STAMPS_FOR_REWARD} أختام وخد برجر مجاني.</p>
+          <p style="font-size:13px;color:var(--ink-2);margin-bottom:12px">كل طلب يتم توصيله لحساب موثّق يضيف ختمًا. عند اكتمال ${state.stampsForReward} أختام، تصلك مكافأة برجر في حسابك.</p>
           <div class="stamps-row">
-            ${Array.from({ length: CONFIG.STAMPS_FOR_REWARD }, (_, i) => `<div class="stamp ${i < state.stamps ? 'filled' : ''}">${i < state.stamps ? '✓' : ''}</div>`).join('')}
+            ${Array.from({ length: Math.min(20, Math.max(1, Number(state.stampsForReward) || 10)) }, (_, i) => `<div class="stamp ${i < state.stamps ? 'filled' : ''}">${i < state.stamps ? '✓' : ''}</div>`).join('')}
           </div>
-          <p style="font-size:13px;color:var(--ink-2);margin-bottom:${state.freeBurger ? '14px' : '0'}"><strong style="color:var(--ink)">${state.stamps}/${CONFIG.STAMPS_FOR_REWARD}</strong> أختام</p>
-          ${state.freeBurger ? '<button class="btn btn-primary btn-block" data-action="claim-free">استلم برجرك المجاني 🍔</button>' : ''}
+          <p style="font-size:13px;color:var(--ink-2);margin-bottom:0"><strong style="color:var(--ink)">${state.stamps}/${state.stampsForReward}</strong> أختام</p>
+          ${!customerAuthUser ? '<p class="points-sub" style="margin-top:8px">سجّل بإيميلك عشان نبدأ نحفظ أختامك بأمان.</p>' : ''}
         </div>
 
         <div class="card-block">
           <h3>⭐ نقاط المكافآت</h3>
           <div style="margin-bottom:4px"><span style="font-size:12px;font-weight:800;color:var(--primary)">${lvlName}</span></div>
           <div class="points-big">${state.points} نقطة</div>
-          <p class="points-sub">1 نقطة لكل ${money(CONFIG.POINTS_DIVISOR)} بتصرفهم</p>
+          <p class="points-sub">${state.pointsRate} نقطة لكل 1 جنيه مؤهل من الطلب</p>
           <div class="points-track"><i style="width:${progress}%"></i></div>
           <p class="points-sub">${Math.max(0, next - state.points)} نقطة للمستوى اللي بعده</p>
-          ${state.points >= CONFIG.POINTS_FOR_DISCOUNT ? `<button class="btn btn-primary btn-block" data-action="redeem-points" style="margin-top:12px">استبدل ${CONFIG.POINTS_FOR_DISCOUNT} نقطة بـ ${money(CONFIG.DISCOUNT_VALUE)}</button>` : ''}
+          ${customerAuthUser && state.loyaltyEnabled && state.points >= state.redeemPoints ? `<button class="btn btn-primary btn-block" data-action="redeem-points" style="margin-top:12px">استبدل ${state.redeemPoints} نقطة بـ ${money(state.redeemValue)}</button>` : ''}
+          ${!customerAuthUser ? '<p class="points-sub">رصيد النقاط لا يُحسب من المتصفح؛ لازم توثّق إيميلك.</p>' : ''}
         </div>
 
-        ${active.length ? `<div class="card-block">
-          <h3>🎁 كوبوناتك</h3>
-          ${active.map(v => `<div class="voucher-row">
+        <div class="card-block">
+          <h3>🎁 مكافآتي</h3>
+          ${activeRemoteVouchers.length ? activeRemoteVouchers.map(v => `<div class="voucher-row">
             <div class="voucher-icon">${vIcon(v)}</div>
-            <div class="voucher-info"><strong>${esc(vouchersLabel(v))}</strong><small>بتتطبق تلقائياً عند الدفع</small></div>
-          </div>`).join('')}
-        </div>` : ''}
+            <div class="voucher-info"><strong>${esc(vouchersLabel(v))}</strong><small>${v.expires_at ? `صالحة لحد ${esc(new Date(v.expires_at).toLocaleDateString('ar-EG'))}` : 'صالحة للاستخدام'}</small>
+              <button class="btn btn-primary btn-sm" data-action="use-reward-voucher" data-voucher-id="${esc(v.id)}" style="margin-top:7px">${state.selectedVoucherId === v.id ? 'مختارة للطلب القادم ✓' : 'استخدمها في طلب'}</button>
+            </div>
+          </div>`).join('') : `<p class="points-sub">${customerAuthUser ? 'مفيش مكافآت متاحة حاليًا. هتظهر هنا تلقائيًا لما تكسبها.' : 'وثّق إيميلك عشان مكافآتك تفضل محفوظة على حسابك.'}</p>`}
+          ${allRemoteVouchers.some(v => v.redeemed_at || v.redeemed_order_id || (v.expires_at && Date.parse(v.expires_at) <= nowMs)) ? `<details style="margin-top:12px"><summary style="cursor:pointer;font-weight:800">سجل المكافآت المستخدمة أو المنتهية</summary>${allRemoteVouchers.filter(v => v.redeemed_at || v.redeemed_order_id || (v.expires_at && Date.parse(v.expires_at) <= nowMs)).map(v => `<div class="voucher-row"><div class="voucher-icon">${vIcon(v)}</div><div class="voucher-info"><strong>${esc(vouchersLabel(v))}</strong><small>${v.redeemed_at || v.redeemed_order_id ? 'تم استخدامها' : 'انتهت صلاحيتها'}</small></div></div>`).join('')}</details>` : ''}
+        </div>
 
         <div class="card-block">
           <h3>🏆 الإنجازات</h3>
@@ -1952,7 +2334,20 @@ body:has(#stickyCart.show) .install-btn{
       </div>`;
   };
 
-  const VIEWS = { home: viewHome, menu: viewMenu, cart: viewCart, orders: viewOrders, profile: viewProfile };
+  const viewNotifications = () => {
+    const notes = Array.isArray(state.customerNotifications) ? state.customerNotifications : [];
+    const unread = notes.filter(n => !n.read_at).length;
+    const dateLabel = value => { try { return new Date(value).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }); } catch { return ''; } };
+    return `<div class="profile-wrap view-anim">
+      <div class="sec-head"><div><span class="eyebrow">SHEEP & BURGER</span><h1>🔔 الإشعارات</h1><p class="muted">آخر أخبار طلباتك ونقاط الولاء</p></div></div>
+      ${!customerAuthUser ? `<div class="card-block"><h3>سجّل دخولك لمتابعة إشعاراتك</h3><p class="muted" style="margin:8px 0 14px">الإشعارات محفوظة على حسابك عشان تقدر ترجع لها في أي وقت.</p><button class="btn btn-primary btn-block" data-action="go" data-to="#/profile">تسجيل الدخول / حسابي</button></div>` : `
+        <div class="card-block" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px"><span>عندك <strong>${unread}</strong> إشعار غير مقروء</span>${unread ? `<button class="btn btn-outline btn-sm" data-action="notifications-read-all">تعليم الكل كمقروء</button>` : ''}</div>
+        ${state.notificationsError ? `<div class="card-block" style="text-align:center;padding:24px 18px"><h3>تعذر تحميل الإشعارات</h3><p class="muted" style="margin-top:6px">اتأكد إن الإنترنت شغال، وبعدها افتح الصفحة تاني.</p><button class="btn btn-outline" style="margin-top:12px" data-action="refresh-notifications">إعادة المحاولة</button></div>` : notes.length ? `<div class="notification-list">${notes.map(n => `<article class="card-block" style="margin-bottom:10px;border-color:${n.read_at ? 'var(--line)' : 'var(--accent)'};background:${n.read_at ? 'var(--surface)' : 'var(--primary-soft)'}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:23px;line-height:1.2">${n.kind === 'reward' ? '⭐' : n.kind === 'order_update' ? '🍔' : n.kind === 'promotion' ? '🎁' : '🔔'}</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><strong>${esc(n.title || 'إشعار')}</strong>${!n.read_at ? '<span class="badge" style="position:static;min-width:10px;width:10px;height:10px;padding:0"> </span>' : ''}</div><p style="font-size:14px;margin:5px 0;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:anywhere">${esc(n.body || '')}</p><small class="muted">${esc(dateLabel(n.created_at))}</small>${!n.read_at ? `<div style="margin-top:9px"><button class="btn btn-outline btn-sm" data-action="notification-read" data-notification-id="${esc(n.id)}">تعليم كمقروء</button></div>` : ''}</div></div></article>`).join('')}</div>` : `<div class="card-block" style="text-align:center;padding:32px 20px"><div style="font-size:36px;margin-bottom:8px">🔕</div><h3>مفيش إشعارات لحد دلوقتي</h3><p class="muted" style="margin-top:6px">لما يتحدث طلبك أو تكسب نقاط ولاء، هتلاقي الرسالة هنا.</p></div>`}
+      `}
+    </div>`;
+  };
+
+  const VIEWS = { home: viewHome, menu: viewMenu, cart: viewCart, orders: viewOrders, profile: viewProfile, notifications: viewNotifications };
 
   /* ═══════════════════════════════════════════════
      [JS] الراوتر
@@ -2038,7 +2433,7 @@ body:has(#stickyCart.show) .install-btn{
 
   const draftPrice = () => {
     if (!state.draft) return 0;
-    return round2(unitPrice({ ...state.draft, qty: 1 }, { coupon: state.coupon }) * state.draft.qty);
+    return round2(unitPrice({ ...state.draft, qty: 1 }, {}) * state.draft.qty);
   };
 
   const renderSheet = () => {
@@ -2153,26 +2548,210 @@ body:has(#stickyCart.show) .install-btn{
   /* ═══════════════════════════════════════════════
      [JS] الكوبونات وملحقات
      ═══════════════════════════════════════════════ */
-  const applyCoupon = () => {
+  const applyCoupon = async () => {
     readForm();
     const code = (state.couponInput || '').trim().toUpperCase();
-    if (!code) { state.coupon = null; state.couponMsg = 'اكتب الكود الأول'; safeSave(K('coupon'), null); }
-    else if (COUPONS[code]) { state.coupon = { code, pct: COUPONS[code] }; state.couponMsg = ''; state.couponInput = code; safeSave(K('coupon'), { code }); }
-    else { state.coupon = null; state.couponMsg = 'الكود غلط'; safeSave(K('coupon'), null); }
-    refresh();
-    toast(state.coupon ? 'الكوبون اتفعّل 🎉' : state.couponMsg);
+    if (!code) { state.coupon = null; state.couponMsg = 'اكتب الكود الأول'; safeSave(K('coupon'), null); refresh(); toast(state.couponMsg); return; }
+    state.couponMsg = 'بنتحقق من الكود...'; refresh();
+    try {
+      const response = await fetch(`${SB_URL}/functions/v1/validate-coupon`, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY }, body: JSON.stringify({ code }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.valid || !result.coupon) {
+        const messages = { COUPON_INVALID: 'الكود غير صحيح أو غير مفعّل.', COUPON_NOT_STARTED: 'الكود لسه ميعاد تفعيله مجاش.', COUPON_EXPIRED: 'صلاحية الكود انتهت.', COUPON_EXHAUSTED: 'الكود وصل للحد الأقصى للاستخدام.' };
+        throw new Error(messages[result.error] || 'تعذر التحقق من الكود. جرّب تاني.');
+      }
+      const c = result.coupon;
+      state.selectedVoucherId = null;
+      state.coupon = { code: c.code, type: c.type, value: Number(c.value), pct: c.type === 'percent' ? Number(c.value) / 100 : 0, min_order: Number(c.min_order || 0), max_discount: c.max_discount == null ? null : Number(c.max_discount) };
+      state.couponInput = c.code;
+      const currentSubtotal = calculatePricing(state.cart, { vouchers: state.vouchers }).subtotal;
+      state.couponMsg = currentSubtotal < state.coupon.min_order ? `الكود صحيح، لكن لازم قيمة المنتجات تكون ${money(state.coupon.min_order)} على الأقل.` : '';
+      safeSave(K('coupon'), { code: c.code, type: c.type, value: Number(c.value), min_order: state.coupon.min_order, max_discount: state.coupon.max_discount });
+      refresh(); toast(state.couponMsg || 'الكوبون اتفعّل 🎉');
+    } catch (err) {
+      state.coupon = null; state.couponMsg = err?.message || 'تعذر التحقق من الكود.'; safeSave(K('coupon'), null); refresh(); toast(state.couponMsg);
+    }
   };
 
-  const maybeApplyBirthday = () => {
-    if (!isBirthday(state.customer.birthday)) return;
-    if (state.birthdayApplied === today()) return;
-    if (state.coupon && state.coupon.code === 'BIRTHDAY50') return;
-    state.coupon = { code: 'BIRTHDAY50', pct: COUPONS.BIRTHDAY50 };
-    state.couponInput = 'BIRTHDAY50';
-    safeSave(K('coupon'), { code: 'BIRTHDAY50' });
-    state.birthdayApplied = today();
-    safeSave(K('birthday_applied'), state.birthdayApplied);
-    setTimeout(() => { toast('🎂 كل سنة وانت طيب! خصم 50%'); if (currentRoute() === 'cart') refresh(); }, 300);
+  const maybeApplyBirthday = () => { /* خصم عيد الميلاد يتم إصداره من الخادم لحساب موثّق فقط. */ };
+
+  const authMessage = (message, isError = true) => {
+    const el = document.getElementById('customerAuthMessage');
+    if (el) { el.textContent = message; el.style.color = isError ? 'var(--danger, #b42318)' : 'var(--success, #16794b)'; }
+    else if (message) toast(message);
+  };
+
+  const customerPasswordAuth = async (mode) => {
+    if (!sbClient || customerAuthBusy) return;
+    const email = String(document.getElementById('customerAuthEmail')?.value || '').normalize('NFKC').replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF\u00A0]/g, '').trim().toLowerCase();
+    const password = String(document.getElementById('customerAuthPassword')?.value || '');
+    const phoneRaw = String(document.getElementById('customerAuthPhone')?.value || '').trim();
+    const signupPhone = mode === 'signup' ? normalizeEgyptPhone(phoneRaw) : null;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { authMessage('اكتب بريدًا إلكترونيًا صحيحًا.'); return; }
+    if (password.length < 6) { authMessage('كلمة المرور لازم تكون 6 أحرف على الأقل.'); return; }
+    if (mode === 'signup' && !signupPhone) { authMessage('رقم الموبايل مطلوب عند إنشاء الحساب، واكتب رقمًا مصريًا صحيحًا يبدأ بـ 010 أو 011 أو 012 أو 015.'); return; }
+    customerAuthBusy = true;
+    state.customer.email = email;
+    if (mode === 'signup') state.customer.phone = signupPhone;
+    safeSave(K('customer'), state.customer);
+    try {
+      let result;
+      if (mode === 'signup') {
+        result = await sbClient.auth.signUp({ email, password, options: { data: { app: 'sheepburger-customer', phone: signupPhone } } });
+      } else {
+        result = await sbClient.auth.signInWithPassword({ email, password });
+      }
+      if (result.error) throw result.error;
+      customerAuthUser = result.data?.session?.user || null;
+      if (!customerAuthUser || !result.data?.session) {
+        customerAuthUser = null;
+        refresh();
+        authMessage('Supabase أنشأ الحساب أو استقبل طلبه لكن لم يُرجع جلسة دخول. ما تكررش إنشاء الحساب بنفس الإيميل. راجع Authentication → Users وحالة تأكيد البريد، وتأكد أن Confirm email متوقف، ثم سجّل الدخول بعد حل حالة الحساب.');
+        return;
+      }
+      const { data: profile } = await sbClient.from('profiles').select('full_name,phone,birthday').eq('id', customerAuthUser.id).maybeSingle();
+      if (profile?.full_name) state.customer.name = profile.full_name;
+      if (profile?.phone) state.customer.phone = profile.phone;
+      if (profile?.birthday) state.customer.birthday = profile.birthday;
+      const profilePhone = mode === 'signup' ? signupPhone : (profile?.phone || null);
+      const { error: profileError } = await sbClient.from('profiles').upsert({
+        id: customerAuthUser.id,
+        full_name: profile?.full_name || null,
+        phone: profilePhone,
+        birthday: profile?.birthday || null
+      }, { onConflict: 'id' });
+      if (profileError) {
+        console.warn('[Profile] تعذر حفظ بيانات العميل', profileError);
+        authMessage(mode === 'signup' ? 'الحساب اتعمل، لكن رقم الموبايل ما اتحفظش. افتح بيانات الحساب واحفظ الرقم مرة تانية.' : 'تم تسجيل الدخول، لكن تعذر تحديث بيانات الحساب.');
+      }
+      if (profilePhone) state.customer.phone = profilePhone;
+      checkoutLoginRequired = false;
+      safeSave(K('customer'), state.customer);
+      await loadCustomerRewards();
+      await loadCustomerNotifications();
+      refresh();
+      if (!profileError) authMessage(mode === 'signup' ? 'تم إنشاء حسابك وتسجيل الدخول بنجاح، واتحفظ رقم موبايلك.' : 'تم تسجيل الدخول بنجاح.', false);
+      toast(mode === 'signup' ? 'أهلًا بيك في SheepBurger ❤️' : 'تم تسجيل الدخول بنجاح');
+    } catch (e) {
+      const msg = String(e?.message || '').toLowerCase();
+      console.warn('[Customer Auth] فشل طلب المصادقة', { mode, code: e?.code || null, status: e?.status || null, message: e?.message || 'unknown error' });
+      let friendly = 'تعذر الاتصال بخدمة الحسابات. تأكد من الإنترنت ثم جرّب مرة أخرى.';
+      if (msg.includes('invalid login credentials')) friendly = 'الإيميل أو كلمة المرور غير صحيحة، أو أن الحساب لم يكتمل تفعيله. لو أنشأت الحساب للتو، راجع حالة البريد في Supabase.';
+      else if (msg.includes('user already registered') || msg.includes('already been registered')) friendly = 'الإيميل ده موجود بالفعل. لا تنشئه مرة ثانية؛ استخدم تسجيل الدخول، ولو لم يعمل راجع حالة الحساب في Supabase.';
+      else if (msg.includes('unable to validate email address') || msg.includes('invalid format') || msg.includes('invalid email')) friendly = 'صيغة الإيميل غير مقبولة من Supabase. اكتب بريدًا كاملًا مثل name@example.com من غير مسافات أو رموز إضافية.';
+      else if (msg.includes('email not confirmed') || msg.includes('email_not_confirmed')) friendly = 'الحساب موجود لكن البريد غير مؤكد. راجع Authentication → Users، وتأكد أن Confirm email متوقف أو أكّد الحساب الموجود.';
+      else if (msg.includes('password should be') || msg.includes('password must')) friendly = 'كلمة المرور لازم تكون 6 أحرف على الأقل.';
+      else if (msg.includes('too many requests') || msg.includes('rate limit')) friendly = 'محاولات كثيرة في وقت قصير. استنى شوية ثم جرّب مرة أخرى.';
+      authMessage(friendly);
+    } finally { customerAuthBusy = false; }
+  };
+
+  const loadCustomerNotifications = async ({ quiet = true, notifyNew = true } = {}) => {
+    if (!sbClient || !customerAuthUser) { state.customerNotifications = []; state.notificationsError = false; updateBadges(); return; }
+    const hadLoaded = state.notificationsLoadedAt > 0;
+    const previousIds = new Set((state.customerNotifications || []).map(n => n.id));
+    try {
+      const { data, error } = await sbClient.from('customer_notifications')
+        .select('id,title,body,kind,related_table,related_id,created_at,read_at,expires_at,metadata')
+        .eq('user_id', customerAuthUser.id)
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+        .order('created_at', { ascending: false }).limit(50);
+      if (error) throw error;
+      state.customerNotifications = Array.isArray(data) ? data : [];
+      state.notificationsLoadedAt = Date.now();
+      state.notificationsError = false;
+      updateBadges();
+      const newest = state.customerNotifications.find(n => !previousIds.has(n.id));
+      if (hadLoaded && notifyNew && newest && document.visibilityState !== 'hidden') {
+        toast(`🔔 ${newest.title || 'عندك إشعار جديد'}`);
+      }
+      if (!quiet && currentRoute() === 'notifications') refresh();
+    } catch (e) {
+      state.notificationsError = true;
+      console.warn('[Notifications] تعذر تحميل إشعارات العميل');
+      if (!quiet && currentRoute() === 'notifications') refresh();
+    }
+  };
+
+  const markCustomerNotificationRead = async (id) => {
+    if (!sbClient || !customerAuthUser || !id) return;
+    const readAt = new Date().toISOString();
+    try {
+      const { error } = await sbClient.from('customer_notifications').update({ read_at: readAt }).eq('id', id).eq('user_id', customerAuthUser.id).is('read_at', null);
+      if (error) throw error;
+      state.customerNotifications = state.customerNotifications.map(n => n.id === id ? { ...n, read_at: readAt } : n);
+      updateBadges();
+      if (currentRoute() === 'notifications') refresh();
+    } catch (e) { toast('تعذر تحديث الإشعار. جرّب مرة تانية.'); }
+  };
+
+  const markAllCustomerNotificationsRead = async () => {
+    if (!sbClient || !customerAuthUser) return;
+    const readAt = new Date().toISOString();
+    try {
+      const { error } = await sbClient.from('customer_notifications').update({ read_at: readAt }).eq('user_id', customerAuthUser.id).is('read_at', null);
+      if (error) throw error;
+      state.customerNotifications = state.customerNotifications.map(n => n.read_at ? n : { ...n, read_at: readAt });
+      updateBadges();
+      if (currentRoute() === 'notifications') refresh();
+    } catch (e) { toast('تعذر تحديث الإشعارات. جرّب مرة تانية.'); }
+  };
+
+  const loadCustomerRewards = async () => {
+    if (!sbClient || !customerAuthUser) return;
+    try {
+      await loadAchievementDefinitions();
+      const { data: sessionData } = await sbClient.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) return;
+      const response = await fetch(`${SB_URL}/functions/v1/rewards-api`, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${token}` }, body: JSON.stringify({ action: 'my_rewards' }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'REWARDS_LOOKUP_FAILED');
+      const ledger = Array.isArray(result.loyalty_ledger) ? result.loyalty_ledger : [];
+      const stamps = Array.isArray(result.stamp_ledger) ? result.stamp_ledger : [];
+      const settings = result.loyalty_settings || {};
+      state.points = Math.max(0, ledger.reduce((sum, row) => sum + (Number(row.points) || 0), 0));
+      state.stamps = Math.max(0, stamps.reduce((sum, row) => sum + (Number(row.stamps_delta) || 0), 0));
+      state.pointsRate = Math.max(0, Number(settings.loyalty_points_per_currency) || 0);
+      state.redeemPoints = Math.max(1, Number(settings.loyalty_redeem_points) || CONFIG.POINTS_FOR_DISCOUNT);
+      state.redeemValue = Math.max(0, Number(settings.loyalty_redeem_value) || 0);
+      state.stampsForReward = Math.max(1, Number(settings.loyalty_stamps_for_reward) || CONFIG.STAMPS_FOR_REWARD);
+      state.loyaltyEnabled = !!settings.loyalty_enabled;
+      await loadCustomerNotifications();
+      state.remoteVouchers = Array.isArray(result.vouchers) ? result.vouchers : [];
+      state.achievements = (Array.isArray(result.achievements) ? result.achievements : []).map(a => a.achievement_key === 'guac_master' ? 'guac_master' : a.achievement_key).filter(k => k in ACHIEVEMENTS);
+      if (state.selectedVoucherId && !state.remoteVouchers.some(v => v.id === state.selectedVoucherId && !v.redeemed_at && !v.redeemed_order_id)) state.selectedVoucherId = null;
+      safeSave(K('points'), state.points);
+      safeSave(K('stamps'), state.stamps);
+      safeSave(K('achievements'), state.achievements);
+    } catch (e) { console.warn('[Rewards] تعذر تحديث رصيد الولاء'); }
+  };
+
+  const saveCustomerProfile = async () => {
+    if (!sbClient || !customerAuthUser) { authMessage('وثّق إيميلك الأول عشان تحفظ بيانات الولاء.'); return; }
+    const birthday = String(document.getElementById('pBirthday')?.value || '').trim();
+    const phoneRaw = String(document.getElementById('pPhone')?.value || '').trim();
+    const phone = phoneRaw ? normalizeEgyptPhone(phoneRaw) : null;
+    if (phoneRaw && !phone) { authMessage('اكتب رقم موبايل مصري صحيح يبدأ بـ 010 أو 011 أو 012 أو 015.'); return; }
+    const name = String(document.getElementById('pName')?.value || state.customer.name || '').trim().slice(0, 80);
+    if (name.length < 2) { authMessage('اكتب اسمك الأول من خانة الاسم فوق.'); return; }
+    try {
+      const { error } = await sbClient.from('profiles').upsert({ id: customerAuthUser.id, full_name: name, phone, birthday: birthday || null }, { onConflict: 'id' });
+      if (error) throw error;
+      state.customer.name = name; state.customer.phone = phone || ''; state.customer.birthday = birthday;
+      safeSave(K('customer'), state.customer);
+      await loadCustomerRewards();
+      authMessage('اتحفظت بياناتك على حسابك، وده هيساعدنا نحافظ على مكافآتك. ❤️', false);
+      refresh();
+    } catch (e) { authMessage('تعذر حفظ البيانات. اتأكد إنك مسجل دخول وجرب تاني.'); }
+  };
+
+  const customerSignOut = async () => {
+    if (sbClient) await sbClient.auth.signOut();
+    customerAuthUser = null; customerOtpSent = false; checkoutLoginRequired = false; state.points = 0; state.stamps = 0; state.achievements = []; state.remoteVouchers = []; state.selectedVoucherId = null; state.loyaltyEnabled = false;
+    state.customerNotifications = []; state.notificationsLoadedAt = 0;
+    state.customer.email = ''; state.customer.name = ''; state.customer.phone = ''; state.customer.birthday = ''; safeSave(K('customer'), state.customer);
+    refresh(); toast('تم تسجيل الخروج');
   };
 
   const saveName = () => {
@@ -2335,12 +2914,26 @@ body:has(#stickyCart.show) .install-btn{
       case 'apply-coupon': applyCoupon(); break;
       case 'checkout': checkout(); break;
       case 'save-name': saveName(); break;
+      case 'customer-signin': customerPasswordAuth('signin'); break;
+      case 'customer-signup': customerPasswordAuth('signup'); break;
+      case 'save-customer-profile': saveCustomerProfile(); break;
+      case 'customer-signout': customerSignOut(); break;
+      case 'notification-read': markCustomerNotificationRead(el.dataset.notificationId); break;
+      case 'notifications-read-all': markAllCustomerNotificationsRead(); break;
+      case 'refresh-notifications': loadCustomerNotifications({ quiet: false }); break;
       case 'toast': toast(el.dataset.msg); break;
       case 'go': location.hash = el.dataset.to; break;
       case 'reorder': reorder(el.dataset.orderId); break;
       case 'add-special': addChefSpecial(); break;
       case 'redeem-points': redeemPoints(); break;
-      case 'claim-free': claimFreeBurger(); break;
+      case 'use-reward-voucher': {
+        const voucher = (state.remoteVouchers || []).find(v => v.id === el.dataset.voucherId);
+        if (!customerAuthUser || !voucher) { toast('سجّل بإيميلك الأول عشان تستخدم المكافأة.'); return; }
+        if (voucher.redeemed_at || voucher.redeemed_order_id || (voucher.expires_at && Date.parse(voucher.expires_at) <= Date.now())) { toast('المكافأة دي مش متاحة للاستخدام.'); return; }
+        state.selectedVoucherId = voucher.id; state.coupon = null; state.couponInput = ''; state.couponMsg = ''; safeSave(K('coupon'), null);
+        toast('اتحددت المكافأة للطلب القادم.'); location.hash = state.cart.length ? '#/cart' : '#/menu'; refresh(); break;
+      }
+      case 'clear-reward-voucher': state.selectedVoucherId = null; refresh(); toast('تم إلغاء اختيار المكافأة.'); break;
       case 'unlock-secret': unlockSecret(); break;
       case 'toggle-review': state.reviewFormOpen = !state.reviewFormOpen; renderSheet(); break;
       case 'cancel-review': state.reviewFormOpen = false; state.reviewName = ''; state.reviewText = ''; renderSheet(); break;
@@ -2400,6 +2993,14 @@ body:has(#stickyCart.show) .install-btn{
     }
   });
 
+  app.addEventListener('change', e => {
+    if (e.target?.id === 'fArea') {
+      state.customer.area = e.target.value;
+      safeSave(K('customer'), state.customer);
+      refresh();
+    }
+  });
+
   app.addEventListener('keydown', e => {
     if (e.key === 'Enter' && (e.target.matches('[data-action="unlock-secret"]') || e.target.id === 'secretCode')) {
       e.preventDefault(); unlockSecret();
@@ -2422,23 +3023,66 @@ body:has(#stickyCart.show) .install-btn{
     }
   });
 
-  window.addEventListener('hashchange', render);
+  window.addEventListener('hashchange', () => {
+    render();
+    if (currentRoute() === 'notifications' && customerAuthUser) loadCustomerNotifications({ quiet: false });
+  });
+  // تحديث الإشعارات أثناء بقاء التطبيق مفتوحًا دون أي خدمة مدفوعة.
+  setInterval(() => {
+    if (customerAuthUser && document.visibilityState !== 'hidden') {
+      loadCustomerNotifications({ quiet: currentRoute() !== 'notifications' });
+      if (currentRoute() === 'profile' && !document.querySelector('#app input:focus, #app select:focus, #app textarea:focus')) loadCustomerRewards().then(() => { if (!document.querySelector('#app input:focus, #app select:focus, #app textarea:focus')) refresh(); }).catch(() => {});
+    }
+  }, 30000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && customerAuthUser) loadCustomerNotifications({ quiet: currentRoute() !== 'notifications' });
+  });
 
   /* ═══════════════════════════════════════════════
      [JS] التشغيل
      ═══════════════════════════════════════════════ */
   (function boot() {
+    loadLiveMenu();
+    loadAchievementDefinitions().then(() => { if (currentRoute() === 'profile') refresh(); }).catch(() => {});
+    startLiveMenu();
     if (!location.hash) location.hash = '#/home';
     if (!state.secretUnlocked && state.stats.totalOrders >= CONFIG.SECRET_ORDERS_NEEDED) {
       state.secretUnlocked = true;
       safeSave(K('secret_unlocked'), true);
     }
+    if (sbClient) {
+      sbClient.auth.getSession().then(async ({ data }) => {
+        customerAuthUser = data?.session?.user || null;
+        if (customerAuthUser) {
+          await loadAchievementDefinitions();
+          state.customer.email = customerAuthUser.email || '';
+          const { data: profile } = await sbClient.from('profiles').select('full_name,phone,birthday').eq('id', customerAuthUser.id).maybeSingle();
+          if (profile) {
+            if (profile.full_name) state.customer.name = profile.full_name;
+            if (profile.phone) state.customer.phone = profile.phone;
+            if (profile.birthday) state.customer.birthday = profile.birthday;
+            safeSave(K('customer'), state.customer);
+          }
+          await loadCustomerRewards();
+          await loadCustomerNotifications();
+        } else {
+          // لا نستخدم أي إيميل قديم محفوظ محليًا أو تابع لجلسة لوحة الإدارة كإيميل للعميل.
+          if (state.customer.email) { state.customer.email = ''; safeSave(K('customer'), state.customer); }
+        }
+        if (currentRoute() === 'profile') refresh();
+      }).catch(() => {});
+      sbClient.auth.onAuthStateChange((_event, session) => {
+        customerAuthUser = session?.user || null;
+        if (!customerAuthUser) { customerOtpSent = false; state.customerNotifications = []; updateBadges(); }
+        else { setTimeout(() => { loadCustomerNotifications(); }, 0); }
+        if (currentRoute() === 'profile' || currentRoute() === 'notifications') setTimeout(() => refresh(), 0);
+      });
+    }
     refreshLive();
     if (state.orders.some(o => o.status < 3)) startTracking();
-    maybeApplyBirthday();
     render();
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+      window.addEventListener('load', () => navigator.serviceWorker.register('./SW.js').catch(() => {}));
     }
   })();
 })();
