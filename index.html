@@ -908,14 +908,9 @@ body:has(#stickyCart.show) .install-btn{
   const CATS = [];
   const SUBCATS = {};
 
-  const ADDONS = {
-    cheese:   { name: 'جبنة زيادة', price: 8,  allergens: ['dairy'] },
-    bacon:    { name: 'بيكن تركي', price: 12, allergens: [] },
-    patty:    { name: 'قطعة لحمة زيادة', price: 20, allergens: [] },
-    jalapeno: { name: 'هالبينو', price: 5,  allergens: [] },
-    sauce:    { name: 'مايونيز ثوم', price: 6,  allergens: ['egg'] },
-    onions:   { name: 'بصل مقرمش', price: 6,  allergens: ['gluten'] }
-  };
+  // أسماء الإضافات وأسعارها تأتي من جدول addons فقط. مرجع الحساسية مؤقت حتى يُضاف إلى الجدول.
+  const ADDON_ALLERGENS = { cheese: ['dairy'], sauce: ['egg'], onions: ['gluten'] };
+  const ADDONS = {};
 
   let ACHIEVEMENTS = {};
 
@@ -963,6 +958,7 @@ body:has(#stickyCart.show) .install-btn{
   let customerAuthBusy = false;
   let liveMenuChannel = null;
   let liveMenuReady = false;
+  let liveMenuError = false;
   let secretMenuToken = '';
   let liveSecretItems = [];
   let liveSecretAddonMap = {};
@@ -984,6 +980,7 @@ body:has(#stickyCart.show) .install-btn{
 
   const loadLiveMenu = async () => {
     if (!sbClient) return;
+    liveMenuError = false;
     try {
       const [{ data: cats, error: catsError }, { data: rows, error: itemsError }, { data: sizes, error: sizesError }, { data: settings, error: settingsError }, { data: zones, error: zonesError }, addonResult, itemAddonResult, subcategoryResult, promotionResult, reviewsResult] = await Promise.all([
         sbClient.from('categories').select('id,slug,name_ar,sort_order,is_active').eq('is_active', true).order('sort_order'),
@@ -1028,7 +1025,7 @@ body:has(#stickyCart.show) .install-btn{
         (addonResult.data || []).forEach(a => {
           const key = String(a.slug || a.id);
           liveAddonIds[key] = a.id;
-          ADDONS[key] = { name: a.name_ar, price: Number(a.price) || 0, allergens: [], dbId: a.id };
+          ADDONS[key] = { name: a.name_ar, price: Number(a.price) || 0, allergens: ADDON_ALLERGENS[key] || [], dbId: a.id };
         });
         Object.entries(liveSecretAddonMap).forEach(([key, a]) => {
           if (!ADDONS[key]) { liveAddonIds[key] = a.dbId; ADDONS[key] = { name:a.name, price:a.price, allergens:[], dbId:a.dbId }; }
@@ -1118,7 +1115,7 @@ body:has(#stickyCart.show) .install-btn{
       console.info('[Supabase] تم تحديث منيو العميل', { products: liveItems.length, categories: (cats || []).length });
     } catch (err) {
       console.error('[Supabase] تعذر تحميل المنيو الحي:', err?.message || err);
-      MENU_ITEMS.splice(0, MENU_ITEMS.length); Object.keys(ITEM).forEach(k => delete ITEM[k]); liveMenuReady = false; refresh();
+      MENU_ITEMS.splice(0, MENU_ITEMS.length); Object.keys(ITEM).forEach(k => delete ITEM[k]); liveMenuReady = false; liveMenuError = true; refresh();
     }
   };
 
@@ -1171,7 +1168,10 @@ body:has(#stickyCart.show) .install-btn{
     try { const r = localStorage.getItem(k); if (r === null) return fb; return JSON.parse(r) ?? fb; }
     catch { return fb; }
   };
-  const safeSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const safeSave = (k, v) => {
+    try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+    catch (e) { console.warn('[storage] تعذر الحفظ:', k, e?.message); return false; }
+  };
   const safeRemove = k => { try { localStorage.removeItem(k); } catch {} };
 
   (function migrate() {
@@ -1307,9 +1307,24 @@ body:has(#stickyCart.show) .install-btn{
     return round2(p + ap);
   };
 
+  const selectedRemoteVoucher = () => {
+    if (!state.selectedVoucherId) return null;
+    const v = (state.remoteVouchers || []).find(x => x.id === state.selectedVoucherId);
+    if (!v || v.redeemed_at || v.redeemed_order_id || (v.expires_at && Date.parse(v.expires_at) <= Date.now())) return null;
+    return v;
+  };
+  // تحويل المكافأة المعتمدة من الخادم لصيغة الحساب المعروضة فقط؛ الخادم هو الذي يطبّق الخصم فعلياً.
+  const pricingVouchersFrom = (v) => {
+    if (!v) return [];
+    if (v.voucher_type === 'percent') return [{ type: 'percent', pct: Math.max(0, Math.min(1, (Number(v.value) || 0) / 100)) }];
+    if (v.voucher_type === 'fixed') return [{ type: 'flat', amount: Number(v.value) || 0 }];
+    if (v.voucher_type === 'free_delivery') return [{ type: 'delivery' }];
+    return [];
+  };
   const calculatePricing = (cart, ctx = {}) => {
     const coupon = ctx.coupon || null;
-    const vouchers = (ctx.vouchers || []).filter(v => !v.used);
+    // القسائم المحلية أُلغيت: المصدر الوحيد هو مكافآت الخادم المختارة.
+    const vouchers = pricingVouchersFrom(ctx.voucher);
     const itemLines = cart.map(line => {
       const base = baseUnitPrice(line);
       const unit = unitPrice(line, {});
@@ -1353,7 +1368,7 @@ body:has(#stickyCart.show) .install-btn{
     const cheeseCount = cart.reduce((n, l) => n + (l.addons.includes('cheese') ? l.qty : 0), 0);
     const freeItemVouchers = vouchers.filter(v => v.type === 'free_item').slice(0, cheeseCount);
     if (freeItemVouchers.length) {
-      voucherDiscount += round2(freeItemVouchers.length * ADDONS.cheese.price);
+      voucherDiscount += round2(freeItemVouchers.length * (ADDONS.cheese?.price ?? 0));
       appliedVouchers.push(...freeItemVouchers);
     }
     const dv = vouchers.find(v => v.type === 'delivery');
@@ -1374,7 +1389,11 @@ body:has(#stickyCart.show) .install-btn{
     special: line.special ? { type: line.special.type, price: line.special.price ?? null, pct: line.special.pct ?? null } : null
   });
   const cartCount = () => state.cart.reduce((s, l) => s + l.qty, 0);
-  const commitCart = () => { safeSave(K('cart'), state.cart); updateBadges(); };
+  const commitCart = () => {
+    if (!safeSave(K('cart'), state.cart)) toast('تعذر حفظ السلة على هذا الجهاز. ممكن تكون مساحة التخزين ممتلئة.');
+    scheduleCartSync();
+    updateBadges();
+  };
 
   const addLineToCart = (newLine) => {
     const key = lineKey(newLine);
@@ -1392,6 +1411,192 @@ body:has(#stickyCart.show) .install-btn{
     commitCart();
     if (currentRoute() === 'cart') refresh();
   };
+
+  /* ═══════════════════════════════════════════════
+     [JS] مزامنة حساب العميل: السلة وسجل الطلبات من قاعدة البيانات
+     ═══════════════════════════════════════════════ */
+  let cartSyncTimer = null;
+  let cartSyncChain = Promise.resolve();
+  let cartHydrated = false;
+  let customerSyncing = false;
+  const CART_SPICE_LEVELS = ['هادي', 'وسط', 'حار'];
+
+  const waitForMenu = async () => {
+    for (let i = 0; i < 75 && !liveMenuReady; i++) await new Promise(r => setTimeout(r, 200));
+    return liveMenuReady;
+  };
+
+  const addonKeyForId = (id) => Object.keys(liveAddonIds).find(k => String(liveAddonIds[k]) === String(id)) || null;
+
+  // تحويل صف من customer_cart_items إلى سطر في السلة المحلية (بنفس شكل addLineToCart)
+  const cartLineFromRow = (row) => {
+    const item = ITEM[row.item_id];
+    if (!item || !Array.isArray(item.sizes) || !item.sizes.length) return null;
+    const size = item.sizes.find(z => String(z.key) === String(row.size_id)) || item.sizes[0];
+    const addons = (Array.isArray(row.selected_addons) ? row.selected_addons : [])
+      .map(a => addonKeyForId(typeof a === 'object' ? a?.id : a)).filter(Boolean);
+    return {
+      id: item.id, size: size.key, spice: row.spice_level || null, addons,
+      note: row.notes || '', qty: clamp(Number(row.quantity) || 1, 1, CONFIG.MAX_QTY),
+      special: null, uid: uid()
+    };
+  };
+
+  // تحويل سطر السلة إلى صف قاعدة البيانات
+  const cartRowFromLine = (l) => {
+    if (!ITEM[l.id]) return null;
+    return {
+      item_id: l.id,
+      size_id: l.size,
+      quantity: clamp(Number(l.qty) || 1, 1, CONFIG.MAX_QTY),
+      selected_addons: (l.addons || []).map(key => ADDONS[key]?.dbId || liveAddonIds[key]).filter(Boolean),
+      spice_level: CART_SPICE_LEVELS.includes(l.spice) ? l.spice : null,
+      notes: (l.note || '').slice(0, 500) || null,
+      client_line_key: lineKey(l)
+    };
+  };
+
+  // رفع السلة الحالية للعميل المسجل (الخادم هو المصدر بعد الدخول)
+  const pushServerCart = async () => {
+    if (!customerAuthUser || !sbClient) return;
+    const seen = new Map();
+    state.cart.map(cartRowFromLine).filter(Boolean).forEach(r => { if (!seen.has(r.client_line_key)) seen.set(r.client_line_key, r); });
+    const rows = [...seen.values()];
+    const { data: cart, error: cartErr } = await sbClient.from('customer_carts')
+      .upsert({ user_id: customerAuthUser.id }, { onConflict: 'user_id' }).select('id').single();
+    if (cartErr) throw cartErr;
+    const { error: delErr } = await sbClient.from('customer_cart_items').delete().eq('cart_id', cart.id);
+    if (delErr) throw delErr;
+    if (rows.length) {
+      const { error: insErr } = await sbClient.from('customer_cart_items')
+        .insert(rows.map(r => ({ ...r, cart_id: cart.id })));
+      if (insErr) throw insErr;
+    }
+  };
+
+  // عند الدخول: ندمج سلة الجهاز مع سلة الحساب المحفوظة (بدون تكرار الكميات)
+  const hydrateServerCart = async () => {
+    if (!customerAuthUser || !sbClient) return;
+    const ready = await waitForMenu();
+    if (!ready) return;
+    const { data: cart, error } = await sbClient.from('customer_carts')
+      .select('id').eq('user_id', customerAuthUser.id).maybeSingle();
+    if (error) throw error;
+    let serverLines = [];
+    if (cart) {
+      const { data: rows, error: rowsErr } = await sbClient.from('customer_cart_items')
+        .select('item_id,size_id,quantity,selected_addons,spice_level,notes,client_line_key')
+        .eq('cart_id', cart.id);
+      if (rowsErr) throw rowsErr;
+      serverLines = (rows || []).map(cartLineFromRow).filter(Boolean);
+    }
+    const merged = new Map();
+    serverLines.forEach(l => merged.set(lineKey(l), l));
+    state.cart.forEach(l => {
+      if (!ITEM[l.id]) return;
+      const k = lineKey(l);
+      const ex = merged.get(k);
+      if (ex) ex.qty = Math.max(ex.qty, clamp(l.qty, 1, CONFIG.MAX_QTY));
+      else merged.set(k, { ...l, uid: uid() });
+    });
+    state.cart = [...merged.values()];
+    safeSave(K('cart'), state.cart);
+    updateBadges();
+    cartHydrated = true;
+    await pushServerCart();
+    if (currentRoute() === 'cart') refresh();
+  };
+
+  // أي تغيير في السلة يُرسل للخادم بعد توقف قصير (مع طابور لمنع التعارض)
+  const scheduleCartSync = () => {
+    if (!customerAuthUser || !sbClient || !cartHydrated) return;
+    clearTimeout(cartSyncTimer);
+    cartSyncTimer = setTimeout(() => {
+      cartSyncChain = cartSyncChain
+        .then(pushServerCart)
+        .catch(e => { console.warn('[Cart] تعذر مزامنة السلة:', e?.message); toast('تعذر حفظ السلة في حسابك. هنحاول تاني.'); });
+    }, 400);
+  };
+
+  // تحويل صف طلب من الخادم إلى نفس شكل الطلب المحلي الذي تعرضه شاشة الطلبات
+  const serverOrderFromRow = (r) => {
+    const statusNum = ({ pending: 0, confirmed: 1, preparing: 1, ready: 2, out_for_delivery: 2, delivered: 3, cancelled: 3 })[r.status] ?? 0;
+    const created = new Date(r.created_at || Date.now());
+    return {
+      id: r.order_number, dbId: r.id, trackingToken: null, ownerId: customerAuthUser?.id || null,
+      date: created.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }),
+      startedAt: created.getTime(),
+      items: (r.order_items || []).map(it => {
+        const addonList = Array.isArray(it.addons) ? it.addons : [];
+        const addonNames = addonList.map(a => a?.name_ar || a?.name || '').filter(Boolean);
+        return {
+          itemId: it.item_id, slug: '', name: it.item_name || 'منتج',
+          qty: Number(it.quantity) || 1, price: Number(it.unit_price) || 0, basePrice: Number(it.unit_price) || 0,
+          details: [it.size_label, it.spice_level, addonNames.length ? `إضافات: ${addonNames.join('، ')}` : '', it.notes ? `ملاحظة: ${it.notes}` : '']
+            .filter(Boolean).join(' · '),
+          addons: addonList.map(a => (typeof a === 'object' ? a?.id : a)).filter(Boolean),
+          size: it.size_id || null, spice: it.spice_level || null, note: it.notes || '', special: null
+        };
+      }),
+      subtotal: Number(r.subtotal || 0), deliveryFee: Number(r.delivery_fee || 0),
+      voucherDiscount: Number(r.discount_total || 0), discountTotal: Number(r.discount_total || 0),
+      total: Number(r.total || 0), payment: r.payment_method === 'cash' ? 'الدفع عند الاستلام' : (r.payment_method || ''),
+      name: r.customer_name || '', address: r.delivery_address || '',
+      status: statusNum, statusLabel: r.status === 'cancelled' ? 'تم إلغاء الطلب' : null
+    };
+  };
+
+  // جلب سجل طلبات الحساب من الخادم ودمجه مع الطلبات المحلية للضيف فقط
+  const loadServerOrders = async () => {
+    if (!customerAuthUser || !sbClient) return;
+    const { data, error } = await sbClient.from('orders')
+      .select('id,order_number,status,payment_method,customer_name,delivery_address,subtotal,discount_total,delivery_fee,total,created_at,order_items(item_id,item_name,size_id,size_label,unit_price,addons,quantity,notes,spice_level)')
+      .eq('user_id', customerAuthUser.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) { console.warn('[Orders] تعذر تحميل الطلبات:', error.message); return; }
+    const serverOrders = (data || []).map(serverOrderFromRow);
+    const serverIds = new Set(serverOrders.map(o => String(o.id)));
+    const localById = new Map(state.orders.map(o => [String(o.id), o]));
+    const merged = serverOrders.map(s => {
+      const l = localById.get(String(s.id));
+      return l ? { ...s, trackingToken: l.trackingToken || null } : s;
+    });
+    // نحتفظ بطلبات الضيف على هذا الجهاز فقط، ونُسقط طلبات أي حساب آخر
+    state.orders.forEach(o => {
+      if (serverIds.has(String(o.id))) return;
+      if (!o.ownerId) merged.push(o);
+    });
+    state.orders = merged.slice(0, 100);
+    safeSave(K('orders'), state.orders);
+    if (currentRoute() === 'orders') refresh();
+  };
+
+  const syncCustomerData = async () => {
+    if (!customerAuthUser || !sbClient || customerSyncing) return;
+    customerSyncing = true;
+    try {
+      await loadServerOrders();
+      cartSyncChain = cartSyncChain.then(hydrateServerCart).catch(e => console.warn('[Cart] تعذر تحميل السلة:', e?.message));
+      await cartSyncChain;
+    } catch (e) {
+      console.warn('[Sync] تعذر مزامنة بيانات الحساب:', e?.message);
+    } finally {
+      customerSyncing = false;
+    }
+  };
+
+  // عند تسجيل الخروج: نُخفي طلبات الحساب من الجهاز ونوقف مزامنة السلة
+  const clearCustomerLocalState = () => {
+    cartHydrated = false;
+    clearTimeout(cartSyncTimer);
+    state.orders = state.orders.filter(o => !o.ownerId);
+    safeSave(K('orders'), state.orders);
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && customerAuthUser) syncCustomerData();
+  });
 
   /* ═══════════════════════════════════════════════
      [JS] الولاء والمكافآت
@@ -1560,7 +1765,7 @@ body:has(#stickyCart.show) .install-btn{
       const zoneId = zoneSelect?.value;
       const zone = (window.SHEEPBURGER_ZONES || []).find(z => String(z.id) === String(zoneId));
       if (!zone) throw new Error('INVALID_DELIVERY_ZONE');
-      const clientSubtotal = calculatePricing(state.cart, { coupon: state.coupon, vouchers: state.vouchers }).subtotal;
+      const clientSubtotal = calculatePricing(state.cart, { coupon: state.coupon, voucher: selectedRemoteVoucher() }).subtotal;
       const minimumOrder = Math.max(Number(settings.min_order || 0), Number(zone.min_order || 0));
       if (clientSubtotal < minimumOrder) throw new Error('MINIMUM_ORDER_NOT_MET');
       const phone = normalizeEgyptPhone(state.customer.phone);
@@ -1620,7 +1825,7 @@ body:has(#stickyCart.show) .install-btn{
       const order = {
         id: remote.order_number, dbId: remote.order_id, trackingToken,
         date: new Date(remote.created_at || Date.now()).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }),
-        startedAt: Date.now(), items: itemSnapshot,
+        startedAt: Date.now(), ownerId: customerAuthUser?.id || null, items: itemSnapshot,
         subtotal: Number(remote.subtotal || 0), deliveryFee: Number(remote.delivery_fee || 0),
         voucherDiscount: Number(remote.discount_total || 0), discountTotal: Number(remote.discount_total || 0),
         total: Number(remote.total || 0), payment: 'الدفع عند الاستلام',
@@ -1742,11 +1947,6 @@ body:has(#stickyCart.show) .install-btn{
   /* ═══════════════════════════════════════════════
      [JS] الجوائز والكوبونات
      ═══════════════════════════════════════════════ */
-  const addVoucher = (v) => {
-    state.vouchers.push({ ...v, id: uid(), used: false });
-    safeSave(K('vouchers'), state.vouchers);
-    refresh();
-  };
 
   const redeemPoints = async () => {
     if (!customerAuthUser || !sbClient) { toast('وثّق إيميلك الأول عشان تستخدم نقاط الولاء 📧'); location.hash = '#/profile'; return; }
@@ -1878,7 +2078,7 @@ body:has(#stickyCart.show) .install-btn{
   const updateStickyCart = () => {
     const n = cartCount();
     if (n === 0 || currentRoute() === 'cart') { stickyCart.classList.remove('show'); return; }
-    const pricing = calculatePricing(state.cart, { coupon: state.coupon, vouchers: state.vouchers });
+    const pricing = calculatePricing(state.cart, { coupon: state.coupon, voucher: selectedRemoteVoucher() });
     document.getElementById('stickyCount').textContent = `${n} ${n > 1 ? 'عناصر' : 'عنصر'}`;
     Anim.countUp(document.getElementById('stickyTotal'), pricing.total, 'sticky');
     stickyCart.classList.add('show');
@@ -1961,7 +2161,7 @@ body:has(#stickyCart.show) .install-btn{
      ═══════════════════════════════════════════════ */
   const viewHome = () => {
     const popular = MENU_ITEMS.filter(i => !isSecret(i) && i.tags.includes('popular')).concat(MENU_ITEMS.filter(i => !isSecret(i) && !i.tags.includes('popular'))).slice(0, 6);
-    const pricing = calculatePricing(state.cart, { coupon: state.coupon, vouchers: state.vouchers });
+    const pricing = calculatePricing(state.cart, { coupon: state.coupon, voucher: selectedRemoteVoucher() });
 
     const special = state.chefSpecial ? ITEM[state.chefSpecial.id] : null;
     const specialPrice = special ? fromPrice(special) : 0;
@@ -2097,8 +2297,9 @@ body:has(#stickyCart.show) .install-btn{
           <button class="cat-pill ${state.subcat === 'All' ? 'active' : ''}" data-action="subfilter" data-val="All" style="padding:7px 14px;font-size:12.5px">الكل</button>
           ${subs.map(s => `<button class="cat-pill ${state.subcat === s.id ? 'active' : ''}" data-action="subfilter" data-val="${esc(s.id)}" style="padding:7px 14px;font-size:12.5px">${esc(s.label)}</button>`).join('')}
         </div>` : ''}
+        ${liveMenuError ? `<div role="alert" style="text-align:center;padding:18px;margin-bottom:14px;background:#fff3ef;border:1px solid #f5c2b3;border-radius:16px"><p style="margin:0 0 10px;font-weight:700;color:#8a2a13">تعذر تحميل المنيو الآن. تأكد من اتصالك وجرب تاني.</p><button class="cat-pill" data-action="retry-menu">🔄 إعادة المحاولة</button></div>` : ''}
         <div class="product-grid" data-grid>
-          ${list.length ? list.map(productCard).join('') : '<p style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-2)">مفيش نتايج للبحث</p>'}
+          ${list.length ? list.map(productCard).join('') : (liveMenuError ? '' : '<p style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-2)">مفيش نتايج للبحث</p>')}
         </div>
       </div>`;
   };
@@ -2112,7 +2313,7 @@ body:has(#stickyCart.show) .install-btn{
         <a href="#/menu" class="btn btn-primary">تصفح المنيو</a>
       </div>`;
     }
-    const pricing = calculatePricing(state.cart, { coupon: state.coupon, vouchers: state.vouchers });
+    const pricing = calculatePricing(state.cart, { coupon: state.coupon, voucher: selectedRemoteVoucher() });
     const original = round2(pricing.subtotal + pricing.itemDiscounts);
     const c = state.customer;
     const cv = k => esc(c[k] || '');
@@ -2560,7 +2761,7 @@ body:has(#stickyCart.show) .install-btn{
       state.selectedVoucherId = null;
       state.coupon = { code: c.code, type: c.type, value: Number(c.value), pct: c.type === 'percent' ? Number(c.value) / 100 : 0, min_order: Number(c.min_order || 0), max_discount: c.max_discount == null ? null : Number(c.max_discount) };
       state.couponInput = c.code;
-      const currentSubtotal = calculatePricing(state.cart, { vouchers: state.vouchers }).subtotal;
+      const currentSubtotal = calculatePricing(state.cart, { voucher: selectedRemoteVoucher() }).subtotal;
       state.couponMsg = currentSubtotal < state.coupon.min_order ? `الكود صحيح، لكن لازم قيمة المنتجات تكون ${money(state.coupon.min_order)} على الأقل.` : '';
       safeSave(K('coupon'), { code: c.code, type: c.type, value: Number(c.value), min_order: state.coupon.min_order, max_discount: state.coupon.max_discount });
       refresh(); toast(state.couponMsg || 'الكوبون اتفعّل 🎉');
@@ -2744,7 +2945,7 @@ body:has(#stickyCart.show) .install-btn{
 
   const customerSignOut = async () => {
     if (sbClient) await sbClient.auth.signOut();
-    customerAuthUser = null; customerOtpSent = false; checkoutLoginRequired = false; state.points = 0; state.stamps = 0; state.achievements = []; state.remoteVouchers = []; state.selectedVoucherId = null; state.loyaltyEnabled = false;
+    clearCustomerLocalState(); customerAuthUser = null; customerOtpSent = false; checkoutLoginRequired = false; state.points = 0; state.stamps = 0; state.achievements = []; state.remoteVouchers = []; state.selectedVoucherId = null; state.loyaltyEnabled = false;
     state.customerNotifications = []; state.notificationsLoadedAt = 0;
     state.customer.email = ''; state.customer.name = ''; state.customer.phone = ''; state.customer.birthday = ''; safeSave(K('customer'), state.customer);
     refresh(); toast('تم تسجيل الخروج');
@@ -2937,6 +3138,7 @@ body:has(#stickyCart.show) .install-btn{
         state.selectedVoucherId = voucher.id; state.coupon = null; state.couponInput = ''; state.couponMsg = ''; safeSave(K('coupon'), null);
         toast('اتحددت المكافأة للطلب القادم.'); location.hash = state.cart.length ? '#/cart' : '#/menu'; refresh(); break;
       }
+      case 'retry-menu': loadLiveMenu(); break;
       case 'clear-reward-voucher': state.selectedVoucherId = null; refresh(); toast('تم إلغاء اختيار المكافأة.'); break;
       case 'unlock-secret': unlockSecret(); break;
       case 'toggle-review': state.reviewFormOpen = !state.reviewFormOpen; renderSheet(); break;
@@ -3067,6 +3269,7 @@ body:has(#stickyCart.show) .install-btn{
           }
           await loadCustomerRewards();
           await loadCustomerNotifications();
+          syncCustomerData();
         } else {
           // لا نستخدم أي إيميل قديم محفوظ محليًا أو تابع لجلسة لوحة الإدارة كإيميل للعميل.
           if (state.customer.email) { state.customer.email = ''; safeSave(K('customer'), state.customer); }
@@ -3075,8 +3278,8 @@ body:has(#stickyCart.show) .install-btn{
       }).catch(() => {});
       sbClient.auth.onAuthStateChange((_event, session) => {
         customerAuthUser = session?.user || null;
-        if (!customerAuthUser) { customerOtpSent = false; state.customerNotifications = []; updateBadges(); }
-        else { setTimeout(() => { loadCustomerNotifications(); }, 0); }
+        if (!customerAuthUser) { customerOtpSent = false; state.customerNotifications = []; clearCustomerLocalState(); updateBadges(); }
+        else { setTimeout(() => { loadCustomerNotifications(); syncCustomerData(); }, 0); }
         if (currentRoute() === 'profile' || currentRoute() === 'notifications') setTimeout(() => refresh(), 0);
       });
     }
