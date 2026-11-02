@@ -866,11 +866,11 @@ body.hide-nav .sticky-cart { display: none !important; }
 
 .img-missing{width:100%;height:100%;background:linear-gradient(135deg,var(--bg-2),var(--line))}
 /* ═══ [HOME] سلايدر البانرات (homepage_banners) + اللافتات (homepage_announcements) ═══ */
-.hsl{position:relative;margin:16px 0 24px;border-radius:var(--r-lg);overflow:hidden;min-height:260px;background:var(--bg-2);box-shadow:var(--shadow-lg);touch-action:pan-y;user-select:none;-webkit-user-select:none}
-.hsl-skeleton{height:260px;border-radius:var(--r-lg);background:linear-gradient(90deg,var(--bg-2),var(--line),var(--bg-2));background-size:200% 100%;animation:hslShimmer 1.4s linear infinite}
+.hsl{position:relative;margin:12px 0 18px;border-radius:var(--r-md);overflow:hidden;height:clamp(190px,56vw,320px);background:var(--bg-2);box-shadow:var(--shadow-lg);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.hsl-skeleton{height:clamp(190px,56vw,320px);border-radius:var(--r-md);background:linear-gradient(90deg,var(--bg-2),var(--line),var(--bg-2));background-size:200% 100%;animation:hslShimmer 1.4s linear infinite}
 @keyframes hslShimmer{from{background-position:200% 0}to{background-position:-200% 0}}
-.hsl-track{display:grid}
-.hsl-slide{grid-area:1/1;position:relative;min-height:260px;display:flex;align-items:flex-end;color:#fff;isolation:isolate;background:linear-gradient(135deg,var(--primary-dark),var(--ink));opacity:0;visibility:hidden;transition:opacity .6s var(--ease),visibility .6s}
+.hsl-track{display:grid;height:100%}
+.hsl-slide{grid-area:1/1;position:relative;height:100%;display:flex;align-items:flex-end;color:#fff;isolation:isolate;background:linear-gradient(135deg,var(--primary-dark),var(--ink));opacity:0;visibility:hidden;transition:opacity .6s var(--ease),visibility .6s}
 .hsl-slide.is-active{opacity:1;visibility:visible}
 .hsl-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
 .hsl-slide.img-failed .hsl-img{display:none}
@@ -894,9 +894,67 @@ body.hide-nav .sticky-cart { display: none !important; }
 .announce-body[data-announce-open]{cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .announce-accent{color:var(--announce-accent,inherit)}
 .announce-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);color:inherit;display:grid;place-items:center;flex-shrink:0;font-size:16px}
-@media(min-width:900px){.hsl{margin:28px 0 36px}.hsl-slide{min-height:420px}}
+@media(min-width:900px){.hsl{margin:24px 0 32px;height:420px}}
 @media (prefers-reduced-motion: reduce){.hsl-slide,.hsl-dot,.hsl-skeleton{transition:none;animation:none}}
 
+/* ═══ [HOME] صف الكروت المربعة + شاشة القسم ═══ */
+.hb-rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.hb-rail::-webkit-scrollbar{display:none}
+.hb-rail>div{flex:0 0 auto;scroll-snap-align:start}
+.hb-tile{width:40vw;min-width:132px;max-width:170px;display:flex;flex-direction:column;gap:6px;text-align:start;background:none;padding:0;cursor:pointer;color:var(--ink)}
+.hb-tile-img{display:block;aspect-ratio:1/1;border-radius:var(--r-md);overflow:hidden;background:linear-gradient(135deg,var(--bg-2),var(--line));box-shadow:var(--shadow-sm)}
+.hb-tile-img img{width:100%;height:100%;object-fit:cover}
+.hb-tile-title{font-weight:800;font-size:14px;line-height:1.3}
+.hb-tile-sub{font-size:12px;color:var(--ink-2);line-height:1.4}
+.hb-tile:focus-visible{outline:3px solid var(--primary);outline-offset:3px;border-radius:var(--r-md)}
+@media(min-width:900px){.hb-tile{width:200px;max-width:200px}}
+.bs{position:fixed;inset:0;z-index:950;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;transition:opacity .25s var(--ease),visibility .25s;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.bs.show{opacity:1;visibility:visible}
+body.bs-open{overflow:hidden}
+.bs-inner{max-width:1120px;margin:0 auto;padding:16px 20px 40px}
+.bs-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.bs-head h2{font-size:22px;font-weight:900;line-height:1.2}
+.bs-head p{font-size:14px;color:var(--ink-2);margin-top:4px}
+.bs-close{width:42px;height:42px;border-radius:50%;background:var(--surface);border:1px solid var(--line);font-size:24px;line-height:1;display:grid;place-items:center;flex-shrink:0}
+.bs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:700px){.bs-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.bs-grid{grid-template-columns:repeat(4,1fr)}}
+@media (prefers-reduced-motion: reduce){.bs{transition:none}}
+/* ═══ [HOME] شريط اللافتات تحت الكروت (سوايب يدوي بدون تايمر) ═══ */
+.ann-strip{margin:4px 0 24px}
+.ann-slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:0;border-radius:var(--r-md)}
+.ann-slider::-webkit-scrollbar{display:none}
+.ann-slide{flex:0 0 100%;min-width:0;scroll-snap-align:start}
+.ann-slide .announce{margin:0;height:100%;min-height:52px;border-radius:var(--r-md)}
+@media(min-width:900px){.ann-slide .announce{min-height:60px}}
+/* ═══ [HOME] لافتة صورة + منتجات مخفّضة + نصوص أفقية ═══ */
+.ann-img{display:block;width:100%;aspect-ratio:16/6;border-radius:var(--r-md);overflow:hidden;background:var(--bg-2);padding:0;border:0;cursor:default}
+.ann-img[data-announce-open]{cursor:pointer}
+.ann-img img{width:100%;height:100%;object-fit:cover}
+.ann-slide .announce{min-height:72px}
+.sale-row,.txt-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sale-row::-webkit-scrollbar,.txt-row::-webkit-scrollbar{display:none}
+.sale-row>div,.txt-row>*{flex:0 0 auto;scroll-snap-align:start}
+.sale-card{width:150px;display:flex;flex-direction:column;gap:6px;text-align:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;padding:0;box-shadow:var(--shadow-sm);color:var(--ink);cursor:pointer}
+.sale-img{display:block;aspect-ratio:1/1;background:var(--bg-2)}
+.sale-img img{width:100%;height:100%;object-fit:cover}
+.sale-name{font-weight:800;font-size:14px;line-height:1.3;padding:0 10px}
+.sale-prices{display:flex;align-items:baseline;gap:8px;padding:0 10px 10px}
+.sale-prices s{color:var(--ink-3);font-size:13px}
+.sale-prices b{color:var(--primary);font-size:15px}
+.txt-card{width:min(78vw,300px);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;box-shadow:var(--shadow-sm)}
+.txt-card h4{font-size:16px;font-weight:800;margin-bottom:6px}
+.txt-card p{font-size:14px;color:var(--ink-2);line-height:1.6}
+/* ═══ [PROMO PAGE] عروض داخل شاشة الصفحة ═══ */
+.bs-cover{border-radius:var(--r-lg);overflow:hidden;margin-bottom:16px;aspect-ratio:16/7;background:var(--bg-2)}
+.bs-cover img{width:100%;height:100%;object-fit:cover}
+.bs-offer{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;text-align:start;box-shadow:var(--shadow-sm);color:var(--ink);cursor:pointer;padding:0}
+.bs-offer-img{display:block;aspect-ratio:1/1;background:var(--bg-2)}
+.bs-offer-img img{width:100%;height:100%;object-fit:cover}
+.bs-offer-body{display:flex;flex-direction:column;gap:4px;padding:10px 12px 12px}
+.bs-offer-body strong{font-size:15px;font-weight:800;line-height:1.3}
+.bs-offer-body small{font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.bs-offer-body em{font-style:normal;font-weight:800;color:var(--primary);font-size:13px}
 /* ═══ [HOME] بلوكات الصفحة الرئيسية (homepage_blocks) ═══ */
 .hb{margin:8px 0 28px;border-radius:var(--r-lg);padding:var(--hb-pad,0px)}
 .hb-pad-sm{--hb-pad:12px}.hb-pad-md{--hb-pad:20px}.hb-pad-lg{--hb-pad:32px}
@@ -904,6 +962,7 @@ body.hide-nav .sticky-cart { display: none !important; }
 .hb-head h2{font-size:22px;font-weight:900;line-height:1.2}
 .hb-head p{font-size:14px;color:var(--ink-2);margin-top:4px}
 .hb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.hb-grid .hb-card-img{aspect-ratio:1/1}
 .hb-slider{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:6px;scrollbar-width:none}
 .hb-slider::-webkit-scrollbar{display:none}
 .hb-slider>*{flex:0 0 min(70vw,260px);scroll-snap-align:start}
@@ -1119,7 +1178,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
         sbClient.from('categories').select('id,slug,name_ar,sort_order,is_active').eq('is_active', true).order('sort_order'),
         // لا تُرسل الأصناف السرية في الاستعلام العام؛ يتم تحميلها بعد التحقق من الكود على الخادم.
         sbClient.from('menu_items').select('id,slug,category_id,subcategory_id,name_ar,description_ar,image_url,tags,is_spicy,is_available,is_secret,sort_order,subcategory_ar,ingredients_ar,allergens,is_vegetarian,display_badge,is_popular,free_delivery').eq('is_available', true).eq('is_secret', false).order('sort_order'),
-        sbClient.from('item_sizes').select('id,item_id,label_ar,price,sort_order,is_available').eq('is_available', true).order('sort_order'),
+        sbClient.from('item_sizes').select('id,item_id,label_ar,price,sale_price,sort_order,is_available').eq('is_available', true).order('sort_order'),
         sbClient.from('store_settings').select('name_ar,address_text,is_open,accepting_orders,min_order,delivery_fee,free_delivery_threshold,avg_prep_minutes,cash_enabled,visa_enabled,currency,loyalty_enabled,loyalty_points_per_currency,loyalty_redeem_points,loyalty_redeem_value,loyalty_stamps_for_reward,show_popular_filter,show_spicy_filter,show_vegetarian_filter,show_free_delivery_filter,chef_special_item_id,chef_special_discount').eq('id', 1).maybeSingle(),
         sbClient.from('delivery_zones').select('id,name_ar,fee,min_order,sort_order,is_active').eq('is_active', true).order('sort_order'),
         sbClient.from('addons').select('id,slug,name_ar,price,is_available,sort_order').eq('is_available', true).order('sort_order'),
@@ -1188,7 +1247,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
       })));
       const sizesByItem = {};
       (sizes || []).forEach(z => {
-        (sizesByItem[z.item_id] ||= []).push({ key: z.id, label: z.label_ar, price: Number(z.price) || 0 });
+        (sizesByItem[z.item_id] ||= []).push({ key: z.id, label: z.label_ar, price: Number(z.price) || 0, sale: Number(z.sale_price) || 0 });
       });
       const itemAddonSet = {};
       (window.SHEEPBURGER_ITEM_ADDONS || []).forEach(x => (itemAddonSet[x.item_id] ||= new Set()).add(x.addon_id));
@@ -2251,7 +2310,8 @@ button.hb-card:hover{border-color:var(--ink-3)}
      ═══════════════════════════════════════════════════════════════ */
   const BANNER_FIELDS = 'id,title_ar,subtitle_ar,image_url,mobile_image_url,button_text_ar,target_type,target_id,target_url,sort_order,display_seconds,is_active,starts_at,ends_at,promotion_id';
   const ANNOUNCE_FIELDS = 'id,title_ar,message_ar,placement,background_color,text_color,accent_color,icon,target_type,target_id,target_url,sort_order,is_dismissible,is_active,starts_at,ends_at,promotion_id,updated_at';
-  const SLIDE_MIN_SEC = 2, SLIDE_MAX_SEC = 30, SLIDE_DEFAULT_SEC = 5, PAUSE_AFTER_USER_MS = 8000;
+  const SLIDE_SECONDS = 5;   // مدة ثابتة لكل شريحة (تتجاهل display_seconds)
+  const PAUSE_AFTER_USER_MS = 8000;
 
   let homeBanners = [];          // الشرائح المعروضة فعليًا
   let homeBannerRows = [];       // البانرات المفعّلة من homepage_banners
@@ -2393,15 +2453,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
     if (!homeBanners.length) { root.innerHTML = ''; return; }   // لا بيانات ثابتة كبديل
 
     const n = homeBanners.length;
-    const controls = n > 1 ? `
-      <div class="hsl-controls">
-        <button type="button" class="hsl-nav" data-hsl-prev aria-label="السابق">›</button>
-        <div class="hsl-dots" role="tablist" aria-label="اختيار الشريحة">
-          ${homeBanners.map((_, i) => `<button type="button" class="hsl-dot" data-hsl-dot="${i}" aria-label="الشريحة ${i + 1}" aria-current="${i === homeBannerIndex ? 'true' : 'false'}"></button>`).join('')}
-        </div>
-        <button type="button" class="hsl-nav" data-hsl-next aria-label="التالي">‹</button>
-      </div>` : '';
-
+    const controls = '';
     root.innerHTML = `<div class="hsl-track" data-hsl-track>${homeBanners.map(renderHeroSlide).join('')}</div>${controls}`;
 
     root.querySelectorAll('[data-hsl-img]').forEach(im => {
@@ -2443,8 +2495,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
   const startHeroAutoplay = () => {
     stopHeroAutoplay();
     if (homeBanners.length < 2 || document.hidden || currentRoute() !== 'home' || homeBannerResumeTimer) return;
-    const sec = Math.min(SLIDE_MAX_SEC, Math.max(SLIDE_MIN_SEC, Number(homeBanners[homeBannerIndex]?.display_seconds) || SLIDE_DEFAULT_SEC));
-    homeBannerTimer = setTimeout(() => nextSlide(), sec * 1000);
+    homeBannerTimer = setTimeout(() => nextSlide(), SLIDE_SECONDS * 1000);
   };
 
   // إيقاف مؤقت عند تفاعل المستخدم، ثم استئناف بعد فترة
@@ -2509,11 +2560,33 @@ button.hb-card:hover{border-color:var(--ink-3)}
   };
 
   const renderAnnouncements = () => {
+    if (currentRoute() === 'home') {
+      document.querySelectorAll('[data-announce-slot]').forEach(slot => { slot.innerHTML = ''; });
+      const strip = document.querySelector('[data-ann-strip]');
+      const list = announcements;
+      if (strip) strip.innerHTML = list.length
+        ? `<div class="ann-slider" role="region" aria-label="الإعلانات">${list.map(a => `<div class="ann-slide">${renderStripAnnouncement(a)}</div>`).join('')}</div>`
+        : '';
+      return;
+    }
     document.querySelectorAll('[data-announce-slot]').forEach(slot => {
+      if (currentRoute() === 'home' && !app.contains(slot)) { slot.innerHTML = ''; return; }
       const placement = slot.dataset.announceSlot;
       const list = announcements.filter(a => a.placement === placement && !isDismissed(a));
       slot.innerHTML = list.map(renderAnnouncement).join('');
     });
+  };
+
+  const renderStripAnnouncement = a => {
+    const src = typeof a.icon === 'string' ? a.icon.trim() : '';
+    if (/^https?:\/\//.test(src)) {
+      const clickable = resolveNavigationTarget(a).kind !== 'none';
+      const inner = `<img src="${esc(src)}" alt="${esc(a.title_ar || '')}" loading="lazy" decoding="async">`;
+      return clickable
+        ? `<button type="button" class="ann-img" data-announce-id="${esc(a.id)}" data-announce-open>${inner}</button>`
+        : `<div class="ann-img" data-announce-id="${esc(a.id)}">${inner}</div>`;
+    }
+    return renderAnnouncement({ ...a, is_dismissible: false });
   };
 
   const dismissAnnouncement = id => {
@@ -2644,60 +2717,181 @@ button.hb-card:hover{border-color:var(--ink-3)}
       : `<div class="hb-card">${inner}</div>`;
   };
 
-  const renderHomepageBlock = block => {
-    const cards = buildBlockCards(block);
-    const type = block.block_type;
-    const bg = safeColor(block.background_color, '');
-    const fg = safeColor(block.text_color, '');
-    const style = [bg && `background:${bg}`, fg && `color:${fg}`].filter(Boolean).join(';');
-    const head = (block.title_ar || block.subtitle_ar)
-      ? `<div class="hb-head">${block.title_ar ? `<h2>${esc(block.title_ar)}</h2>` : ''}${block.subtitle_ar ? `<p>${esc(block.subtitle_ar)}</p>` : ''}</div>` : '';
+  /* ═══════════════════════════════════════════════════════════════
+     [PROMOTION PAGES] promotion_pages + menu_promotions.promotion_page_id
+     الكارت المربع = صفحة عرض، وشاشته = العروض المرتبطة بها
+     ═══════════════════════════════════════════════════════════════ */
+  const PAGE_FIELDS = 'id,slug,title_ar,subtitle_ar,description_ar,card_image_url,cover_image_url,sort_order,is_active,starts_at,ends_at';
+  const PAGE_OFFER_FIELDS = 'id,name_ar,description_ar,image_url,promotion_type,value,target_item_id,target_category_id,promotion_page_id,priority,is_active,starts_at,ends_at';
+  let livePromotionPages = [];
+  let pageOffers = {};   // page.id -> [offer]
 
-    let body = '';
-    const content = block.content && typeof block.content === 'object' ? block.content : {};
-    if (type === 'text' || (!cards.length && content.text_ar)) {
-      const text = content.text_ar || content.text || '';
-      if (!text) return '';
-      body = `<div class="hb-text">${esc(text)}</div>`;
-    } else if (type === 'image_text_button') {
-      if (!block.image_url && !block.title_ar) return '';
-      const btnText = block.settings?.button_text_ar;
-      const t = resolveNavigationTarget({ target_type: 'url', target_url: block.target_url });
-      body = `<div class="hb-card" style="box-shadow:none">${block.image_url ? `<div class="hb-card-img" style="aspect-ratio:21/9"><img src="${esc(block.image_url)}" alt="${esc(block.title_ar || '')}" loading="lazy"></div>` : ''}
-        <div class="hb-card-body">${block.title_ar ? `<h3>${esc(block.title_ar)}</h3>` : ''}${block.subtitle_ar ? `<p>${esc(block.subtitle_ar)}</p>` : ''}
-        ${btnText && t.kind === 'url' ? `<div class="hb-cta-row"><a class="btn btn-primary btn-sm" href="${esc(t.href)}">${esc(btnText)}</a></div>` : ''}</div></div>`;
-    } else {
-      if (!cards.length) return '';   // بلوك بلا محتوى صالح لا يُعرض
-      const isCats = cards.every(c => c.kind === 'card' && c.target.kind === 'category');
-      if (isCats) {
-        body = `<div class="hb-pills">${cards.map(c => `<button type="button" class="cat-pill" data-hb-open="${esc(c.key)}">${esc(c.title)}</button>`).join('')}</div>`;
-      } else {
-        const layout = block.layout_type || '';
-        const cls = (type === 'product_slider' || layout === 'slider') ? 'hb-slider' : layout === 'list' ? 'hb-list' : 'hb-grid';
-        body = `<div class="${cls}">${cards.map(renderBlockCard).join('')}</div>`;
+  async function loadPromotionPages() {
+    if (!sbClient) return;
+    try {
+      const { data: pages, error } = await sbClient.from('promotion_pages')
+        .select(PAGE_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
+      if (error) throw error;
+      const valid = (pages || []).filter(p => p && p.is_active !== false && isWithinSchedule(p) && (p.title_ar || p.card_image_url));
+      let offers = [];
+      if (valid.length) {
+        const { data: rows, error: oErr } = await sbClient.from('menu_promotions')
+          .select(PAGE_OFFER_FIELDS).in('promotion_page_id', valid.map(p => p.id)).eq('is_active', true)
+          .order('priority', { ascending: false });
+        if (oErr) throw oErr;
+        offers = (rows || []).filter(o => o.is_active !== false && isWithinSchedule(o));
       }
+      const byPage = {};
+      offers.forEach(o => { (byPage[o.promotion_page_id] ||= []).push(o); });
+      livePromotionPages = valid;
+      pageOffers = byPage;
+    } catch (err) {
+      console.warn('[PromotionPages] تعذر تحميل صفحات العروض:', err?.message || err);
+      livePromotionPages = [];
+      pageOffers = {};
     }
+    renderHomepageBlocks();
+  }
 
-    return `<section class="hb ${blockPadClass(block)}" style="${style}" data-block-id="${esc(block.id)}" data-block-type="${esc(type)}">${head}${body}</section>`;
+  const promoOfferTarget = o => o.target_item_id
+    ? { kind: 'item', id: o.target_item_id }
+    : o.target_category_id ? { kind: 'category', id: o.target_category_id } : { kind: 'route', href: '#/menu' };
+
+  const offerValueLabel = o => {
+    const v = Number(o.value) || 0;
+    switch (o.promotion_type) {
+      case 'percent': return `خصم ${v}%`;
+      case 'fixed': return `خصم ${money(v)}`;
+      case 'free_delivery': return 'توصيل مجاني';
+      case 'free_item': return 'منتج مجاني';
+      case 'free_addon': return 'إضافة مجانية';
+      default: return '';
+    }
+  };
+
+  // الرئيسية: صف أفقي من الكروت المربعة (صفحات العروض التي لها عروض فعلية)
+  const pageTileHtml = p => `<button type="button" class="hb-tile" data-page-open="${esc(p.id)}" aria-label="${esc(p.title_ar || 'عروض')}">
+      <span class="hb-tile-img">${p.card_image_url ? `<img src="${esc(p.card_image_url)}" alt="" loading="lazy" decoding="async">` : ''}</span>
+      ${p.title_ar ? `<span class="hb-tile-title">${esc(p.title_ar)}</span>` : ''}
+      ${p.subtitle_ar ? `<span class="hb-tile-sub">${esc(p.subtitle_ar)}</span>` : ''}
+    </button>`;
+
+  const saleCandidates = () => Object.values(ITEM).map(it => {
+    const sz = (it.sizes || []).filter(z => z.sale > 0 && z.price > 0 && z.sale < z.price).sort((a, b) => a.sale - b.sale)[0];
+    return sz ? { it, sz } : null;
+  }).filter(Boolean);
+
+  const renderSaleStrip = () => {
+    const root = document.querySelector('[data-sale-strip]');
+    if (!root) return;
+    const list = saleCandidates();
+    root.innerHTML = list.length
+      ? `<div class="sale-row" role="list">${list.map(({ it, sz }) => `<div role="listitem">
+          <button type="button" class="sale-card" data-item-open="${esc(it.id)}">
+            <span class="sale-img">${it.img ? `<img src="${esc(it.img)}" alt="" loading="lazy" decoding="async">` : ''}</span>
+            <span class="sale-name">${esc(it.name)}</span>
+            <span class="sale-prices"><s>${moneyHtml(sz.price)}</s><b>${moneyHtml(sz.sale)}</b></span>
+          </button></div>`).join('')}</div>`
+      : '';
+  };
+
+  const renderTextRow = () => {
+    const root = document.querySelector('[data-text-row]');
+    if (!root) return;
+    const TEXT_BLOCK_TYPES = ['text', 'text_promo'];
+    const list = homeBlocks.filter(b => TEXT_BLOCK_TYPES.includes(b.block_type)).map(b => {
+      const c = b.content && typeof b.content === 'object' ? b.content : {};
+      const text = c.text_ar || c.text || (typeof b.content === 'string' ? b.content : '');
+      return { b, text };
+    }).filter(x => x.text || x.b.title_ar);
+    root.innerHTML = list.length
+      ? `<div class="txt-row" role="list">${list.map(({ b, text }) => `<article class="txt-card" role="listitem">
+          ${b.title_ar ? `<h4>${esc(b.title_ar)}</h4>` : ''}
+          ${text ? `<p>${esc(text)}</p>` : ''}
+        </article>`).join('')}</div>`
+      : '';
   };
 
   const renderHomepageBlocks = () => {
     const root = document.querySelector('[data-home-blocks]');
     if (!root) return;
-    if (homeBlocksState === 'idle' || homeBlocksState === 'loading') { root.innerHTML = ''; return; }
-    if (homeBlocksState === 'error') {
-      root.innerHTML = '<div class="hsl-state"><p>تعذر تحميل أقسام الرئيسية.</p><button type="button" class="btn btn-outline btn-sm" data-blocks-retry>إعادة المحاولة</button></div>';
-      return;
-    }
-    const slot = '<div class="announce-slot" data-announce-slot="between_blocks"></div>';
-    root.innerHTML = homeBlocks.map(renderHomepageBlock).filter(Boolean).join(slot);
+    const visible = livePromotionPages.filter(p => (pageOffers[p.id] || []).length);
+    root.innerHTML = visible.length
+      ? `<div class="hb-rail" role="list">${visible.map(p => `<div role="listitem">${pageTileHtml(p)}</div>`).join('')}</div>`
+      : '';
+    renderSaleStrip();
+    renderTextRow();
     renderAnnouncements();
   };
 
+  // شاشة الصفحة: غلافها ووصفها وكل عروضها
+  const pageScreenHtml = p => {
+    const offers = pageOffers[p.id] || [];
+    const head = `<header class="bs-head">
+        <button type="button" class="bs-close" data-block-close aria-label="إغلاق">×</button>
+        <div>${p.title_ar ? `<h2>${esc(p.title_ar)}</h2>` : ''}${p.subtitle_ar ? `<p>${esc(p.subtitle_ar)}</p>` : ''}${p.description_ar ? `<p>${esc(p.description_ar)}</p>` : ''}</div>
+      </header>`;
+    const cover = p.cover_image_url ? `<div class="bs-cover"><img src="${esc(p.cover_image_url)}" alt="" loading="lazy" decoding="async"></div>` : '';
+    const cards = offers.map(o => {
+      const label = offerValueLabel(o);
+      return `<button type="button" class="bs-offer" data-promo-open="${esc(o.id)}">
+          <span class="bs-offer-img">${o.image_url ? `<img src="${esc(o.image_url)}" alt="" loading="lazy" decoding="async">` : ''}</span>
+          <span class="bs-offer-body">
+            ${o.name_ar ? `<strong>${esc(o.name_ar)}</strong>` : ''}
+            ${o.description_ar ? `<small>${esc(o.description_ar)}</small>` : ''}
+            ${label ? `<em>${esc(label)}</em>` : ''}
+          </span>
+        </button>`;
+    }).join('');
+    return `<div class="bs-inner">${head}${cover}<div class="bs-grid">${cards}</div></div>`;
+  };
+
+  const blockScreen = () => {
+    let el = document.getElementById('blockScreen');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'blockScreen';
+      el.className = 'bs';
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-modal', 'true');
+      document.body.appendChild(el);
+    }
+    return el;
+  };
+
+  const openPageScreen = id => {
+    const page = livePromotionPages.find(p => String(p.id) === String(id));
+    if (!page) return;
+    const el = blockScreen();
+    el.innerHTML = pageScreenHtml(page);
+    el.scrollTop = 0;
+    el.classList.add('show');
+    document.body.classList.add('bs-open');
+  };
+
+  const closeBlockScreen = () => {
+    const el = document.getElementById('blockScreen');
+    if (el) el.classList.remove('show');
+    document.body.classList.remove('bs-open');
+  };
+
   document.addEventListener('click', e => {
-    if (e.target.closest('[data-blocks-retry]')) { loadHomepageBlocks(); return; }
-    const hb = e.target.closest('[data-hb-open]');
-    if (hb) openResolved(blockTargets[hb.dataset.hbOpen]);
+    const itemEl = e.target.closest('[data-item-open]');
+    if (itemEl) { openItem(itemEl.dataset.itemOpen); return; }
+    const open = e.target.closest('[data-page-open]');
+    if (open) { openPageScreen(open.dataset.pageOpen); return; }
+    if (e.target.closest('[data-block-close]')) { closeBlockScreen(); return; }
+    const offerEl = e.target.closest('[data-promo-open]');
+    if (offerEl) {
+      const id = offerEl.dataset.promoOpen;
+      const offer = Object.values(pageOffers).flat().find(o => String(o.id) === String(id));
+      closeBlockScreen();
+      if (offer) openResolved(promoOfferTarget(offer));
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.body.classList.contains('bs-open')) closeBlockScreen();
   });
 
   /* ═══════════════════════════════════════════════════════════════
@@ -2844,11 +3038,15 @@ button.hb-card:hover{border-color:var(--ink-3)}
     return `
       <div class="view-anim">
         <div class="hsl" data-hsl-root aria-roledescription="carousel" aria-label="العروض الرئيسية"></div>
-        <div class="announce-slot" data-announce-slot="below_hero"></div>
 
         <div data-home-blocks></div>
+        <div class="ann-strip" data-ann-strip></div>
+        <div data-sale-strip></div>
+        <div data-text-row></div>
 
-        <div class="hb-menu-cta"><a href="#/menu" class="btn btn-primary">افتح المنيو الكامل</a></div>
+        <div class="announce-slot" data-announce-slot="below_hero"></div>
+        <div class="announce-slot" data-announce-slot="between_blocks"></div>
+        <div class="announce-slot" data-announce-slot="top"></div>
         <div class="announce-slot" data-announce-slot="above_footer"></div>
 
         ${!state.secretUnlocked ? `
@@ -4107,14 +4305,14 @@ button.hb-card:hover{border-color:var(--ink-3)}
      [JS] التشغيل (الأصلي)
      ═══════════════════════════════════════════════ */
   (function boot() {
-    Promise.resolve(loadLiveMenu()).then(() => Promise.all([loadAddonGroups(), loadItemBadges()])).catch(() => {});
+    Promise.resolve(loadLiveMenu()).then(() => Promise.all([loadAddonGroups(), loadItemBadges(), loadPromotionPages()])).catch(() => {});
     initAddonGroupGuards();
     loadAchievementDefinitions().then(() => { if (currentRoute() === 'profile') refresh(); }).catch(() => {});
     startLiveMenu();
     loadHomeBanners();
     loadAnnouncements();
     loadHomepageBlocks();
-    setInterval(() => { loadHomeBanners(); loadAnnouncements(); loadHomepageBlocks(); }, 5 * 60 * 1000);
+    setInterval(() => { loadHomeBanners(); loadAnnouncements(); loadHomepageBlocks(); loadPromotionPages(); }, 5 * 60 * 1000);
     if (!location.hash) location.hash = '#/home';
     state.secretUnlocked = false;
     if (sbClient) {
