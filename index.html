@@ -1268,29 +1268,33 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   /* ═══════════════════════════════════════════════
      [JS] الإعدادات والثوابت (الأصلي)
      ═══════════════════════════════════════════════ */
-  const CONFIG = Object.freeze({
+  const CONFIG = {
     MAX_QTY: 20,
     STATUS_STEP_MS: 6000,
     STORAGE_SCHEMA: 6,
     STORAGE_PREFIX: 'sheepburger_v6_'
-  });
+  };
 
-  const STATUSES = ['تم الاستلام', 'بيتحضر', 'في الطريق', 'تم التوصيل'];
-  const SPICE_LEVELS = ['هادي', 'وسط', 'حار'];
-  const ALLERGENS = { gluten: 'جلوتين', dairy: 'ألبان', egg: 'بيض', nuts: 'مكسرات' };
+  let STATUSES = ['تم الاستلام', 'بيتحضر', 'في الطريق', 'تم التوصيل'];
+  let SPICE_LEVELS = ['هادي', 'وسط', 'حار'];
+  let ALLERGENS = { gluten: 'جلوتين', dairy: 'ألبان', egg: 'بيض', nuts: 'مكسرات' };
 
   const CATS = [];
   const SUBCATS = {};
 
-  // أسماء الإضافات وأسعارها تأتي من جدول addons فقط. مرجع الحساسية مؤقت حتى يُضاف إلى الجدول.
-  const ADDON_ALLERGENS = { cheese: ['dairy'], sauce: ['egg'], onions: ['gluten'] };
+  // بيانات الإضافات والحساسية والأسعار تُقرأ من الجداول الفعلية.
   const ADDONS = {};
+  let liveCategoryBadges = {};
+  let livePromotionBadges = {};
+  let liveProductRecommendations = {};
+  let liveCustomerAddresses = [];
+  let liveBranchOverrides = { items: {}, sizes: {}, addons: {} };
 
   let ACHIEVEMENTS = {};
 
   // لوحة ألوان متدرجة؛ يحصل كل إنجاز على لون مميز حتى لو أُضيف من الإدارة.
-  const ACHIEVEMENT_PALETTES = [['#fff0e8','#fbd1bf','#b93816'],['#edf4ff','#cbdfff','#2456a6'],['#fff7d6','#ffe8a1','#946200'],['#e8f8ef','#c4efd6','#167347'],['#f5eaff','#e2ccff','#7137a8'],['#ffeaf2','#ffc9dc','#a9275b'],['#e6f8fb','#bcecf4','#116b7a'],['#f2f2f2','#dedede','#414141']];
-  const achievementStyle = i => { const p=ACHIEVEMENT_PALETTES[i % ACHIEVEMENT_PALETTES.length]; return `--ach-bg:${p[0]};--ach-border:${p[1]};--ach-color:${p[2]}`; };
+  let ACHIEVEMENT_PALETTES = [['#fff0e8','#fbd1bf','#b93816'],['#edf4ff','#cbdfff','#2456a6'],['#fff7d6','#ffe8a1','#946200'],['#e8f8ef','#c4efd6','#167347'],['#f5eaff','#e2ccff','#7137a8'],['#ffeaf2','#ffc9dc','#a9275b'],['#e6f8fb','#bcecf4','#116b7a'],['#f2f2f2','#dedede','#414141']];
+  const achievementStyle = i => { const p=ACHIEVEMENT_PALETTES[i % ACHIEVEMENT_PALETTES.length] || ACHIEVEMENT_PALETTES[0]; return `--ach-bg:${p.bg || p[0]};--ach-border:${p.border || p[1]};--ach-color:${p.color || p[2]}`; };
 
   // Achievement definitions are managed in the admin panel and loaded from Supabase.
   async function loadAchievementDefinitions() {
@@ -1339,7 +1343,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   let livePromotions = [];
   let activePromotionIndex = 0;
 
-  const categoryKey = (slug, name) => {
+  const categoryKey = (slug, name, id = null) => {
     const value = String(slug || '').toLowerCase();
     const label = String(name || '').toLowerCase();
     if (value.includes('burger') || label.includes('برجر')) return 'Burgers';
@@ -1347,7 +1351,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (value.includes('side') || value.includes('add') || label.includes('جانبي')) return 'Sides';
     if (value.includes('drink') || label.includes('مشروب')) return 'Drinks';
     if (value.includes('dessert') || value.includes('sweet') || label.includes('حلويات')) return 'Desserts';
-    return null;
+    return id ? `dbcat:${id}` : 'dbcat:uncategorized';
   };
   const liveAddonIds = Object.create(null);
 
@@ -1355,18 +1359,24 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (!sbClient) return;
     liveMenuError = false;
     try {
-      const [{ data: cats, error: catsError }, { data: rows, error: itemsError }, { data: sizes, error: sizesError }, { data: settings, error: settingsError }, { data: zones, error: zonesError }, addonResult, itemAddonResult, subcategoryResult, promotionResult, reviewsResult] = await Promise.all([
-        sbClient.from('categories').select('id,slug,name_ar,sort_order,is_active').eq('is_active', true).order('sort_order'),
+      const [{ data: cats, error: catsError }, { data: rows, error: itemsError }, { data: sizes, error: sizesError }, { data: settings, error: settingsError }, { data: zones, error: zonesError }, addonResult, itemAddonResult, subcategoryResult, promotionResult, reviewsResult, contentResult, branchResult, branchMenuResult, branchSizeResult, branchAddonResult, recommendationResult] = await Promise.all([
+        sbClient.from('categories').select('id,slug,name_ar,emoji,sort_order,is_active').eq('is_active', true).order('sort_order'),
         // لا تُرسل الأصناف السرية في الاستعلام العام؛ يتم تحميلها بعد التحقق من الكود على الخادم.
-        sbClient.from('menu_items').select('id,slug,category_id,subcategory_id,name_ar,description_ar,image_url,tags,is_spicy,is_available,is_secret,sort_order,subcategory_ar,ingredients_ar,allergens,is_vegetarian,display_badge,is_popular,free_delivery').eq('is_available', true).eq('is_secret', false).order('sort_order'),
-        sbClient.from('item_sizes').select('id,item_id,label_ar,price,sale_price,sort_order,is_available').eq('is_available', true).order('sort_order'),
-        sbClient.from('store_settings').select('name_ar,address_text,is_open,accepting_orders,min_order,delivery_fee,free_delivery_threshold,avg_prep_minutes,cash_enabled,visa_enabled,currency,loyalty_enabled,loyalty_points_per_currency,loyalty_redeem_points,loyalty_redeem_value,loyalty_stamps_for_reward,show_popular_filter,show_spicy_filter,show_vegetarian_filter,show_free_delivery_filter,chef_special_item_id,chef_special_discount').eq('id', 1).maybeSingle(),
+        sbClient.from('menu_items').select('id,slug,category_id,subcategory_id,name_ar,description_ar,image_url,tags,is_spicy,is_available,is_secret,sort_order,subcategory_ar,ingredients_ar,allergens,is_vegetarian,display_badge,is_popular,free_delivery').eq('is_secret', false).order('sort_order'),
+        sbClient.from('item_sizes').select('id,item_id,label_ar,price,sale_price,sort_order,is_available').order('sort_order'),
+        sbClient.from('store_settings').select('name_ar,address_text,is_open,accepting_orders,min_order,delivery_fee,free_delivery_threshold,avg_prep_minutes,cash_enabled,currency,loyalty_enabled,loyalty_points_per_currency,loyalty_redeem_points,loyalty_redeem_value,loyalty_stamps_for_reward,show_popular_filter,show_spicy_filter,show_vegetarian_filter,show_free_delivery_filter,chef_special_item_id,chef_special_discount').eq('id', 1).maybeSingle(),
         sbClient.from('delivery_zones').select('id,name_ar,fee,min_order,sort_order,is_active').eq('is_active', true).order('sort_order'),
-        sbClient.from('addons').select('id,slug,name_ar,price,is_available,sort_order').eq('is_available', true).order('sort_order'),
+        sbClient.from('addons').select('id,slug,name_ar,price,sale_price,allergens,is_available,sort_order').order('sort_order'),
         sbClient.from('item_addons').select('item_id,addon_id'),
         sbClient.from('subcategories').select('id,category_id,name_ar,sort_order,is_active').eq('is_active',true).order('sort_order'),
         sbClient.from('menu_promotions').select('id,name_ar,description_ar,image_url,promotion_type,target_item_id,target_category_id,reward_item_id,value,max_discount,min_order,priority,starts_at,ends_at,max_uses,used_count,is_active').eq('is_active', true).order('priority',{ascending:false}).limit(20),
-        sbClient.from('reviews').select('id,item_id,rating,comment,display_name,created_at').eq('is_hidden', false).order('created_at',{ascending:false}).limit(500)
+        sbClient.from('reviews').select('id,item_id,rating,comment,display_name,created_at').eq('is_hidden', false).order('created_at',{ascending:false}).limit(500),
+        sbClient.from('app_content').select('group_key,item_key,label_ar,value,sort_order').eq('is_active', true).order('group_key').order('sort_order'),
+        sbClient.from('branches').select('id,name_ar,is_active,sort_order').order('sort_order'),
+        sbClient.from('branch_menu_items').select('branch_id,item_id,is_available'),
+        sbClient.from('branch_item_sizes').select('branch_id,size_id,price,sale_price,is_available'),
+        sbClient.from('branch_addons').select('branch_id,addon_id,price,sale_price,is_available'),
+        sbClient.from('product_recommendation_placements').select('id,item_type,item_id,placement_key,branch_id,title_override,description_override,sort_order,is_active,starts_at,ends_at').eq('is_active', true).order('sort_order')
       ]);
       if (catsError) throw catsError;
       if (itemsError) throw itemsError;
@@ -1374,6 +1384,43 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       if (settingsError) throw settingsError;
       if (zonesError) throw zonesError;
       window.SHEEPBURGER_ZONES = zones || [];
+      if (!contentResult?.error && Array.isArray(contentResult?.data)) {
+        const content = contentResult.data;
+        const byGroup = key => content.filter(x => x.group_key === key);
+        const allergens = byGroup('allergen');
+        if (allergens.length) ALLERGENS = Object.fromEntries(allergens.map(x => [x.item_key, x.label_ar || x.item_key]));
+        const spices = byGroup('spice_level');
+        if (spices.length) SPICE_LEVELS = spices.map(x => x.label_ar || x.item_key);
+        CART_SPICE_LEVELS = [...SPICE_LEVELS];
+        const statuses = byGroup('order_status');
+        if (statuses.length) STATUSES = statuses.map(x => x.label_ar || x.item_key);
+        const palettes = byGroup('achievement_palette').map(x => x.value || {}).filter(v => v && typeof v === 'object');
+        if (palettes.length) ACHIEVEMENT_PALETTES = palettes;
+        byGroup('config').forEach(x => {
+          const value = Number(x.value?.value);
+          if (!Number.isFinite(value) || value <= 0) return;
+          if (x.item_key === 'max_qty_per_item') CONFIG.MAX_QTY = Math.min(99, Math.max(1, Math.trunc(value)));
+          if (x.item_key === 'status_step_ms') CONFIG.STATUS_STEP_MS = Math.min(3600000, Math.max(1000, Math.trunc(value)));
+        });
+      } else if (contentResult?.error) console.warn('[Content] تعذر تحميل app_content:', contentResult.error.message);
+      const allBranches = Array.isArray(branchResult?.data) ? branchResult.data : [];
+      const activeBranches = allBranches.filter(b => b.is_active === true);
+      // RLS قد يخفي الفروع غير النشطة؛ لا نستنتج العدد الكلي من استعلام العميل.
+      window.SHEEPBURGER_BRANCH_STATE = { loaded: !branchResult?.error, total: activeBranches.length, active: activeBranches, selectedId: activeBranches.length === 1 ? activeBranches[0].id : null };
+      if (branchResult?.error) console.warn('[Branches] تعذر التحقق من الفروع:', branchResult.error.message);
+      const selectedBranchId = window.SHEEPBURGER_BRANCH_STATE.selectedId;
+      const branchRows = (rows, key) => Object.fromEntries((rows || []).filter(x => !selectedBranchId || String(x.branch_id) === String(selectedBranchId)).map(x => [x[key], x]));
+      liveBranchOverrides = selectedBranchId ? {
+        items: branchRows(branchMenuResult?.data, 'item_id'),
+        sizes: branchRows(branchSizeResult?.data, 'size_id'),
+        addons: branchRows(branchAddonResult?.data, 'addon_id')
+      } : { items: {}, sizes: {}, addons: {} };
+      if (branchMenuResult?.error || branchSizeResult?.error || branchAddonResult?.error) console.warn('[Branch overrides] تعذر تحميل بعض تعديلات الفرع');
+      const placementNow = Date.now();
+      const validRecommendations = (recommendationResult?.data || []).filter(x => x.is_active && (!x.starts_at || new Date(x.starts_at).getTime() <= placementNow) && (!x.ends_at || new Date(x.ends_at).getTime() >= placementNow) && (!x.branch_id || !selectedBranchId || String(x.branch_id) === String(selectedBranchId)));
+      liveProductRecommendations = {};
+      validRecommendations.forEach(x => { if (x.item_type === 'product' && (!x.branch_id || (selectedBranchId && String(x.branch_id) === String(selectedBranchId)))) (liveProductRecommendations[x.placement_key] ||= []).push(x); });
+      window.SHEEPBURGER_PRODUCT_RECOMMENDATIONS = liveProductRecommendations;
       const nowMs = Date.now();
       // اعرض كل العروض النشطة والصالحة زمنيًا، ولا تستبعد الوصف القصير أو المكوّن من كلمة واحدة.
       livePromotions = (promotionResult?.data || []).filter(p =>
@@ -1397,8 +1444,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         Object.keys(liveAddonIds).forEach(k => delete liveAddonIds[k]);
         (addonResult.data || []).forEach(a => {
           const key = String(a.slug || a.id);
+          const override = liveBranchOverrides.addons[a.id];
+          if (override ? override.is_available === false : a.is_available === false) return;
           liveAddonIds[key] = a.id;
-          ADDONS[key] = { name: a.name_ar, price: Number(a.price) || 0, allergens: ADDON_ALLERGENS[key] || [], dbId: a.id };
+          const base = Number(a.price) || 0;
+          const sale = override?.sale_price ?? a.sale_price;
+          ADDONS[key] = { name: a.name_ar, price: Number(override?.price ?? base) || 0, sale: Number(sale) || 0, allergens: Array.isArray(a.allergens) ? a.allergens : [], dbId: a.id };
         });
         Object.entries(liveSecretAddonMap).forEach(([key, a]) => {
           if (!ADDONS[key]) { liveAddonIds[key] = a.dbId; ADDONS[key] = { name:a.name, price:a.price, allergens:[], dbId:a.dbId }; }
@@ -1419,23 +1470,25 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       window.SHEEPBURGER_CATEGORIES = categoryById;
       // اعرض كل التصنيفات النشطة من قاعدة البيانات، وليس قائمة أسماء ثابتة.
       // معرّف قاعدة البيانات هو مفتاح الفلترة، بينما cat الدلالي يُحتفظ به لوظائف البرجر والإحصائيات.
-      const mappedCategories = (cats || []).map(c => ({ row: c, key: categoryKey(c.slug, c.name_ar) }));
+      const mappedCategories = (cats || []).map(c => ({ row: c, key: categoryKey(c.slug, c.name_ar, c.id) }));
       CATS.splice(0, CATS.length, ...mappedCategories.map(x => ({
         id: x.row.id,
         key: x.key,
         label: x.row.name_ar || x.row.slug || 'تصنيف',
-        emoji: ({ Burgers:'🍔', Chicken:'🍗', Sides:'🍟', Drinks:'🥤', Desserts:'🍦' })[x.key] || '🍽️'
+        emoji: x.row.emoji || ({ Burgers:'🍔', Chicken:'🍗', Sides:'🍟', Drinks:'🥤', Desserts:'🍦' })[x.key] || '🍽️'
       })));
       const sizesByItem = {};
       (sizes || []).forEach(z => {
-        (sizesByItem[z.item_id] ||= []).push({ key: z.id, label: z.label_ar, price: Number(z.price) || 0, sale: Number(z.sale_price) || 0 });
+        const override = liveBranchOverrides.sizes[z.id];
+        if (override ? override.is_available === false : z.is_available === false) return;
+        (sizesByItem[z.item_id] ||= []).push({ key: z.id, label: z.label_ar, price: Number(override?.price ?? z.price) || 0, sale: Number(override?.sale_price ?? z.sale_price) || 0 });
       });
       const itemAddonSet = {};
       (window.SHEEPBURGER_ITEM_ADDONS || []).forEach(x => (itemAddonSet[x.item_id] ||= new Set()).add(x.addon_id));
-      const liveItems = (rows || []).filter(r => categoryById[r.category_id] && (sizesByItem[r.id] || []).length)
+      const liveItems = (rows || []).filter(r => categoryById[r.category_id] && (sizesByItem[r.id] || []).length && (liveBranchOverrides.items[r.id] ? liveBranchOverrides.items[r.id].is_available !== false : r.is_available !== false))
         .map(r => {
           const c = categoryById[r.category_id];
-          const cat = categoryKey(c.slug, c.name_ar);
+          const cat = categoryKey(c.slug, c.name_ar, c.id);
           const tags = Array.isArray(r.tags) ? r.tags : [];
           const availableAddonIds = itemAddonSet[r.id] || new Set();
           const addonKeys = Object.keys(liveAddonIds).filter(key => availableAddonIds.has(liveAddonIds[key]));
@@ -1659,14 +1712,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   const baseUnitPrice = line => {
     const it = ITEM[line.id]; if (!it) return 0;
     const sp = it.sizes.find(s => s.key === line.size)?.price ?? 0;
-    const ap = line.addons.reduce((s, a) => s + (ADDONS[a]?.price ?? 0), 0);
+    const ap = line.addons.reduce((s, a) => s + (ADDONS[a] ? (ADDONS[a].sale > 0 && ADDONS[a].sale < ADDONS[a].price ? ADDONS[a].sale : ADDONS[a].price) : 0), 0);
     return round2(sp + ap);
   };
 
   const unitPrice = (line, ctx = {}) => {
     const it = ITEM[line.id]; if (!it) return 0;
     const sp = it.sizes.find(s => s.key === line.size)?.price ?? 0;
-    const ap = line.addons.reduce((s, a) => s + (ADDONS[a]?.price ?? 0), 0);
+    const ap = line.addons.reduce((s, a) => s + (ADDONS[a] ? (ADDONS[a].sale > 0 && ADDONS[a].sale < ADDONS[a].price ? ADDONS[a].sale : ADDONS[a].price) : 0), 0);
     let p = sp;
     if (line.special?.type === 'free') p = 0;
     else if (line.special?.type === 'fixed') p = Math.min(sp, line.special.price);
@@ -1779,6 +1832,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     commitCart(); bumpIcon();
   };
 
+  const addQuickLine = (item, special = null) => {
+    if (!item || !item.sizes?.length) return false;
+    if (!liveAddonGroupsReady) { toast('خيارات الإضافات لسه بتتحمّل. حاول بعد لحظات.'); return false; }
+    const problem = addonGroupProblem(item.id, []);
+    if (problem) {
+      openItem(item.id);
+      toast('المنتج يحتاج اختيارات إضافات قبل إضافته للسلة.');
+      return false;
+    }
+    addLineToCart({ id: item.id, size: item.sizes[0].key, spice: item.spice ? 'وسط' : null, addons: [], note: '', qty: 1, special });
+    return true;
+  };
+
   const changeQty = (uidVal, delta) => {
     const l = state.cart.find(x => x.uid === uidVal);
     if (!l) return;
@@ -1795,7 +1861,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   let cartSyncChain = Promise.resolve();
   let cartHydrated = false;
   let customerSyncing = false;
-  const CART_SPICE_LEVELS = ['هادي', 'وسط', 'حار'];
+  let CART_SPICE_LEVELS = [...SPICE_LEVELS];
 
   const waitForMenu = async () => {
     for (let i = 0; i < 75 && !liveMenuReady; i++) await new Promise(r => setTimeout(r, 200));
@@ -1838,18 +1904,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const { data: cart, error: cartErr } = await sbClient.from('customer_carts')
       .upsert({ user_id: customerAuthUser.id }, { onConflict: 'user_id' }).select('id').single();
     if (cartErr) throw cartErr;
-    const { data: oldRows, error: oldErr } = await sbClient.from('customer_cart_items').select('*').eq('cart_id', cart.id);
+    const { data: oldRows, error: oldErr } = await sbClient.from('customer_cart_items')
+      .select('id,client_line_key').eq('cart_id', cart.id);
     if (oldErr) throw oldErr;
-    const { error: delErr } = await sbClient.from('customer_cart_items').delete().eq('cart_id', cart.id);
-    if (delErr) throw delErr;
+    // upsert أولًا ثم حذف البنود المفقودة؛ لا نمسح السلة كاملة قبل نجاح الكتابة.
     if (rows.length) {
-      const { error: insErr } = await sbClient.from('customer_cart_items')
-        .insert(rows.map(r => ({ ...r, cart_id: cart.id })));
-      if (insErr) {
-        // إن فشل الإدخال نعيد البنود القديمة كما كانت حتى لا تفرغ السلة
-        if (oldRows?.length) await sbClient.from('customer_cart_items').insert(oldRows);
-        throw insErr;
-      }
+      const { error: upsertErr } = await sbClient.from('customer_cart_items')
+        .upsert(rows.map(r => ({ ...r, cart_id: cart.id })), { onConflict: 'cart_id,client_line_key' });
+      if (upsertErr) throw upsertErr;
+    }
+    const desiredKeys = new Set(rows.map(r => String(r.client_line_key)));
+    const staleIds = (oldRows || []).filter(r => !desiredKeys.has(String(r.client_line_key))).map(r => r.id);
+    if (staleIds.length) {
+      const { error: deleteErr } = await sbClient.from('customer_cart_items').delete().in('id', staleIds);
+      if (deleteErr) throw deleteErr;
     }
   };
 
@@ -2047,6 +2115,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (notesEl) state.cartNotes = notesEl.value.trim();
   };
 
+  const loadCustomerAddresses = async () => {
+    if (!sbClient || !customerAuthUser) { liveCustomerAddresses = []; return []; }
+    try {
+      const { data, error } = await sbClient.from('customer_addresses')
+        .select('id,label,recipient_name,phone,area,street,building,floor,apartment,delivery_instructions,is_default,latitude,longitude')
+        .eq('user_id', customerAuthUser.id).order('is_default', { ascending: false }).order('created_at', { ascending: false });
+      if (error) throw error;
+      liveCustomerAddresses = data || [];
+      return liveCustomerAddresses;
+    } catch (e) { console.warn('[Addresses] تعذر تحميل العناوين المحفوظة:', e?.message || e); liveCustomerAddresses = []; return []; }
+  };
+
   const validateForm = () => {
     readForm();
     const c = state.customer;
@@ -2092,6 +2172,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (btn) { btn.disabled = true; btn.textContent = 'بنأكد طلبك…'; }
     try {
       if (!sbClient || !liveMenuReady) throw new Error('MENU_NOT_READY');
+      if (!liveAddonGroupsReady) throw new Error('ADDON_GROUPS_NOT_READY');
+      const branchState = window.SHEEPBURGER_BRANCH_STATE || { loaded: false, total: 0, active: [], selectedId: null };
+      if (!branchState.loaded) throw new Error('BRANCH_LOOKUP_FAILED');
+      if (branchState.total > 0 && !branchState.active.length) throw new Error('NO_ACTIVE_BRANCH');
+      if (branchState.active.length > 1 && !branchState.selectedId) throw new Error('BRANCH_SELECTION_REQUIRED');
       const settings = window.SHEEPBURGER_STORE || {};
       if (!settings.is_open || !settings.accepting_orders) throw new Error('STORE_CLOSED');
       if (settings.cash_enabled === false) throw new Error('CASH_PAYMENT_DISABLED');
@@ -2099,9 +2184,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       const zoneId = zoneSelect?.value;
       const zone = (window.SHEEPBURGER_ZONES || []).find(z => String(z.id) === String(zoneId));
       if (!zone) throw new Error('INVALID_DELIVERY_ZONE');
-      const clientSubtotal = calculatePricing(state.cart, { coupon: state.coupon, voucher: selectedRemoteVoucher() }).subtotal;
-      const minimumOrder = Math.max(Number(settings.min_order || 0), Number(zone.min_order || 0));
-      if (clientSubtotal < minimumOrder) throw new Error('MINIMUM_ORDER_NOT_MET');
+      // حد الطلب والأسعار والخصومات يتحقق منها preview_order_quote على الخادم.
+      const invalidAddonLine = state.cart.find(l => addonGroupProblem(l.id, l.addons));
+      if (invalidAddonLine) throw new Error(addonGroupProblem(invalidAddonLine.id, invalidAddonLine.addons));
       const phone = normalizeEgyptPhone(state.customer.phone);
       if (!phone) throw new Error('INVALID_CUSTOMER_PHONE');
       state.customer.phone = phone;
@@ -2112,6 +2197,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         idempotency_key: null, tracking_token: null,
         customer_name: state.customer.name.trim(), customer_phone: phone,
         delivery_address: address, zone_id: zone.id,
+        ...(branchState.selectedId ? { branch_id: branchState.selectedId } : {}),
         notes: state.cartNotes || '', // استخدام الملاحظات الجديدة
         coupon_code: state.selectedVoucherId ? null : (state.coupon?.code || state.couponInput || null),
         voucher_id: state.selectedVoucherId || null,
@@ -2121,7 +2207,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           const addon_ids = (l.addons || []).map(key => ADDONS[key]?.dbId || liveAddonIds[key]).filter(Boolean);
           if ((l.addons || []).length !== addon_ids.length) throw new Error('ADDON_NOT_READY');
           if (!item || !item.sizes.some(z => String(z.key) === String(l.size))) throw new Error('ITEM_OR_SIZE_UNAVAILABLE');
-          return { item_id: l.id, size_id: l.size, quantity: l.qty, addon_ids, notes: l.note || null };
+          return { item_id: l.id, size_id: l.size, quantity: l.qty, addon_ids, spice_level: l.spice || null, notes: l.note || null, ...(branchState.selectedId ? { branch_id: branchState.selectedId } : {}) };
         })
       };
       // نفس محتوى الطلب = نفس المفتاح والتتبع (إعادة الإرسال بعد فشل الشبكة لا تنشئ طلبًا مكررًا)
@@ -2152,6 +2238,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           INVALID_DELIVERY_ZONE: 'منطقة التوصيل غير متاحة حالياً.',
           ITEM_OR_SIZE_UNAVAILABLE: 'فيه منتج أو حجم اتوقف من المنيو. حدّث الصفحة وراجع السلة.',
           CASH_PAYMENT_DISABLED: 'الدفع عند الاستلام غير متاح حالياً.',
+          BRANCH_REQUIRED: 'لا يمكن إنشاء الطلب قبل تفعيل فرع في إعدادات المطعم.', BRANCH_NOT_FOUND: 'الفرع المحدد غير متاح حاليًا. حدّث الصفحة.',
           ADDON_NOT_READY: 'الإضافات لسه بتتحمّل. حدّث المنيو وجرب تاني.',
           INVALID_OR_UNAVAILABLE_ADDON: 'إحدى الإضافات لم تعد متاحة. راجع السلة.'
         };
@@ -2193,7 +2280,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       startTracking();
     } catch (e) {
       console.warn('Checkout error:', e);
-      if (err) err.textContent = e?.message && !['MENU_NOT_READY','INVALID_CUSTOMER_PHONE','INVALID_DELIVERY_ZONE','STORE_CLOSED','CASH_PAYMENT_DISABLED','ADDON_NOT_READY','MINIMUM_ORDER_NOT_MET'].includes(e.message) ? e.message : ({ MINIMUM_ORDER_NOT_MET: 'قيمة الطلب أقل من الحد الأدنى للمتجر أو منطقة التوصيل.', ADDON_NOT_READY: 'الإضافات لسه بتتحمّل. حدّث المنيو وجرب تاني.', MENU_NOT_READY: 'لسه بنحمّل المنيو من النظام، استنى لحظة وجرب تاني.', INVALID_CUSTOMER_PHONE: 'اكتب رقم موبايل مصري صحيح يبدأ بـ 010 أو 011 أو 012 أو 015.', INVALID_DELIVERY_ZONE: 'اختار منطقة توصيل متاحة.', STORE_CLOSED: 'المطعم مغلق أو متوقف عن استقبال الطلبات حالياً.', CASH_PAYMENT_DISABLED: 'الدفع عند الاستلام غير متاح حالياً.' }[e?.message] || 'حصلت مشكلة في الاتصال. جرب تاني.');
+      if (err) err.textContent = e?.message && !['MENU_NOT_READY','INVALID_CUSTOMER_PHONE','INVALID_DELIVERY_ZONE','STORE_CLOSED','CASH_PAYMENT_DISABLED','ADDON_NOT_READY','MINIMUM_ORDER_NOT_MET','BRANCH_LOOKUP_FAILED','NO_ACTIVE_BRANCH','BRANCH_SELECTION_REQUIRED','ADDON_GROUPS_NOT_READY'].includes(e.message) ? e.message : ({ MINIMUM_ORDER_NOT_MET: 'قيمة الطلب أقل من الحد الأدنى للمتجر أو منطقة التوصيل.', ADDON_NOT_READY: 'الإضافات لسه بتتحمّل. حدّث المنيو وجرب تاني.', MENU_NOT_READY: 'لسه بنحمّل المنيو من النظام، استنى لحظة وجرب تاني.', INVALID_CUSTOMER_PHONE: 'اكتب رقم موبايل مصري صحيح يبدأ بـ 010 أو 011 أو 012 أو 015.', INVALID_DELIVERY_ZONE: 'اختار منطقة توصيل متاحة.', STORE_CLOSED: 'المطعم مغلق أو متوقف عن استقبال الطلبات حالياً.', CASH_PAYMENT_DISABLED: 'الدفع عند الاستلام غير متاح حاليًا.', BRANCH_LOOKUP_FAILED: 'تعذر التحقق من الفروع. حدّث الصفحة وحاول مرة أخرى.', NO_ACTIVE_BRANCH: 'لا يمكن إتمام الطلب حاليًا لعدم وجود فرع نشط. يرجى التواصل مع المطعم.', BRANCH_SELECTION_REQUIRED: 'يوجد أكثر من فرع نشط، واختيار الفرع غير متاح حاليًا.', ADDON_GROUPS_NOT_READY: 'خيارات الإضافات لم تكتمل بعد. حدّث الصفحة وحاول مرة أخرى.' }[e?.message] || 'حصلت مشكلة في الاتصال. جرب تاني.');
     } finally {
       checkingOut = false;
       const b = document.querySelector('[data-action="checkout"]');
@@ -2202,6 +2289,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   const reorder = (orderId) => {
+    if (!liveAddonGroupsReady) { toast('خيارات الإضافات لسه بتتحمّل. حاول بعد لحظات.'); return; }
     const order = state.orders.find(o => String(o.id) === String(orderId));
     if (!order || !Array.isArray(order.items) || !order.items.length) {
       toast('مش قادرين نلاقي تفاصيل الطلب. جرّب تحديث المنيو.');
@@ -2231,6 +2319,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         const match = m.addons.find(key => String(ADDONS[key]?.dbId || liveAddonIds[key] || key) === String(a));
         return match || null;
       }).filter(Boolean);
+      const groupProblem = addonGroupProblem(m.id, addons);
+      if (groupProblem) { missing.push(`${m.name}: ${groupProblem}`); return; }
       addLineToCart({
         id: m.id, size: matchedSize.key,
         spice: m.spice ? (item.spice || 'وسط') : null,
@@ -2282,8 +2372,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       const { data: matching, error: itemError } = await sbClient.from('order_items').select('order_id').eq('item_id',itemId).in('order_id',orderIds).limit(1);
       if (itemError) throw itemError;
       if (!matching?.length) { toast('لازم تكون استلمت الصنف ده من طلب مرتبط بحسابك قبل تقييمه'); return; }
-      const { error: insertError } = await sbClient.from('reviews').insert({ user_id:customerAuthUser.id, order_id:matching[0].order_id, item_id:itemId, rating:clamp(state.reviewStars,1,5), comment:text.slice(0,300), display_name:(name.slice(0,30)||state.customer.name||'عميل').slice(0,80) });
-      if (insertError) { if (insertError.code === '23505') { toast('سبق وقيّمت الصنف ده'); return; } throw insertError; }
+      const { error: insertError } = await sbClient.rpc('submit_review_secure', {
+        p_order_id: matching[0].order_id,
+        p_item_id: itemId,
+        p_rating: clamp(state.reviewStars, 1, 5),
+        p_comment: text.slice(0, 300),
+        p_display_name: (name.slice(0, 30) || state.customer.name || 'عميل').slice(0, 80)
+      });
+      if (insertError) {
+        if (insertError.code === '23505' || /already|duplicate/i.test(insertError.message || '')) { toast('سبق وقيّمت الصنف ده'); return; }
+        throw insertError;
+      }
       await loadLiveMenu();
       toast('تم حفظ تقييمك في قاعدة البيانات ⭐'); showConfetti(); renderSheet();
     } catch (e) { console.warn('[Reviews] تعذر حفظ التقييم',e?.message); toast('تعذر حفظ التقييم. تأكد من اتصالك وحاول مرة أخرى.'); }
@@ -2317,7 +2416,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const burgers = MENU_ITEMS.filter(i => i.cat === 'Burgers' && !isSecret(i));
     if (!burgers.length) return;
     const cheapest = burgers.reduce((min, it) => fromPrice(it) < fromPrice(min) ? it : min, burgers[0]);
-    addLineToCart({ id: cheapest.id, size: cheapest.sizes[0].key, spice: null, addons: [], note: '', qty: 1, special: { type: 'free' } });
+    if (!addQuickLine(cheapest, { type: 'free' })) return;
     state.freeBurger = false;
     safeSave(K('free_burger'), false);
     showConfetti();
@@ -2505,7 +2604,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
      ═══════════════════════════════════════════════════════════════ */
   const BANNER_FIELDS = 'id,title_ar,subtitle_ar,image_url,mobile_image_url,button_text_ar,target_type,target_id,target_url,sort_order,display_seconds,is_active,starts_at,ends_at,promotion_id';
   const ANNOUNCE_FIELDS = 'id,title_ar,message_ar,image_url,mobile_image_url,placement,background_color,text_color,accent_color,icon,target_type,target_id,target_url,sort_order,is_dismissible,is_active,starts_at,ends_at,promotion_id,updated_at';
-  const SLIDE_SECONDS = 5;   // مدة ثابتة لكل شريحة (تتجاهل display_seconds)
+  const SLIDE_SECONDS = 5;   // قيمة احتياطية فقط عند غياب display_seconds
   const PAUSE_AFTER_USER_MS = 8000;
 
   let homeBanners = [];          // الشرائح المعروضة فعليًا
@@ -2689,7 +2788,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   const startHeroAutoplay = () => {
     stopHeroAutoplay();
     if (homeBanners.length < 2 || document.hidden || currentRoute() !== 'home' || homeBannerResumeTimer) return;
-    homeBannerTimer = setTimeout(() => nextSlide(), SLIDE_SECONDS * 1000);
+    const configuredSeconds = Number(homeBanners[homeBannerIndex]?.display_seconds);
+    const seconds = Number.isFinite(configuredSeconds) && configuredSeconds > 0
+      ? Math.min(120, Math.max(2, configuredSeconds)) : SLIDE_SECONDS;
+    homeBannerTimer = setTimeout(() => nextSlide(), seconds * 1000);
   };
 
   // إيقاف مؤقت عند تفاعل المستخدم، ثم استئناف بعد فترة
@@ -2988,7 +3090,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       if (!title && !image) return null;
       const target = resolvePromotionTarget(p);
       const v = Number(p.value) || 0;
-      const badge = (['percent', 'fixed'].includes(p.promotion_type) && v <= 0) ? '' : offerValueLabel(p);
+      const valueBadge = (['percent', 'fixed'].includes(p.promotion_type) && v <= 0) ? '' : offerValueLabel(p);
+      const badge = [promotionBadgeLabel(p.id), valueBadge].filter(Boolean).join(' · ');
       blockTargets[bi.id] = target;
       return { kind: 'card', key: bi.id, target, title, subtitle: subOv || p.description_ar || '', image, badge, ends: p.ends_at || '', note: promoNote(p) };
     }
@@ -3164,8 +3267,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       ...r.item, name: r.title || r.item.name, desc: r.subtitle || r.item.desc, img: r.image || r.item.img
     }));
     if (!items.length && b.block_type === 'products_popular') {
-      // المنتجات المميزة من علامة is_popular في المنيو الحي فقط
-      items = Object.values(ITEM).filter(i => !isSecret(i) && i.tags.includes('popular')).slice(0, 8);
+      const placed = (liveProductRecommendations.homepage || []).map(x => ITEM[x.item_id]).filter(i => i && !isSecret(i));
+      items = placed.length ? placed : Object.values(ITEM).filter(i => !isSecret(i) && i.tags.includes('popular')).slice(0, 8);
     }
     if (!items.length) return '';
     return hbSection(b, s, hbItemsWrap(layoutOf(b), items.map(it => hbProductCard(it, s)), s));
@@ -3421,6 +3524,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
      التحقق في الواجهة للتجربة فقط؛ الخادم يطبّق القاعدة نفسها عند الطلب.
      ═══════════════════════════════════════════════════════════════ */
   let liveAddonGroups = {};   // item.id -> [{ id, name, required, min, max, options: [addonKey] }]
+  let liveAddonGroupsReady = false;
 
   const loadAddonGroups = async () => {
     if (!sbClient) return;
@@ -3441,25 +3545,32 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         if (!options.length) return;
         let min = Math.max(0, Number(g.min_select) || 0);
         if (g.is_required) min = Math.max(1, min);
-        const max = Math.max(min, Number(g.max_select) || 1);
+        const configuredMax = g.max_select == null ? options.length : Number(g.max_select);
+        const max = Math.max(min, Number.isFinite(configuredMax) ? configuredMax : options.length);
         (next[g.item_id] ||= []).push({ id: g.id, name: g.name_ar || '', required: min > 0, min, max, options });
       });
       liveAddonGroups = next;
+      liveAddonGroupsReady = true;
     } catch (err) {
       console.warn('[AddonGroups] تعذر تحميل مجموعات الإضافات:', err?.message || err);
       liveAddonGroups = {};
+      liveAddonGroupsReady = false;
     }
   };
 
   // يرجع رسالة عربية إذا لم تكتمل الاختيارات، أو null إذا كانت صحيحة
   const addonGroupProblem = (itemId, addons) => {
     const item = ITEM[itemId];
+    const selected = [...new Set(Array.isArray(addons) ? addons : [])];
     for (const g of (liveAddonGroups[itemId] || [])) {
       const offered = g.options.filter(k => item?.addons?.includes(k));
       if (!offered.length) continue;
-      const n = offered.filter(k => (addons || []).includes(k)).length;
-      if (n < Math.min(g.min, offered.length)) return `لازم تختار ${g.min} على الأقل من "${g.name}".`;
-      if (n > g.max) return `تقدر تختار ${g.max} بحد أقصى من "${g.name}".`;
+      const n = offered.filter(k => selected.includes(k)).length;
+      const min = Math.min(Math.max(0, Number(g.min) || 0), offered.length);
+      const configuredMax = Number(g.max);
+      const max = Math.min(offered.length, Math.max(min, Number.isFinite(configuredMax) ? configuredMax : offered.length));
+      if (n < min) return `لازم تختار ${min} على الأقل من "${g.name}".`;
+      if (n > max) return `تقدر تختار ${max} بحد أقصى من "${g.name}".`;
     }
     return null;
   };
@@ -3468,7 +3579,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const d = state.draft || { addons: [] };
     const opt = a => `<label class="opt ${d.addons.includes(a) ? 'sel' : ''}">
         <span class="opt-label"><strong>${esc(ADDONS[a].name)}</strong>${ADDONS[a].allergens.length ? `<small>بيحتوي على ${ADDONS[a].allergens.map(x => ALLERGENS[x]).join(', ')}</small>` : ''}</span>
-        <span class="opt-price">+${money(ADDONS[a].price)}</span>
+        <span class="opt-price">+${money(ADDONS[a].sale > 0 && ADDONS[a].sale < ADDONS[a].price ? ADDONS[a].sale : ADDONS[a].price)}${ADDONS[a].sale > 0 && ADDONS[a].sale < ADDONS[a].price ? ` <del>${money(ADDONS[a].price)}</del>` : ''}</span>
         <input type="checkbox" name="addon" value="${esc(a)}" ${d.addons.includes(a) ? 'checked' : ''}>
       </label>`;
     const groups = (liveAddonGroups[it.id] || []).map(g => ({ ...g, options: g.options.filter(k => it.addons.includes(k)) })).filter(g => g.options.length);
@@ -3514,17 +3625,25 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         .eq('is_active', true).order('priority', { ascending: false });
       if (error) throw error;
       const valid = (badges || []).filter(b => b.is_active !== false && isWithinSchedule(b) && b.label_ar);
-      if (!valid.length) { liveItemBadges = {}; return; }
-      const { data: links, error: linksErr } = await sbClient.from('menu_item_badges')
-        .select('badge_id,item_id,sort_order').in('badge_id', valid.map(b => b.id)).order('sort_order', { ascending: true });
-      if (linksErr) throw linksErr;
+      if (!valid.length) { liveItemBadges = {}; liveCategoryBadges = {}; livePromotionBadges = {}; return; }
+      const ids = valid.map(b => b.id);
+      const [itemLinks, categoryLinks, promotionLinks] = await Promise.all([
+        sbClient.from('menu_item_badges').select('badge_id,item_id,sort_order').in('badge_id', ids).order('sort_order', { ascending: true }),
+        sbClient.from('category_badges').select('badge_id,category_id,sort_order').in('badge_id', ids).order('sort_order', { ascending: true }),
+        sbClient.from('promotion_badges').select('badge_id,promotion_id,sort_order').in('badge_id', ids).order('sort_order', { ascending: true })
+      ]);
+      if (itemLinks.error) throw itemLinks.error;
       const byId = Object.fromEntries(valid.map(b => [b.id, b]));
-      const next = {};
-      (links || []).forEach(l => { const b = byId[l.badge_id]; if (b) (next[l.item_id] ||= []).push(b); });
+      const next = {}, categories = {}, promotions = {};
+      (itemLinks.data || []).forEach(l => { const b = byId[l.badge_id]; if (b) (next[l.item_id] ||= []).push(b); });
+      (categoryLinks.data || []).forEach(l => { const b = byId[l.badge_id]; if (b) (categories[l.category_id] ||= []).push(b); });
+      (promotionLinks.data || []).forEach(l => { const b = byId[l.badge_id]; if (b) (promotions[l.promotion_id] ||= []).push(b); });
       liveItemBadges = next;
+      liveCategoryBadges = categories;
+      livePromotionBadges = promotions;
     } catch (err) {
       console.warn('[Badges] تعذر تحميل شارات المنتجات:', err?.message || err);
-      liveItemBadges = {};
+      liveItemBadges = {}; liveCategoryBadges = {}; livePromotionBadges = {};
     }
   };
 
@@ -3544,6 +3663,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const anim = BADGE_ANIMATION[b.animation] ? ` data-anim="${BADGE_ANIMATION[b.animation]}"` : '';
     return `<span class="badge-tag db-badge"${anim} style="${style}">${b.icon ? `<span aria-hidden="true">${esc(b.icon)}</span> ` : ''}${esc(b.label_ar)}</span>`;
   }).join('');
+
+  const categoryBadgeHtml = id => (liveCategoryBadges[id] || []).map(b => `<span class="badge-tag db-badge" style="background:${safeColor(b.background_color, '#dc2626')};color:${safeColor(b.text_color, '#fff')};font-size:${Math.min(20,Math.max(8,Number(b.font_size_px)||10))}px;border-radius:${BADGE_SHAPE_RADIUS[b.shape]||'999px'}">${b.icon ? esc(b.icon)+' ' : ''}${esc(b.label_ar)}</span>`).join('');
+  const promotionBadgeLabel = id => (livePromotionBadges[id] || []).map(b => b.label_ar).filter(Boolean).join(' · ');
 
   /* ═══════════════════════════════════════════════
      [JS] الصفحات (الأصلي)
@@ -3629,7 +3751,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         </div>
         <div class="cats">
           <button class="cat-pill ${state.filter === 'All' ? 'active' : ''}" data-action="filter" data-val="All">🍽️ الكل</button>
-          ${CATS.map(c => `<button class="cat-pill ${state.filter === c.id ? 'active' : ''}" data-action="filter" data-val="${esc(c.id)}"><span class="emoji">${c.emoji}</span>${esc(c.label)}</button>`).join('')}
+          ${CATS.map(c => `<button class="cat-pill ${state.filter === c.id ? 'active' : ''}" data-action="filter" data-val="${esc(c.id)}"><span class="emoji">${c.emoji}</span>${esc(c.label)}${categoryBadgeHtml(c.id)}</button>`).join('')}
           ${window.SHEEPBURGER_STORE?.show_popular_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:popular' ? 'active' : ''}" data-action="filter" data-val="tag:popular">🔥 الأكثر طلباً</button>` : ''}
           ${window.SHEEPBURGER_STORE?.show_spicy_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:spicy' ? 'active' : ''}" data-action="filter" data-val="tag:spicy">🌶 حار</button>` : ''}
           ${window.SHEEPBURGER_STORE?.show_vegetarian_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:veggie' ? 'active' : ''}" data-action="filter" data-val="tag:veggie">🥬 نباتي</button>` : ''}
@@ -3770,6 +3892,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
             <p style="font-size:14px; font-weight:800;">بيانات التوصيل</p>
           </div>
           
+          ${customerAuthUser && liveCustomerAddresses.length ? `<div style="margin:0 0 14px"><label for="savedAddress">العناوين المحفوظة</label><select id="savedAddress"><option value="">اكتب عنوانًا جديدًا أو اختر عنوانًا محفوظًا</option>${liveCustomerAddresses.map(a => `<option value="${esc(a.id)}">${esc(a.label)} — ${esc(a.area)}، ${esc(a.street)}${a.is_default ? ' (افتراضي)' : ''}</option>`).join('')}</select></div>` : ''}
           <div class="form-grid">
               <div><label for="fName">الاسم بالكامل *</label><input type="text" id="fName" autocomplete="name" value="${cv('name')}" maxlength="60" required></div>
               <div><label for="fPhone">رقم الموبايل *</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" value="${cv('phone')}" maxlength="20" required></div>
@@ -3816,13 +3939,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
               <span>نقداً (الدفع عند الاستلام)</span>
             </label>
             <span style="font-size:20px;">💵</span>
-          </div>
-          <div class="payment-option" style="opacity:0.5;">
-            <label>
-              <input type="radio" name="payment" value="card" disabled>
-              <span>إضافة بطاقة جديدة</span>
-            </label>
-            <span style="font-size:20px;">💳</span>
           </div>
         </div>
 
@@ -4201,6 +4317,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
   const commitDraft = () => {
     const d = state.draft; if (!d) return;
+    if (!liveAddonGroupsReady) { toast('خيارات الإضافات لسه بتتحمّل. حاول بعد لحظات.'); return; }
     const groupProblem = addonGroupProblem(d.id, d.addons);
     if (groupProblem) { toast(groupProblem); return; }
     addLineToCart({ id: d.id, size: d.size, spice: d.spice, addons: [...d.addons].sort(), note: d.note.trim(), qty: d.qty, special: null });
@@ -4231,6 +4348,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     ['VOUCHER_REQUIRES_ACCOUNT', 'سجّل الدخول عشان تستخدم القسيمة.'],
     ['MINIMUM_ORDER_NOT_MET', 'قيمة الطلب أقل من الحد الأدنى للطلب.'],
     ['STORE_CLOSED', 'المطعم مغلق حاليًا.'],
+    ['BRANCH_LOOKUP_FAILED', 'تعذر التحقق من الفروع. حدّث الصفحة وحاول مرة أخرى.'],
+    ['BRANCH_REQUIRED', 'لا يمكن إتمام الطلب قبل تفعيل فرع نشط في إعدادات المطعم.'],
+    ['ADDON_GROUPS_NOT_READY', 'خيارات الإضافات لم تكتمل بعد. حدّث الصفحة وحاول مرة أخرى.'],
+    ['INVALID_BRANCH', 'الفرع المحدد غير متاح حاليًا. حدّث الصفحة.'],
+    ['NO_ACTIVE_BRANCH', 'لا يمكن إتمام الطلب حاليًا لعدم وجود فرع نشط. يرجى التواصل مع المطعم.'],
+    ['BRANCH_SELECTION_REQUIRED', 'يوجد أكثر من فرع نشط، واختيار الفرع غير متاح حاليًا.'],
     ['ITEM_OR_SIZE_UNAVAILABLE', 'بعض المنتجات غير متاحة حاليًا، راجع السلة.'],
     ['INVALID_DELIVERY_ZONE', 'منطقة التوصيل غير متاحة.'],
   ];
@@ -4248,10 +4371,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
   // نفس شكل البنود الذي يرسله create_order_secure
   const buildQuoteItems = () => {
+    const branchState = window.SHEEPBURGER_BRANCH_STATE || { loaded: false, total: 0, active: [], selectedId: null };
+    if (!branchState.loaded || (branchState.total > 0 && !branchState.selectedId)) return null;
     const items = state.cart.map(l => {
       const addon_ids = (l.addons || []).map(key => ADDONS[key]?.dbId || liveAddonIds[key]).filter(Boolean);
-      if ((l.addons || []).length !== addon_ids.length) return null;
-      return { item_id: l.id, size_id: l.size, quantity: l.qty, addon_ids };
+      if ((l.addons || []).length !== addon_ids.length || addonGroupProblem(l.id, l.addons)) return null;
+      const item = ITEM[l.id];
+      if (!item || !item.sizes.some(z => String(z.key) === String(l.size))) return null;
+      return { item_id: l.id, size_id: l.size, quantity: l.qty, addon_ids, ...(branchState.selectedId ? { branch_id: branchState.selectedId } : {}) };
     });
     if (!items.length || items.some(x => !x)) return null;
     return items;
@@ -4260,12 +4387,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   const quoteSignature = () => JSON.stringify({
     lines: state.cart.map(l => [l.id, l.size, l.qty, [...(l.addons || [])].sort()]),
     zone: currentZoneId(),
+    branch: window.SHEEPBURGER_BRANCH_STATE?.selectedId || '',
     coupon: state.coupon?.code || '',
     voucher: state.selectedVoucherId || '',
     phone: state.coupon || state.selectedVoucherId ? (normalizeEgyptPhone(state.customer.phone) || '') : ''
   });
 
   const fetchServerQuote = async ({ couponCode = null, voucherId = null } = {}) => {
+    if (!liveAddonGroupsReady) return { ok: false, error: 'ADDON_GROUPS_NOT_READY' };
+    const branchState = window.SHEEPBURGER_BRANCH_STATE || { loaded: false, total: 0, active: [], selectedId: null };
+    if (!branchState.loaded) return { ok: false, error: 'BRANCH_LOOKUP_FAILED' };
+    if (branchState.total > 0 && !branchState.active.length) return { ok: false, error: 'NO_ACTIVE_BRANCH' };
+    if (branchState.active.length > 1 && !branchState.selectedId) return { ok: false, error: 'BRANCH_SELECTION_REQUIRED' };
     const items = buildQuoteItems();
     const zoneId = currentZoneId();
     if (!sbClient || !items || !zoneId) return { ok: false, error: '' };   // الطلب غير مكتمل بعد
@@ -4491,9 +4624,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       state.remoteVouchers = Array.isArray(result.vouchers) ? result.vouchers : [];
       state.achievements = (Array.isArray(result.achievements) ? result.achievements : []).map(a => a.achievement_key === 'guac_master' ? 'guac_master' : a.achievement_key).filter(k => k in ACHIEVEMENTS);
       if (state.selectedVoucherId && !state.remoteVouchers.some(v => v.id === state.selectedVoucherId && !v.redeemed_at && !v.redeemed_order_id)) state.selectedVoucherId = null;
-      safeSave(K('points'), state.points);
-      safeSave(K('stamps'), state.stamps);
-      safeSave(K('achievements'), state.achievements);
+      // النقاط والأختام والإنجازات بيانات خادمية فقط؛ لا تُخزّن في localStorage.
     } catch (e) { console.warn('[Rewards] تعذر تحديث رصيد الولاء'); }
   };
 
@@ -4538,7 +4669,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (!state.chefSpecial) return;
     const it = ITEM[state.chefSpecial.id];
     if (!it) return;
-    addLineToCart({ id: it.id, size: it.sizes[0].key, spice: it.spice ? 'وسط' : null, addons: [], note: '', qty: 1, special: null });
+    if (!addQuickLine(it)) return;
     toast('اتضاف للسلة');
   };
 
@@ -4668,7 +4799,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         e.stopPropagation();
         const it = ITEM[el.dataset.id];
         if (!it || (isSecret(it) && !state.secretUnlocked)) return;
-        addLineToCart({ id: it.id, size: it.sizes[0].key, spice: it.spice ? 'وسط' : null, addons: [], note: '', qty: 1, special: null });
+        if (!addQuickLine(it)) break;
         Anim.flyToCart(el);
         toast(`${it.name} اتضاف`);
         el.classList.add('done'); el.textContent = '✓';
@@ -4772,6 +4903,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   });
 
   app.addEventListener('change', e => {
+    if (e.target?.id === 'savedAddress') {
+      const a = liveCustomerAddresses.find(x => String(x.id) === String(e.target.value));
+      if (a) {
+        const zone = (window.SHEEPBURGER_ZONES || []).find(z => String(z.name_ar).trim() === String(a.area).trim());
+        state.customer = { ...state.customer, name: a.recipient_name || state.customer.name || '', phone: a.phone || state.customer.phone || '', area: zone?.id || a.area, street: a.street || '', building: a.building || '', floor: a.floor || '', apt: a.apartment || '' };
+        safeSave(K('customer'), state.customer); refresh();
+      }
+      return;
+    }
     if (e.target?.id === 'fArea') {
       state.customer.area = e.target.value;
       safeSave(K('customer'), state.customer);
@@ -4828,7 +4968,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     loadHomeBanners();
     loadAnnouncements();
     loadHomepageBlocks();
-    setInterval(() => { loadHomeBanners(); loadAnnouncements(); loadHomepageBlocks(); loadPromotionPages(); }, 5 * 60 * 1000);
+    setInterval(() => { loadHomeBanners(); loadAnnouncements(); loadHomepageBlocks(); loadPromotionPages(); loadLiveMenu(); loadItemBadges(); }, 5 * 60 * 1000);
     if (!location.hash) location.hash = '#/home';
     state.secretUnlocked = false;
     if (sbClient) {
@@ -4845,6 +4985,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
             safeSave(K('customer'), state.customer);
           }
           await loadCustomerRewards();
+          await loadCustomerAddresses();
           await loadCustomerNotifications();
           syncCustomerData();
         } else {
@@ -4855,7 +4996,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       sbClient.auth.onAuthStateChange((_event, session) => {
         customerAuthUser = session?.user || null;
         if (!customerAuthUser) { customerOtpSent = false; state.customerNotifications = []; clearCustomerLocalState(); updateBadges(); }
-        else { setTimeout(() => { loadCustomerNotifications(); syncCustomerData(); }, 0); }
+        else { setTimeout(() => { loadCustomerAddresses().then(() => { if (currentRoute() === 'checkout') refresh(); }); loadCustomerNotifications(); syncCustomerData(); }, 0); }
         if (currentRoute() === 'profile' || currentRoute() === 'notifications') setTimeout(() => refresh(), 0);
       });
     }
