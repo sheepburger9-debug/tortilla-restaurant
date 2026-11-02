@@ -13,7 +13,6 @@
 <meta name="description" content="برجر طازج، بطاطس، ومشروبات. اطلب توصيل لحد باب البيت.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
-<meta name="format-detection" content="telephone=no">
 <meta name="theme-color" content="#FAF5EC">
 <title>Sheep & Burger — برجر طازة</title>
 
@@ -933,6 +932,11 @@ body.bs-open{overflow:hidden}
 .ann-img[data-announce-open]{cursor:pointer}
 .ann-img img{width:100%;height:100%;object-fit:cover}
 .ann-slide .announce{min-height:72px}
+.ann-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}
+.ann-dot{width:8px;height:8px;border-radius:99px;background:var(--line);transition:width .3s var(--ease),background .3s}
+.ann-dot.is-active{width:22px;background:var(--primary)}
+.ann-img picture{display:block;width:100%;height:100%}
+.ann-img picture img{width:100%;height:100%;object-fit:cover}
 .sale-row,.txt-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .sale-row::-webkit-scrollbar,.txt-row::-webkit-scrollbar{display:none}
 .sale-row>div,.txt-row>*{flex:0 0 auto;scroll-snap-align:start}
@@ -1022,41 +1026,36 @@ button.hb-banner{cursor:pointer}
 .hb-cta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 @media (prefers-reduced-motion: reduce){.hb-skeleton{animation:none}}
 .hb-note{display:block;font-size:12px;color:var(--ink-2);margin-top:4px}
-
-/* ═══ [V3] الترتيب الأفقي + كارت المنيو مستطيل + كارت البلوك مربع ═══ */
-.hb-hz{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:4px 2px 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x}
-.hb-hz::-webkit-scrollbar{display:none}
-.hb-hz>*{flex:0 0 min(44vw,200px);min-width:0;scroll-snap-align:start}
-@media(min-width:900px){.hb-hz>*{flex-basis:220px}}
-.hb-hz.hb-slider-wide>*{flex-basis:min(86vw,460px)}
-.hb-hz .hb-card,.hb-hz .hb-prod{width:100%;height:auto;aspect-ratio:1/1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
-.hb-hz .hb-card-img{position:absolute;inset:0;aspect-ratio:auto}
-.hb-hz .hb-card-img img{width:100%;height:100%;object-fit:cover}
-.hb-card.has-img .hb-card-body{position:relative;background:linear-gradient(180deg,rgba(20,10,5,0) 0%,rgba(20,10,5,.82) 100%);color:#fff;padding:44px 12px 12px}
-.hb-card.has-img h3,.hb-card.has-img p,.hb-card.has-img .hb-ends{color:#fff}
-.hb-card.has-img .hb-note,.hb-card.has-img .hb-ends{color:rgba(255,255,255,.9)}
-.hb-hz .hb-card-body{padding:12px}
-.hb-hz .hb-card-body h3{font-size:14.5px;line-height:1.25}
-.hb-hz .hb-card-body p{font-size:12px;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
-.hb-prod .product-img{position:absolute;inset:0;aspect-ratio:auto;height:100%}
-.hb-prod .product-body{position:relative;margin-top:auto;padding:10px 12px 12px;min-width:0}
-.hb-prod .product-name{font-size:14.5px;margin-bottom:2px}
-.hb-prod .product-desc{-webkit-line-clamp:1;margin-bottom:6px;font-size:12px}
-.hb-prod .product-foot{margin-top:4px}
-.hb-prod.has-img{background:var(--surface)}
-.hb-prod.has-img .product-body{background:linear-gradient(180deg,rgba(20,10,5,0) 0%,rgba(20,10,5,.84) 100%);padding-top:44px;color:#fff}
-.hb-prod.has-img .product-name,.hb-prod.has-img .product-desc,.hb-prod.has-img .product-price,.hb-prod.has-img .product-rating{color:#fff}
-.hb-prod .add-btn{flex-shrink:0}
-.hb-prod.has-img .add-btn{background:var(--primary);color:#fff}
-.hb-prod .product-badges{top:8px;right:8px}
-/* كارت المنيو مستطيل */
-.product.product-rect{flex-direction:row;min-height:132px}
-.product-rect .product-img{flex:0 0 40%;width:40%;aspect-ratio:auto;min-height:132px}
-.product-rect .product-body{padding:12px 14px;min-width:0}
-.product-rect .product-desc{-webkit-line-clamp:2;margin-bottom:8px}
-.product-rect .product-foot{margin-top:0}
-.product-grid.product-grid-rect{grid-template-columns:1fr;gap:14px}
-@media(min-width:900px){.product-grid.product-grid-rect{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}}
+/* ═══ [PHASE2] تحسينات بصرية للأقسام الرئيسية + حالة تحديث السعر ═══ */
+.home-sec-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 12px}
+.home-sec-title h2{font-size:clamp(19px,4.6vw,24px);font-weight:900;line-height:1.2;letter-spacing:-.01em}
+.home-sec-title p{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.sale-sec{background:linear-gradient(135deg,#FFF3EC,#FFE4D8);border-radius:var(--r-lg);padding:16px 14px 14px;margin:8px 0 22px}
+.sale-sec .home-sec-title h2{color:var(--primary-dark)}
+.sale-tag{display:inline-flex;align-items:center;background:var(--primary);color:#fff;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:var(--r-full);white-space:nowrap}
+.sale-card{width:150px;transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.sale-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.sale-img{position:relative;border-radius:var(--r-sm);overflow:hidden;margin:6px 6px 0}
+.sale-img img{transition:transform .5s var(--ease)}
+.sale-card:hover .sale-img img{transform:scale(1.05)}
+.sale-pct{position:absolute;top:6px;inset-inline-end:6px;background:var(--primary);color:#fff;font-size:12px;font-weight:900;padding:3px 8px;border-radius:var(--r-full);box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:1}
+.sale-prices b{font-size:16px;font-weight:900}
+.hb-card{transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.hb-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.hb-card-img img,.hb-tile-img img{transition:transform .5s var(--ease)}
+.hb-card:hover .hb-card-img img,.hb-tile:hover .hb-tile-img img{transform:scale(1.05)}
+.ann-img{border-radius:var(--r-lg);box-shadow:var(--shadow-md)}
+.pending-note{font-size:12.5px;color:#8a5a00;background:#FFF8E1;border:1px solid #FFE0B2;padding:8px 12px;border-radius:var(--r-xs);margin-bottom:10px;line-height:1.6}
+.pending-price{font-size:14px;color:var(--ink-2);font-weight:700}
+@media(min-width:900px){.sale-card{width:200px}}
+@media (prefers-reduced-motion: reduce){.sale-card,.hb-card,.sale-card .sale-img img,.hb-card-img img,.hb-tile-img img{transition:none;transform:none!important}}
+/* ═══ [ADS] سلايدر الصور الإعلانية: صور فقط ═══ */
+.ann-strip:empty{display:none;margin:0}
+.ann-strip{margin:4px 0 22px}
+.ann-slider{border-radius:var(--r-lg);box-shadow:var(--shadow-md)}
+.ann-img{aspect-ratio:16/9;overflow:hidden;width:100%;border-radius:var(--r-lg);box-shadow:none}
+.ann-img img{display:block;width:100%;height:100%;object-fit:cover}
+@media(min-width:900px){.ann-img{aspect-ratio:16/5}}
 </style>
 </head>
 <body>
@@ -1999,6 +1998,7 @@ button.hb-banner{cursor:pointer}
       state.customer.phone = phone;
       const address = [zone.name_ar, state.customer.street, `عمارة ${state.customer.building}`, `الدور ${state.customer.floor}`, `شقة ${state.customer.apt}`].filter(Boolean).join('، ');
       if (serverQuote && serverQuote.sig === quoteSignature() && serverQuote.error) throw new Error(serverQuote.error);
+      if (!serverQuote || serverQuote.sig !== quoteSignature() || !serverQuote.quote) throw new Error('بنحدّث السعر من السيرفر. استنى ثواني وجرب تاني.');
       const payload = {
         idempotency_key: null, tracking_token: null,
         customer_name: state.customer.name.trim(), customer_phone: phone,
@@ -2364,7 +2364,7 @@ button.hb-banner{cursor:pointer}
   };
 
   const productCard = (it) => `
-    <article class="product product-rect" data-action="open" data-id="${esc(it.id)}" tabindex="0" role="button" aria-label="${esc(it.name)}">
+    <article class="product" data-action="open" data-id="${esc(it.id)}" tabindex="0" role="button" aria-label="${esc(it.name)}">
       <div class="product-img">
         ${badgesHtml(it)}
         ${it.img ? `<img src="${esc(it.img)}" alt="${esc(it.name)}" loading="lazy">` : '<div class="img-missing" aria-hidden="true"></div>'}
@@ -2395,7 +2395,7 @@ button.hb-banner{cursor:pointer}
      [BANNERS] homepage_banners — سلايدر ديناميكي من Supabase
      ═══════════════════════════════════════════════════════════════ */
   const BANNER_FIELDS = 'id,title_ar,subtitle_ar,image_url,mobile_image_url,button_text_ar,target_type,target_id,target_url,sort_order,display_seconds,is_active,starts_at,ends_at,promotion_id';
-  const ANNOUNCE_FIELDS = 'id,title_ar,message_ar,placement,background_color,text_color,accent_color,icon,target_type,target_id,target_url,sort_order,is_dismissible,is_active,starts_at,ends_at,promotion_id,updated_at';
+  const ANNOUNCE_FIELDS = 'id,title_ar,message_ar,image_url,mobile_image_url,placement,background_color,text_color,accent_color,icon,target_type,target_id,target_url,sort_order,is_dismissible,is_active,starts_at,ends_at,promotion_id,updated_at';
   const SLIDE_SECONDS = 5;   // مدة ثابتة لكل شريحة (تتجاهل display_seconds)
   const PAUSE_AFTER_USER_MS = 8000;
 
@@ -2512,7 +2512,6 @@ button.hb-banner{cursor:pointer}
     const desktop = safeImgUrl(b.image_url) || safeImgUrl(b.mobile_image_url);
     const mobile = safeImgUrl(b.mobile_image_url) || desktop;
     const t = resolveNavigationTarget(b);
-    const hasBtn = !!(b.button_text_ar && t.kind !== 'none');
     const active = i === homeBannerIndex;
     const img = mobile ? `<picture class="hsl-pic">${desktop && desktop !== mobile ? `<source media="(min-width: 900px)" srcset="${esc(desktop)}">` : ''}<img class="hsl-img" src="${esc(mobile)}" alt="${esc(b.title_ar || '')}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" data-hsl-img></picture>` : '';
     return `<div class="hsl-slide${active ? ' is-active' : ''}" data-hsl-slide="${i}" role="group" aria-roledescription="slide" aria-label="${i + 1} من ${homeBanners.length}" aria-hidden="${active ? 'false' : 'true'}">
@@ -2520,7 +2519,6 @@ button.hb-banner{cursor:pointer}
       <div class="hsl-content">
         ${b.title_ar ? `<h2>${esc(b.title_ar)}</h2>` : ''}
         ${b.subtitle_ar ? `<p>${esc(b.subtitle_ar)}</p>` : ''}
-        ${hasBtn ? `<button type="button" class="hsl-cta" data-hsl-cta="${i}">${esc(b.button_text_ar)}</button>` : ''}
       </div>
     </div>`;
   };
@@ -2614,7 +2612,7 @@ button.hb-banner{cursor:pointer}
   const isDismissed = a => readDismissed().includes(dismissKey(a));
 
   const filterActiveAnnouncements = rows => (rows || []).filter(a =>
-    a && a.is_active !== false && isWithinSchedule(a) && (a.title_ar || a.message_ar)
+    a && a.is_active !== false && isWithinSchedule(a) && (a.title_ar || a.message_ar || a.image_url || a.mobile_image_url)
   );
 
   async function loadAnnouncements() {
@@ -2634,6 +2632,7 @@ button.hb-banner{cursor:pointer}
   }
 
   const renderAnnouncement = a => {
+    if (!a.title_ar && !a.message_ar) return '';
     const t = resolveNavigationTarget(a);
     const clickable = t.kind !== 'none';
     const style = `background:${safeColor(a.background_color, '#1F1610')};color:${safeColor(a.text_color, '#FFFFFF')};--announce-accent:${safeColor(a.accent_color, '#E8A425')}`;
@@ -2646,34 +2645,70 @@ button.hb-banner{cursor:pointer}
     </aside>`;
   };
 
+  let annSliderTimer = null;
+  let annPausedUntil = 0;
+  const bindAnnSlider = () => {
+    clearInterval(annSliderTimer);
+    const sl = document.querySelector('[data-ann-slider]');
+    if (!sl) return;
+    const slides = [...sl.children];
+    const dots = [...document.querySelectorAll('[data-ann-dots] .ann-dot')];
+    const current = () => {
+      const w = sl.clientWidth || 1;
+      return Math.min(slides.length - 1, Math.max(0, Math.round(Math.abs(sl.scrollLeft) / w)));
+    };
+    sl.addEventListener('scroll', () => {
+      const i = current();
+      dots.forEach((d, k) => d.classList.toggle('is-active', k === i));
+    }, { passive: true });
+    const hold = () => { annPausedUntil = Infinity; };
+    const release = () => { annPausedUntil = Date.now() + 2500; };
+    sl.addEventListener('touchstart', hold, { passive: true });
+    sl.addEventListener('touchend', release, { passive: true });
+    sl.addEventListener('touchcancel', release, { passive: true });
+    sl.addEventListener('pointerdown', hold, { passive: true });
+    sl.addEventListener('pointerup', release, { passive: true });
+    sl.addEventListener('pointercancel', release, { passive: true });
+    if (slides.length > 1) {
+      annSliderTimer = setInterval(() => {
+        if (document.hidden || Date.now() < annPausedUntil || currentRoute() !== 'home') return;
+        slides[(current() + 1) % slides.length].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      }, 4500);
+    }
+  };
+
+  const annHasImage = a => !!(safeImgUrl(a.image_url) || safeImgUrl(a.mobile_image_url));
   const renderAnnouncements = () => {
     if (currentRoute() === 'home') {
-      document.querySelectorAll('[data-announce-slot]').forEach(slot => { slot.innerHTML = ''; });
       const strip = document.querySelector('[data-ann-strip]');
-      const list = announcements;
-      if (strip) strip.innerHTML = list.length
-        ? `<div class="ann-slider" role="region" aria-label="الإعلانات">${list.map(a => `<div class="ann-slide">${renderStripAnnouncement(a)}</div>`).join('')}</div>`
-        : '';
-      return;
+      if (strip) {
+        const slides = announcements.filter(annHasImage).map(renderStripAnnouncement).filter(Boolean);
+        strip.innerHTML = slides.length
+          ? `<div class="ann-slider" data-ann-slider role="region" aria-roledescription="carousel" aria-label="الإعلانات">${slides.map(s => `<div class="ann-slide">${s}</div>`).join('')}</div>${slides.length > 1 ? `<div class="ann-dots" data-ann-dots aria-hidden="true">${slides.map((_, i) => `<span class="ann-dot${i === 0 ? ' is-active' : ''}"></span>`).join('')}</div>` : ''}`
+          : '';
+        bindAnnSlider();
+      }
     }
+    // اللافتات النصية تظهر في مكان placement الخاص بها على كل الصفحات
     document.querySelectorAll('[data-announce-slot]').forEach(slot => {
-      if (currentRoute() === 'home' && !app.contains(slot)) { slot.innerHTML = ''; return; }
+      if (currentRoute() === 'home') { slot.innerHTML = ''; return; }
       const placement = slot.dataset.announceSlot;
-      const list = announcements.filter(a => a.placement === placement && !isDismissed(a));
+      const list = announcements.filter(a => a.placement === placement && !annHasImage(a) && !isDismissed(a));
       slot.innerHTML = list.map(renderAnnouncement).join('');
     });
   };
 
+  // لافتة الصور: الهاتف يبدأ بـ mobile_image_url ثم image_url، والكمبيوتر يفضّل image_url
+  // اللافتة بلا صورة صالحة تُتجاهل بالكامل
   const renderStripAnnouncement = a => {
-    const src = typeof a.icon === 'string' ? a.icon.trim() : '';
-    if (/^https?:\/\//.test(src)) {
-      const clickable = resolveNavigationTarget(a).kind !== 'none';
-      const inner = `<img src="${esc(src)}" alt="${esc(a.title_ar || '')}" loading="lazy" decoding="async">`;
-      return clickable
-        ? `<button type="button" class="ann-img" data-announce-id="${esc(a.id)}" data-announce-open>${inner}</button>`
-        : `<div class="ann-img" data-announce-id="${esc(a.id)}">${inner}</div>`;
-    }
-    return renderAnnouncement({ ...a, is_dismissible: false });
+    const desktop = safeImgUrl(a.image_url);
+    const mobile = safeImgUrl(a.mobile_image_url) || desktop;
+    if (!mobile) return '';
+    const clickable = resolveNavigationTarget(a).kind !== 'none';
+    const pic = `<picture>${desktop && desktop !== mobile ? `<source media="(min-width: 900px)" srcset="${esc(desktop)}">` : ''}<img src="${esc(mobile)}" alt="${esc(a.title_ar || 'إعلان')}" loading="lazy" decoding="async"></picture>`;
+    return clickable
+      ? `<button type="button" class="ann-img" data-announce-id="${esc(a.id)}" data-announce-open aria-label="${esc(a.title_ar || 'إعلان')}">${pic}</button>`
+      : `<div class="ann-img" data-announce-id="${esc(a.id)}">${pic}</div>`;
   };
 
   const dismissAnnouncement = id => {
@@ -2688,7 +2723,7 @@ button.hb-banner{cursor:pointer}
   // يُستدعى بعد كل رسم للصفحة لتجهيز الأماكن الديناميكية
   const mountRouteWidgets = r => {
     if (r === 'home') { renderHeroSlider(); startHeroAutoplay(); renderHomepageBlocks(); }
-    else stopHeroAutoplay();
+    else { stopHeroAutoplay(); clearInterval(annSliderTimer); }
     renderAnnouncements();
     scheduleServerQuote();
   };
@@ -2912,10 +2947,15 @@ button.hb-banner{cursor:pointer}
     return `<section class="hb ${blockPadClass(b)}${s.full_width === true ? ' hb-full' : ''}${cls ? ' ' + cls : ''}" style="${hbStyle(b, s)}" data-hb-block="${esc(b.id)}"${title ? ` aria-label="${esc(title)}"` : ''}>${head}${inner}</section>`;
   };
 
-  // كل البلوكات أفقية: صف قابل للتمرير بالسحب، بدون شبكة رأسية
   const hbItemsWrap = (layout, cards, s, wide = false) => {
     const items = cards.map(c => `<div role="listitem">${c}</div>`).join('');
-    return `<div class="hb-hz${wide ? ' hb-slider-wide' : ''}" role="list">${items}</div>`;
+    if (layout === 'carousel') return `<div class="hb-slider${wide ? ' hb-slider-wide' : ''}" role="list">${items}</div>`;
+    if (layout === 'list') return `<div class="hb-list" role="list">${items}</div>`;
+    const cols = numOpt(s, 'columns', 1, 4, null);
+    const vars = cols == null
+      ? '--hb-c-m:2;--hb-c-t:3;--hb-c-d:4'
+      : `--hb-c-m:${Math.min(cols, 2)};--hb-c-t:${Math.min(cols, 3)};--hb-c-d:${cols}`;
+    return `<div class="hb-grid" role="list" style="${vars}">${items}</div>`;
   };
 
   const hbCard = (r, s, c = {}) => {
@@ -2924,15 +2964,15 @@ button.hb-banner{cursor:pointer}
     const inner = `${r.image ? `<div class="hb-card-img"><img src="${esc(r.image)}" alt="${esc(r.title || '')}" loading="lazy" decoding="async"></div>` : ''}
       <div class="hb-card-body">${showBadge && r.badge ? `<span class="hb-badge">${esc(r.badge)}</span>` : ''}${r.title ? `<h3>${esc(r.title)}</h3>` : ''}${showDesc && r.subtitle ? `<p>${esc(r.subtitle)}</p>` : ''}${r.note ? `<small class="hb-note">${esc(r.note)}</small>` : ''}${r.ends && shortDate(r.ends) ? `<small class="hb-ends">ينتهي ${esc(shortDate(r.ends))}</small>` : ''}</div>`;
     return r.target.kind !== 'none'
-      ? `<button type="button" class="hb-card${r.image ? ' has-img' : ''}" data-hb-open="${esc(r.key)}">${inner}</button>`
-      : `<div class="hb-card${r.image ? ' has-img' : ''}">${inner}</div>`;
+      ? `<button type="button" class="hb-card" data-hb-open="${esc(r.key)}">${inner}</button>`
+      : `<div class="hb-card">${inner}</div>`;
   };
 
   // بطاقة منتج داخل البلوك: نفس الأزرار والوظائف الحالية (فتح المنتج + إضافة سريعة)
   const hbProductCard = (it, s) => {
     const showDesc = boolOpt(s, 'show_description', true);
     const showPrice = boolOpt(s, 'show_price', true);
-    return `<article class="product hb-prod${it.img ? ' has-img' : ''}" data-action="open" data-id="${esc(it.id)}" tabindex="0" role="button" aria-label="${esc(it.name)}">
+    return `<article class="product" data-action="open" data-id="${esc(it.id)}" tabindex="0" role="button" aria-label="${esc(it.name)}">
       <div class="product-img">
         ${badgesHtml(it)}
         ${it.img ? `<img src="${esc(it.img)}" alt="${esc(it.name)}" loading="lazy" decoding="async">` : '<div class="img-missing" aria-hidden="true"></div>'}
@@ -3000,7 +3040,7 @@ button.hb-banner{cursor:pointer}
       target: r.target, key: r.key,
       showCta: boolOpt(s, 'show_cta', true) && r.target.kind !== 'none', ctaLabel: ctaText(c)
     })}</div>`).join('');
-    const wrapCls = 'hb-hz hb-slider-wide';
+    const wrapCls = layoutOf(b) === 'carousel' ? 'hb-slider hb-slider-wide' : 'hb-list';
     return `<section class="hb-banner-sec" data-hb-block="${esc(b.id)}"><div class="${wrapCls}" role="list">${banners}</div></section>`;
   };
 
@@ -3136,36 +3176,47 @@ button.hb-banner{cursor:pointer}
     if (!root) return;
     const list = saleCandidates();
     root.innerHTML = list.length
-      ? `<div class="sale-row" role="list">${list.map(({ it, sz }) => `<div role="listitem">
-          <button type="button" class="sale-card" data-item-open="${esc(it.id)}">
-            <span class="sale-img">${it.img ? `<img src="${esc(it.img)}" alt="" loading="lazy" decoding="async">` : ''}</span>
-            <span class="sale-name">${esc(it.name)}</span>
-            <span class="sale-prices"><s>${moneyHtml(sz.price)}</s><b>${moneyHtml(sz.sale)}</b></span>
-          </button></div>`).join('')}</div>`
+      ? `<section class="sale-sec" aria-label="عروض السيل">
+          <div class="home-sec-title"><div><h2>عروض السيل 🔥</h2><p>أسعار مخفّضة من المطعم مباشرة</p></div><span class="sale-tag">خصم</span></div>
+          <div class="sale-row" role="list">${list.map(({ it, sz }) => {
+            const pct = Math.round((1 - sz.sale / sz.price) * 100);
+            return `<div role="listitem">
+              <button type="button" class="sale-card" data-item-open="${esc(it.id)}">
+                <span class="sale-img">${it.img ? `<img src="${esc(it.img)}" alt="${esc(it.name)}" loading="lazy" decoding="async">` : ''}${pct > 0 ? `<span class="sale-pct">-${pct}%</span>` : ''}</span>
+                <span class="sale-name">${esc(it.name)}</span>
+                <span class="sale-prices"><s>${moneyHtml(sz.price)}</s><b>${moneyHtml(sz.sale)}</b></span>
+              </button></div>`;
+          }).join('')}</div>
+        </section>`
       : '';
   };
 
   const renderHomepageBlocks = () => {
-    const root = document.querySelector('[data-home-blocks]');
-    if (!root) return;
-    let blocksHtml;
-    if (homeBlocksState === 'error') {
-      blocksHtml = '<div class="hsl-state" role="alert"><p>تعذر تحميل أقسام الرئيسية حاليًا.</p><button type="button" class="btn btn-outline btn-sm" data-hb-retry>إعادة المحاولة</button></div>';
-    } else if (!homeBlocks.length && (homeBlocksState === 'idle' || homeBlocksState === 'loading')) {
-      blocksHtml = '<div class="hb-skeleton" aria-busy="true" aria-label="جارٍ تحميل الأقسام"></div>';
-    } else {
-      // ترتيب البلوكات كما هو في قاعدة البيانات (sort_order)
-      blocksHtml = homeBlocks.map(renderOneBlock).filter(Boolean).join('');
-    }
-    // شريط صفحات العروض (الكروت المربعة) يبقى كما هو بعد البلوكات
-    const visible = livePromotionPages.filter(p => (pageOffers[p.id] || []).length);
-    const rail = visible.length
-      ? `<div class="hb-rail" role="list">${visible.map(p => `<div role="listitem">${pageTileHtml(p)}</div>`).join('')}</div>`
-      : '';
-    root.innerHTML = blocksHtml;
+    const cardsRoot = document.querySelector('[data-home-cards]');
     const offersRoot = document.querySelector('[data-home-offers]');
-    if (offersRoot) offersRoot.innerHTML = rail;
+    const blocksRoot = document.querySelector('[data-home-blocks]');
+    if (!cardsRoot && !offersRoot && !blocksRoot) return;
+    const loading = !homeBlocks.length && (homeBlocksState === 'idle' || homeBlocksState === 'loading');
+    const failed = homeBlocksState === 'error';
+    const renderList = list => list.map(renderOneBlock).filter(Boolean).join('');
+
+    // 1) كروت الشاشات (صفحات العروض)
+    if (cardsRoot) {
+      const visible = livePromotionPages.filter(p => (pageOffers[p.id] || []).length);
+      cardsRoot.innerHTML = visible.length
+        ? `<div class="home-sec-title"><div><h2>اكتشف العروض</h2><p>اختار القسم اللي يعجبك</p></div></div><div class="hb-rail" role="list">${visible.map(p => `<div role="listitem">${pageTileHtml(p)}</div>`).join('')}</div>`
+        : '';
+    }
+    // 3) بلوك عروض السيل يُرسم في renderSaleStrip
     renderSaleStrip();
+    // 4) بلوك العروض
+    if (offersRoot) offersRoot.innerHTML = (loading || failed) ? '' : renderList(homeBlocks.filter(b => OFFER_BLOCK_TYPES.includes(b.block_type)));
+    // 5) باقي البلوكات بترتيب الإدارة
+    if (blocksRoot) {
+      if (failed) blocksRoot.innerHTML = '<div class="hsl-state" role="alert"><p>تعذر تحميل أقسام الرئيسية حاليًا.</p><button type="button" class="btn btn-outline btn-sm" data-hb-retry>إعادة المحاولة</button></div>';
+      else if (loading) blocksRoot.innerHTML = '<div class="hb-skeleton" aria-busy="true" aria-label="جارٍ تحميل الأقسام"></div>';
+      else blocksRoot.innerHTML = renderList(homeBlocks.filter(b => !OFFER_BLOCK_TYPES.includes(b.block_type)));
+    }
     renderAnnouncements();
   };
 
@@ -3399,16 +3450,12 @@ button.hb-banner{cursor:pointer}
       <div class="view-anim">
         <div class="hsl" data-hsl-root aria-roledescription="carousel" aria-label="العروض الرئيسية"></div>
 
-        <div data-home-blocks></div>
+        <div data-home-cards></div>
         <div class="ann-strip" data-ann-strip></div>
         <div data-sale-strip></div>
         <div data-home-offers></div>
+        <div data-home-blocks></div>
         <div data-text-row></div>
-
-        <div class="announce-slot" data-announce-slot="below_hero"></div>
-        <div class="announce-slot" data-announce-slot="between_blocks"></div>
-        <div class="announce-slot" data-announce-slot="top"></div>
-        <div class="announce-slot" data-announce-slot="above_footer"></div>
 
         ${!state.secretUnlocked ? `
           <div class="card-block" style="text-align:center;border-style:dashed">
@@ -3482,7 +3529,7 @@ button.hb-banner{cursor:pointer}
           ${subs.map(s => `<button class="cat-pill ${state.subcat === s.id ? 'active' : ''}" data-action="subfilter" data-val="${esc(s.id)}" style="padding:7px 14px;font-size:12.5px">${esc(s.label)}</button>`).join('')}
         </div>` : ''}
         ${liveMenuError ? `<div role="alert" style="text-align:center;padding:18px;margin-bottom:14px;background:#fff3ef;border:1px solid #f5c2b3;border-radius:16px"><p style="margin:0 0 10px;font-weight:700;color:#8a2a13">تعذر تحميل المنيو الآن. تأكد من اتصالك وجرب تاني.</p><button class="cat-pill" data-action="retry-menu">🔄 إعادة المحاولة</button></div>` : ''}
-        <div class="product-grid product-grid-rect" data-grid>
+        <div class="product-grid" data-grid>
           ${list.length ? list.map(productCard).join('') : (liveMenuError ? '' : '<p style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-2)">مفيش نتايج للبحث</p>')}
         </div>
       </div>`;
@@ -3575,19 +3622,16 @@ button.hb-banner{cursor:pointer}
           ${pricing.smallOrderFee > 0 ? `<div class="summary-row"><span>رسوم الطلبات الصغيرة ⓘ</span><span class="price-ltr">${money(pricing.smallOrderFee)}</span></div>` : ''}
           <div class="summary-row"><span>رسوم التوصيل</span><span class="price-ltr">${pricing.deliveryFee ? money(pricing.deliveryFee) : '<b style="color:var(--success);">مجاني</b>'}</span></div>
           ${pricing.voucherDiscount > 0 ? `<div class="summary-row discount" style="color:var(--success);"><span>كوبونات</span><span class="price-ltr">−${money(pricing.voucherDiscount)}</span></div>` : ''}
-          <div class="summary-row"><span>رسوم الخدمة</span><span class="price-ltr">${money(pricing.serviceFee || 4)}</span></div>
-          
-          <div class="pro-banner">
-            <div><strong>PRO</strong> وفر 28.99 ج.م على هذا الطلب!</div>
-          </div>
+          ${pricing.serviceFee > 0 ? `<div class="summary-row"><span>رسوم الخدمة</span><span class="price-ltr">${money(pricing.serviceFee)}</span></div>` : ''}
 
-          <div class="summary-row total"><span>المبلغ الإجمالي</span><span class="price-ltr">${money(pricing.total)}</span></div>
+
+          ${pricing.serverVerified ? '' : '<p class="pending-note" role="status">السعر قيد التحديث من السيرفر… لن يُسمح بإتمام الطلب قبل تأكيده.</p>'}<div class="summary-row total"><span>المبلغ الإجمالي</span><span class="price-ltr">${pricing.serverVerified ? money(pricing.total) : '<span class="pending-price">جارٍ التحديث…</span>'}</span></div>
         </div>
       </div>
 
       <div class="sticky-bottom-bar">
         <a href="#/menu" class="btn-add-more">أضف المزيد</a>
-        <a href="#/checkout" class="btn-checkout">تابع للدفع · ${money(pricing.total)}</a>
+        <a href="#/checkout" class="btn-checkout">تابع للدفع${pricing.serverVerified ? ' · ' + money(pricing.total) : ''}</a>
       </div>
     `;
   };
@@ -3678,15 +3722,15 @@ button.hb-banner{cursor:pointer}
           ${pricing.smallOrderFee > 0 ? `<div class="summary-row"><span>رسوم الطلبات الصغيرة ⓘ</span><span class="price-ltr">${money(pricing.smallOrderFee)}</span></div>` : ''}
           <div class="summary-row"><span>رسوم التوصيل</span><span class="price-ltr">${pricing.deliveryFee ? money(pricing.deliveryFee) : '<b style="color:var(--success);">مجاني</b>'}</span></div>
           ${pricing.voucherDiscount > 0 ? `<div class="summary-row discount" style="color:var(--success);"><span>كوبونات</span><span class="price-ltr">−${money(pricing.voucherDiscount)}</span></div>` : ''}
-          <div class="summary-row"><span>رسوم الخدمة</span><span class="price-ltr">${money(pricing.serviceFee || 4)}</span></div>
-          <div class="summary-row total"><span>المبلغ الإجمالي</span><span class="price-ltr">${money(pricing.total)}</span></div>
+          ${pricing.serviceFee > 0 ? `<div class="summary-row"><span>رسوم الخدمة</span><span class="price-ltr">${money(pricing.serviceFee)}</span></div>` : ''}
+          ${pricing.serverVerified ? '' : '<p class="pending-note" role="status">السعر قيد التحديث من السيرفر… لن يُسمح بإتمام الطلب قبل تأكيده.</p>'}<div class="summary-row total"><span>المبلغ الإجمالي</span><span class="price-ltr">${pricing.serverVerified ? money(pricing.total) : '<span class="pending-price">جارٍ التحديث…</span>'}</span></div>
         </div>
         
         <p class="form-error" id="ferr" role="alert" style="color:var(--danger); text-align:center; margin-bottom:10px;"></p>
       </div>
 
       <div class="sticky-bottom-bar">
-        <button class="btn-checkout" style="width:100%;" data-action="checkout">تنفيذ الطلب · ${money(pricing.total)}</button>
+        <button class="btn-checkout" style="width:100%;" data-action="checkout" ${pricing.serverVerified ? '' : 'disabled'}>${pricing.serverVerified ? 'تنفيذ الطلب · ' + money(pricing.total) : 'جارٍ تحديث السعر…'}</button>
       </div>
     `;
   };
