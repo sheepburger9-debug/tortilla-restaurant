@@ -3094,14 +3094,37 @@ button.hb-banner{cursor:pointer}
     text: renderTextPromo
   };
 
-  // نوع غير معروف لا يُعرض؛ وخطأ بلوك واحد لا يمنع باقي الصفحة
+  // الأنواع التي تُعرض في قسم "بلوك العروض" (الترتيب 5)؛ باقي الأنواع تُعرض بعده حسب sort_order
+  const OFFER_BLOCK_TYPES = ['promo_banner', 'promotion_cards'];
+
+  // عرض احتياطي لأي نوع بلوك جديد لم يُضف له Renderer بعد: يستخدم عناصر البلوك الصالحة فقط
+  const renderFallbackBlock = (b, s, c, resolved) => {
+    const products = resolved.filter(r => r.kind === 'item').map(r => hbProductCard(r.item, s));
+    if (products.length) return hbSection(b, s, hbItemsWrap(layoutOf(b), products, s));
+    const cards = resolved.filter(r => r.kind === 'card').map(r => hbCard(r, s, c));
+    if (cards.length) return hbSection(b, s, hbItemsWrap(layoutOf(b), cards, s));
+    return blockLevelBanner(b, s, c);
+  };
+
+  // نوع غير معروف يُعرض بالعرض الاحتياطي مع تشخيص واضح؛ وخطأ بلوك واحد لا يمنع باقي الصفحة
   const renderOneBlock = b => {
-    const render = BLOCK_RENDERERS[b.block_type];
-    if (!render) return '';
+    const known = Object.prototype.hasOwnProperty.call(BLOCK_RENDERERS, b.block_type);
+    const diag = { block_id: b.id, block_type: b.block_type, layout_type: layoutOf(b) };
+    if (!known) console.warn('[Blocks] نوع بلوك غير معروف، يُستخدم العرض الاحتياطي', diag);
     try {
-      return render(b, blockSettings(b), blockContent(b), blockItemsResolved(b));
+      const resolved = blockItemsResolved(b);
+      const render = known ? BLOCK_RENDERERS[b.block_type] : renderFallbackBlock;
+      const html = render(b, blockSettings(b), blockContent(b), resolved);
+      console.info('[Blocks]', {
+        ...diag,
+        loaded_items: (homeBlockItems[b.id] || []).length,
+        valid_items: resolved.length,
+        rendered: !!html,
+        reason: html ? '' : 'لا توجد بيانات صالحة للعرض'
+      });
+      return html;
     } catch (err) {
-      console.warn('[Blocks] تعذر عرض بلوك', b.id, err?.message || err);
+      console.warn('[Blocks] خطأ أثناء رسم البلوك', { ...diag, error: err?.message || String(err) });
       return '';
     }
   };
