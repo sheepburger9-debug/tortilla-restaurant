@@ -13,6 +13,7 @@
 <meta name="description" content="برجر طازج، بطاطس، ومشروبات. اطلب توصيل لحد باب البيت.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
+<meta name="format-detection" content="telephone=no">
 <meta name="theme-color" content="#FAF5EC">
 <title>Sheep & Burger — برجر طازة</title>
 
@@ -984,6 +985,78 @@ button.hb-card:hover{border-color:var(--ink-3)}
 @media(min-width:700px){.hb-grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:1000px){.hb-grid{grid-template-columns:repeat(4,1fr)}.hb-slider>*{flex-basis:260px}}
 @media (prefers-reduced-motion: reduce){.hb-slider{scroll-behavior:auto}}
+/* ═══ [HOME] عارض البلوكات: بانر الحملة/العرض، شبكات، بطاقات، حالات الصور ═══ */
+.hsl-pic{position:absolute;inset:0;z-index:-2;display:block}
+.hsl-slide.img-failed .hsl-pic{display:none}
+.hsl-dot{border:0;padding:0;cursor:pointer}
+.hb-skeleton{height:160px;border-radius:var(--r-md);background:linear-gradient(90deg,var(--bg-2),var(--line),var(--bg-2));background-size:200% 100%;animation:hslShimmer 1.4s linear infinite;margin:8px 0 24px}
+.hb-banner-sec{margin:8px 0 28px}
+.hb-banner{position:relative;display:flex;align-items:flex-end;width:100%;min-height:200px;border-radius:var(--hb-radius,var(--r-md));overflow:hidden;background:linear-gradient(135deg,var(--hb-accent,var(--primary-dark)),var(--ink));color:#fff;text-align:var(--hb-align,start);isolation:isolate;box-shadow:var(--shadow-lg);padding:0;border:0;font:inherit;margin:0}
+button.hb-banner{cursor:pointer}
+.hb-banner-media{position:absolute;inset:0;z-index:-2}
+.hb-banner-media img{width:100%;height:100%;object-fit:cover;object-position:var(--hb-obj-m,50% 50%)}
+@media(min-width:900px){.hb-banner-media img{object-position:var(--hb-obj-d,50% 50%)}}
+.hb-banner-ov{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(20,10,5,.1) 0%,rgba(20,10,5,.88) 100%)}
+.hb-banner-body{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:22px 20px;width:100%;max-width:640px;text-align:var(--hb-align,start);box-sizing:border-box}
+.hb-title{display:block;font-family:var(--serif);font-size:clamp(22px,4.6vw,38px);font-weight:900;line-height:1.2}
+.hb-sub{display:block;font-size:clamp(14px,2vw,16px);line-height:1.6;opacity:.94}
+.hb-banner-body .hb-cta-row{margin-top:8px}
+.hb-banner-body .hsl-cta{cursor:pointer;font:inherit}
+.hb-badge{display:inline-block;align-self:flex-start;background:var(--accent);color:var(--ink);font-weight:800;font-size:12.5px;line-height:1.2;padding:5px 11px;border-radius:var(--r-full);margin-bottom:4px}
+.hb-card .hb-badge{background:var(--primary);color:#fff}
+.hb-banner.img-failed .hb-banner-media{display:none}
+.hb-card.img-failed .hb-card-img{display:none}
+.hb-card-body{text-align:var(--hb-align,start)}
+.hb-card-body h3{word-break:break-word}
+.hb-ends{display:block;font-size:12px;color:var(--ink-3);margin-top:6px}
+.hb-grid{display:grid;gap:12px;grid-template-columns:repeat(var(--hb-c-m,2),minmax(0,1fr))}
+@media(min-width:700px){.hb-grid{grid-template-columns:repeat(var(--hb-c-t,3),minmax(0,1fr))}}
+@media(min-width:1000px){.hb-grid{grid-template-columns:repeat(var(--hb-c-d,4),minmax(0,1fr))}}
+.hb-slider-wide>*{flex-basis:min(86vw,460px)}
+.hb-slider>*{min-width:0}
+.hb-list{display:flex;flex-direction:column;gap:12px}
+.hb-list>*{min-width:0}
+.hb-full{width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);border-radius:0}
+.hb-head{text-align:var(--hb-align,start)}
+.hb-txt-card{width:auto;max-width:none}
+.hb-cta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+@media (prefers-reduced-motion: reduce){.hb-skeleton{animation:none}}
+.hb-note{display:block;font-size:12px;color:var(--ink-2);margin-top:4px}
+
+/* ═══ [V3] الترتيب الأفقي + كارت المنيو مستطيل + كارت البلوك مربع ═══ */
+.hb-hz{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:4px 2px 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x}
+.hb-hz::-webkit-scrollbar{display:none}
+.hb-hz>*{flex:0 0 min(44vw,200px);min-width:0;scroll-snap-align:start}
+@media(min-width:900px){.hb-hz>*{flex-basis:220px}}
+.hb-hz.hb-slider-wide>*{flex-basis:min(86vw,460px)}
+.hb-hz .hb-card,.hb-hz .hb-prod{width:100%;height:auto;aspect-ratio:1/1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.hb-hz .hb-card-img{position:absolute;inset:0;aspect-ratio:auto}
+.hb-hz .hb-card-img img{width:100%;height:100%;object-fit:cover}
+.hb-card.has-img .hb-card-body{position:relative;background:linear-gradient(180deg,rgba(20,10,5,0) 0%,rgba(20,10,5,.82) 100%);color:#fff;padding:44px 12px 12px}
+.hb-card.has-img h3,.hb-card.has-img p,.hb-card.has-img .hb-ends{color:#fff}
+.hb-card.has-img .hb-note,.hb-card.has-img .hb-ends{color:rgba(255,255,255,.9)}
+.hb-hz .hb-card-body{padding:12px}
+.hb-hz .hb-card-body h3{font-size:14.5px;line-height:1.25}
+.hb-hz .hb-card-body p{font-size:12px;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+.hb-prod .product-img{position:absolute;inset:0;aspect-ratio:auto;height:100%}
+.hb-prod .product-body{position:relative;margin-top:auto;padding:10px 12px 12px;min-width:0}
+.hb-prod .product-name{font-size:14.5px;margin-bottom:2px}
+.hb-prod .product-desc{-webkit-line-clamp:1;margin-bottom:6px;font-size:12px}
+.hb-prod .product-foot{margin-top:4px}
+.hb-prod.has-img{background:var(--surface)}
+.hb-prod.has-img .product-body{background:linear-gradient(180deg,rgba(20,10,5,0) 0%,rgba(20,10,5,.84) 100%);padding-top:44px;color:#fff}
+.hb-prod.has-img .product-name,.hb-prod.has-img .product-desc,.hb-prod.has-img .product-price,.hb-prod.has-img .product-rating{color:#fff}
+.hb-prod .add-btn{flex-shrink:0}
+.hb-prod.has-img .add-btn{background:var(--primary);color:#fff}
+.hb-prod .product-badges{top:8px;right:8px}
+/* كارت المنيو مستطيل */
+.product.product-rect{flex-direction:row;min-height:132px}
+.product-rect .product-img{flex:0 0 40%;width:40%;aspect-ratio:auto;min-height:132px}
+.product-rect .product-body{padding:12px 14px;min-width:0}
+.product-rect .product-desc{-webkit-line-clamp:2;margin-bottom:8px}
+.product-rect .product-foot{margin-top:0}
+.product-grid.product-grid-rect{grid-template-columns:1fr;gap:14px}
+@media(min-width:900px){.product-grid.product-grid-rect{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}}
 </style>
 </head>
 <body>
@@ -1136,7 +1209,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
   /* ═══════════════════════════════════════════════════════════════
      [LIVE] ربط منيو العميل بـ Supabase — تحديثات لحظية من لوحة الأدمن
      ═══════════════════════════════════════════════════════════════ */
-  const CUSTOMER_APP_BUILD = 'supabase-live-home-promotions-subcategories-slider-2026-10-28-fix7';
+  const CUSTOMER_APP_BUILD = 'supabase-live-home-blocks-renderers-2026-11-02-fix8';
   const SB_URL = 'https://gwufhitzmupyumdjabnj.supabase.co';
   const SB_KEY = 'sb_publishable_oTZFsXGeGb_PAhI7A-eTAw_MGwsBTGG';
   const sbClient = window.supabase?.createClient
@@ -1184,7 +1257,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
         sbClient.from('addons').select('id,slug,name_ar,price,is_available,sort_order').eq('is_available', true).order('sort_order'),
         sbClient.from('item_addons').select('item_id,addon_id'),
         sbClient.from('subcategories').select('id,category_id,name_ar,sort_order,is_active').eq('is_active',true).order('sort_order'),
-        sbClient.from('menu_promotions').select('id,name_ar,description_ar,image_url,promotion_type,target_item_id,reward_item_id,value,priority,starts_at,ends_at,max_uses,used_count,is_active').eq('is_active', true).order('priority',{ascending:false}).limit(20),
+        sbClient.from('menu_promotions').select('id,name_ar,description_ar,image_url,promotion_type,target_item_id,target_category_id,reward_item_id,value,max_discount,min_order,priority,starts_at,ends_at,max_uses,used_count,is_active').eq('is_active', true).order('priority',{ascending:false}).limit(20),
         sbClient.from('reviews').select('id,item_id,rating,comment,display_name,created_at').eq('is_hidden', false).order('created_at',{ascending:false}).limit(500)
       ]);
       if (catsError) throw catsError;
@@ -1529,8 +1602,9 @@ button.hb-card:hover{border-color:var(--ink-3)}
     const freeDeliveryThreshold = Number(liveSettings.free_delivery_threshold ?? 0);
     
     // رسوم إضافية مطلوبة في التصميم الجديد
-    const smallOrderFee = (subtotal > 0 && subtotal < 90) ? 5.00 : 0;
-    const serviceFee = cart.length ? 4.00 : 0;
+    // لا توجد رسوم صغر الطلب أو خدمة في preview_order_quote ولا create_order_with_voucher_secure؛ لذلك تبقى صفرًا حتى لا يختلف الإجمالي المعروض عن الخادم
+    const smallOrderFee = 0;
+    const serviceFee = 0;
 
     if (subtotal > 0) {
       if (freeDeliveryThreshold > 0 && subtotal >= freeDeliveryThreshold) freeDeliveryReason = 'threshold';
@@ -1792,6 +1866,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
      [JS] الطلبات (الأصلي)
      ═══════════════════════════════════════════════ */
   let checkingOut = false;
+  let pendingCheckout = null;   // { fp, idempotencyKey, trackingToken } لإعادة المحاولة بنفس الطلب
   let trackingTimer = null;
 
   const computeStatus = (order) => {
@@ -1924,10 +1999,8 @@ button.hb-card:hover{border-color:var(--ink-3)}
       state.customer.phone = phone;
       const address = [zone.name_ar, state.customer.street, `عمارة ${state.customer.building}`, `الدور ${state.customer.floor}`, `شقة ${state.customer.apt}`].filter(Boolean).join('، ');
       if (serverQuote && serverQuote.sig === quoteSignature() && serverQuote.error) throw new Error(serverQuote.error);
-      const idempotencyKey = crypto.randomUUID();
-      const trackingToken = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x => x.toString(16).padStart(2, '0')).join('');
       const payload = {
-        idempotency_key: idempotencyKey, tracking_token: trackingToken,
+        idempotency_key: null, tracking_token: null,
         customer_name: state.customer.name.trim(), customer_phone: phone,
         delivery_address: address, zone_id: zone.id,
         notes: state.cartNotes || '', // استخدام الملاحظات الجديدة
@@ -1942,6 +2015,18 @@ button.hb-card:hover{border-color:var(--ink-3)}
           return { item_id: l.id, size_id: l.size, quantity: l.qty, addon_ids, notes: l.note || null };
         })
       };
+      // نفس محتوى الطلب = نفس المفتاح والتتبع (إعادة الإرسال بعد فشل الشبكة لا تنشئ طلبًا مكررًا)
+      const fingerprint = JSON.stringify(payload);
+      if (!pendingCheckout || pendingCheckout.fp !== fingerprint) {
+        pendingCheckout = {
+          fp: fingerprint,
+          idempotencyKey: crypto.randomUUID(),
+          trackingToken: Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x => x.toString(16).padStart(2, '0')).join('')
+        };
+      }
+      payload.idempotency_key = pendingCheckout.idempotencyKey;
+      payload.tracking_token = pendingCheckout.trackingToken;
+      const trackingToken = pendingCheckout.trackingToken;
       const { data: authSessionData } = sbClient ? await sbClient.auth.getSession() : { data: { session: null } };
       const authHeaders = { 'Content-Type': 'application/json', apikey: SB_KEY };
       if (authSessionData?.session?.access_token) authHeaders.Authorization = `Bearer ${authSessionData.session.access_token}`;
@@ -1964,6 +2049,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
         throw new Error(messages[result.error] || `تعذر إنشاء الطلب (${result.error || response.status}).`);
       }
       const remote = result.order;
+      pendingCheckout = null;
       const itemSnapshot = state.cart.map(l => ({
         itemId: l.id, slug: ITEM[l.id]?.slug || '',
         name: ITEM[l.id]?.name || 'منتج', qty: l.qty,
@@ -2278,7 +2364,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
   };
 
   const productCard = (it) => `
-    <article class="product" data-action="open" data-id="${esc(it.id)}" tabindex="0" role="button" aria-label="${esc(it.name)}">
+    <article class="product product-rect" data-action="open" data-id="${esc(it.id)}" tabindex="0" role="button" aria-label="${esc(it.name)}">
       <div class="product-img">
         ${badgesHtml(it)}
         ${it.img ? `<img src="${esc(it.img)}" alt="${esc(it.name)}" loading="lazy">` : '<div class="img-missing" aria-hidden="true"></div>'}
@@ -2375,6 +2461,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
       if (currentRoute() === 'menu') refresh(); else location.hash = '#/menu';
       return;
     }
+    if (t.kind === 'page') { openPageScreen(t.id); return; }
     if (t.kind === 'url') {
       if (t.href.startsWith('#')) location.hash = t.href;
       else if (t.href.startsWith('/')) location.href = t.href;
@@ -2422,12 +2509,12 @@ button.hb-card:hover{border-color:var(--ink-3)}
   }));
 
   const renderHeroSlide = (b, i) => {
-    const desktop = b.image_url || b.mobile_image_url || '';
-    const mobile = b.mobile_image_url || b.image_url || '';
+    const desktop = safeImgUrl(b.image_url) || safeImgUrl(b.mobile_image_url);
+    const mobile = safeImgUrl(b.mobile_image_url) || desktop;
     const t = resolveNavigationTarget(b);
     const hasBtn = !!(b.button_text_ar && t.kind !== 'none');
     const active = i === homeBannerIndex;
-    const img = mobile ? `<img class="hsl-img" src="${esc(mobile)}" alt="${esc(b.title_ar || '')}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" data-hsl-img>` : '';
+    const img = mobile ? `<picture class="hsl-pic">${desktop && desktop !== mobile ? `<source media="(min-width: 900px)" srcset="${esc(desktop)}">` : ''}<img class="hsl-img" src="${esc(mobile)}" alt="${esc(b.title_ar || '')}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" data-hsl-img></picture>` : '';
     return `<div class="hsl-slide${active ? ' is-active' : ''}" data-hsl-slide="${i}" role="group" aria-roledescription="slide" aria-label="${i + 1} من ${homeBanners.length}" aria-hidden="${active ? 'false' : 'true'}">
       ${img}
       <div class="hsl-content">
@@ -2453,7 +2540,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
     if (!homeBanners.length) { root.innerHTML = ''; return; }   // لا بيانات ثابتة كبديل
 
     const n = homeBanners.length;
-    const controls = '';
+    const controls = n > 1 ? `<div class="hsl-controls"><div class="hsl-dots">${homeBanners.map((_, i) => `<button type="button" class="hsl-dot" data-hsl-dot="${i}" aria-label="الشريحة ${i + 1}" aria-current="${i === homeBannerIndex ? 'true' : 'false'}"></button>`).join('')}</div></div>` : '';
     root.innerHTML = `<div class="hsl-track" data-hsl-track>${homeBanners.map(renderHeroSlide).join('')}</div>${controls}`;
 
     root.querySelectorAll('[data-hsl-img]').forEach(im => {
@@ -2636,6 +2723,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
 
   let homeBlocks = [];
   let homeBlockItems = {};
+  let homePlacementsByBlock = {};   // block.id -> مواضع عروض من promotion_display_placements
   let homeBlocksState = 'idle';
   const blockTargets = {};   // block_item.id -> وجهة الضغط
 
@@ -2644,16 +2732,131 @@ button.hb-card:hover{border-color:var(--ink-3)}
   // homepage_block_items.item_type -> target_type المستخدم في resolveNavigationTarget
   const BLOCK_ITEM_TARGET_TYPE = { product: 'product', category: 'category', promotion: 'promotion', promotion_page: 'promotion_page', url: 'url' };
 
+  async function loadHomepageBlocks() {
+    if (!sbClient) { homeBlocksState = 'error'; renderHomepageBlocks(); return; }
+    if (homeBlocksState !== 'ready') { homeBlocksState = 'loading'; renderHomepageBlocks(); }
+    try {
+      const { data: rows, error } = await sbClient.from('homepage_blocks')
+        .select(HOMEPAGE_BLOCK_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
+      if (error) throw error;
+      // block_type حقل حر في القاعدة، لذلك لا نفلتر عليه؛ البلوك يُعرض فقط إن كان له محتوى صالح
+      const valid = (rows || []).filter(b => b && b.is_active !== false && isWithinSchedule(b) && !isTestBlock(b))
+        .sort((x, y) => (Number(x.sort_order) || 0) - (Number(y.sort_order) || 0));
+
+      const byBlock = {};
+      if (valid.length) {
+        const { data: items, error: itemsErr } = await sbClient.from('homepage_block_items')
+          .select(BLOCK_ITEM_FIELDS).in('block_id', valid.map(b => b.id)).eq('is_active', true)
+          .order('sort_order', { ascending: true });
+        if (itemsErr) throw itemsErr;
+        (items || []).filter(i => i.is_active !== false).forEach(i => { (byBlock[i.block_id] ||= []).push(i); });
+      }
+      // مواضع العروض داخل البلوكات؛ فشلها لا يمنع عرض البلوكات
+      const placementsByBlock = {};
+      if (valid.length) {
+        const { data: placements, error: plErr } = await sbClient.from('promotion_display_placements')
+          .select('id,promotion_id,block_id,sort_order,is_active,starts_at,ends_at')
+          .eq('placement_type', 'homepage_block').eq('is_active', true)
+          .in('block_id', valid.map(b => b.id)).order('sort_order', { ascending: true });
+        if (plErr) console.warn('[Blocks] تعذر تحميل مواضع العروض:', plErr.message);
+        (placements || []).filter(p => isWithinSchedule(p)).forEach(p => { (placementsByBlock[p.block_id] ||= []).push(p); });
+      }
+      homePlacementsByBlock = placementsByBlock;
+      homeBlocks = valid;
+      homeBlockItems = byBlock;
+      homeBlocksState = 'ready';
+    } catch (err) {
+      console.warn('[Blocks] تعذر تحميل بلوكات الرئيسية:', err?.message || err);
+      homeBlocks = [];
+      homeBlocksState = 'error';
+    }
+    renderHomepageBlocks();
+  }
+
+  /* ── أدوات قراءة آمنة: JSON غير صحيح أو قيمة غير متوقعة لا توقف الصفحة ── */
+  const parseJsonObject = v => {
+    if (v && typeof v === 'object' && !Array.isArray(v)) return v;
+    if (typeof v !== 'string' || !v.trim()) return {};
+    try { const p = JSON.parse(v); return (p && typeof p === 'object' && !Array.isArray(p)) ? p : {}; } catch { return {}; }
+  };
+  const blockSettings = b => parseJsonObject(b.settings);
+  const blockContent = b => {
+    if (b.content && typeof b.content === 'object') return b.content;
+    if (typeof b.content === 'string') {
+      const parsed = parseJsonObject(b.content);
+      return Object.keys(parsed).length ? parsed : { text_ar: b.content };
+    }
+    return {};
+  };
+  const boolOpt = (s, k, fb) => (typeof s[k] === 'boolean' ? s[k] : fb);
+  const numOpt = (s, k, min, max, fb) => {
+    if (s[k] === '' || s[k] == null) return fb;
+    const n = Number(s[k]);
+    return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fb;
+  };
+  const enumOpt = (s, k, allowed, fb) => (allowed.includes(s[k]) ? s[k] : fb);
+  const safeImgUrl = v => (typeof v === 'string' && /^(https?:\/\/|\/(?!\/))/.test(v.trim())) ? v.trim() : '';
+  const OBJ_POS = { center: '50% 50%', background: '50% 50%', top: '50% 0%', bottom: '50% 100%', left: '0% 50%', right: '100% 50%' };
+  // المحاذاة في القاعدة: right/left/center/start/end (right = بداية السطر في RTL)
+  const ALIGN_MAP = Object.assign(Object.create(null), { start: 'start', right: 'start', center: 'center', end: 'end', left: 'end' });
+  const alignOpt = s => ALIGN_MAP[s.text_align] || ALIGN_MAP[s.align] || null;
+  // بلوك تجريبي/اختبار يحمل علامة صريحة بأنه لا يظهر للعملاء
+  const isTestBlock = b => { const s = blockSettings(b), c = blockContent(b); return s.test_only === true || s.demo === true || c.demo === true || c.test === true; };
+  const POS_KEYS = Object.keys(OBJ_POS);
+  const shortDate = v => { if (!v) return ''; const d = new Date(v); return isNaN(d) ? '' : d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }); };
+
+  // نوع الوظيفة (block_type) منفصل عن شكل العرض (layout_type)
+  const HB_LAYOUTS = ['banner', 'cards', 'carousel', 'grid', 'list', 'text'];
+  const HB_DEFAULT_LAYOUT = { campaign_hero: 'banner', promo_banner: 'banner', promotion_cards: 'grid', product_carousel: 'carousel', product_grid: 'grid', products_popular: 'grid', category_grid: 'grid', text_promo: 'text', text: 'text' };
+  const layoutOf = b => (HB_LAYOUTS.includes(b.layout_type) ? b.layout_type : (HB_DEFAULT_LAYOUT[b.block_type] || 'grid'));
+
+  // ─── تحويل عناصر البلوك إلى بيانات جاهزة للعرض (من الكاش الحي فقط) ───
+  const resolvePromotionTarget = p => {
+    if (p.target_item_id) return { kind: 'item', id: p.target_item_id };
+    const offer = Object.values(pageOffers).flat().find(o => String(o.id) === String(p.id));
+    const catId = p.target_category_id || offer?.target_category_id;
+    if (catId) return { kind: 'category', id: catId };
+    return { kind: 'route', href: '#/menu' };
+  };
+
+  const promoNote = p => [
+    Number(p.min_order) > 0 ? `الحد الأدنى للطلب ${money(Number(p.min_order))}` : '',
+    Number(p.max_discount) > 0 ? `أقصى خصم ${money(Number(p.max_discount))}` : ''
+  ].filter(Boolean).join(' · ');
+
   const resolveBlockItem = bi => {
-    const titleOv = bi.title_override_ar || '';
-    const subOv = bi.subtitle_override_ar || '';
-    const imgOv = bi.image_override_url || '';
+    const titleOv = (bi.title_override_ar || '').trim();
+    const subOv = (bi.subtitle_override_ar || '').trim();
+    const imgOv = safeImgUrl(bi.image_override_url);
+
     if (bi.item_type === 'product') {
       const it = ITEM[bi.target_id];
       if (!it) return null;   // المنتج غير موجود أو غير متاح في المنيو الحي
       blockTargets[bi.id] = { kind: 'item', id: it.id };
       return { kind: 'item', item: it, title: titleOv || it.name, subtitle: subOv || it.desc, image: imgOv || it.img };
     }
+
+    if (bi.item_type === 'promotion') {
+      const p = promotionById(bi.target_id);
+      if (!p) return null;
+      const title = titleOv || p.name_ar || '';
+      const image = imgOv || safeImgUrl(p.image_url);
+      if (!title && !image) return null;
+      const target = resolvePromotionTarget(p);
+      const v = Number(p.value) || 0;
+      const badge = (['percent', 'fixed'].includes(p.promotion_type) && v <= 0) ? '' : offerValueLabel(p);
+      blockTargets[bi.id] = target;
+      return { kind: 'card', key: bi.id, target, title, subtitle: subOv || p.description_ar || '', image, badge, ends: p.ends_at || '', note: promoNote(p) };
+    }
+
+    if (bi.item_type === 'promotion_page') {
+      const page = livePromotionPages.find(p => String(p.id) === String(bi.target_id));
+      if (!page || !(pageOffers[page.id] || []).length) return null;
+      const target = { kind: 'page', id: page.id };
+      blockTargets[bi.id] = target;
+      return { kind: 'card', key: bi.id, target, title: titleOv || page.title_ar || '', subtitle: subOv || page.subtitle_ar || '', image: imgOv || safeImgUrl(page.card_image_url) };
+    }
+
     const type = BLOCK_ITEM_TARGET_TYPE[bi.item_type];
     if (!type) return null;
     const target = resolveNavigationTarget({ target_type: type, target_id: bi.target_id, target_url: bi.target_url });
@@ -2669,53 +2872,200 @@ button.hb-card:hover{border-color:var(--ink-3)}
     return { kind: 'card', key: bi.id, target, title, subtitle: subOv, image: imgOv };
   };
 
-  async function loadHomepageBlocks() {
-    if (!sbClient) { homeBlocksState = 'error'; renderHomepageBlocks(); return; }
+  // عناصر البلوك بترتيبها المسجّل، بدون تكرار منتج داخل نفس البلوك
+  const blockItemsResolved = block => {
+    const seen = new Set();
+    const rows = [...(homeBlockItems[block.id] || [])];
+    const promoIds = new Set(rows.filter(i => i.item_type === 'promotion').map(i => String(i.target_id)));
+    (homePlacementsByBlock[block.id] || []).forEach(p => {
+      if (promoIds.has(String(p.promotion_id))) return;   // لا تكرار مع عنصر البلوك نفسه
+      promoIds.add(String(p.promotion_id));
+      rows.push({ id: 'pl-' + p.id, block_id: block.id, item_type: 'promotion', target_id: p.promotion_id, sort_order: p.sort_order, is_active: true });
+    });
+    return rows.map(resolveBlockItem).filter(r => {
+      if (!r) return false;
+      if (r.kind === 'item') { if (seen.has(String(r.item.id))) return false; seen.add(String(r.item.id)); }
+      return true;
+    });
+  };
+
+  // ─── عناصر HTML مشتركة ───
+  const hbStyle = (b, s) => {
+    const parts = [];
+    const bg = safeColor(b.background_color, '');
+    const fg = safeColor(b.text_color, '');
+    const ac = safeColor(b.accent_color, '');
+    if (bg) parts.push(`background:${bg}`);
+    if (fg) parts.push(`color:${fg}`);
+    if (ac) parts.push(`--hb-accent:${ac}`);
+    const r = numOpt(s, 'border_radius', 0, 32, null);
+    if (r !== null) parts.push(`--hb-radius:${r}px`);
+    const align = alignOpt(s);
+    if (align) parts.push(`--hb-align:${align}`);
+    return parts.join(';');
+  };
+
+  const hbSection = (b, s, inner, cls = '') => {
+    const title = (b.title_ar || '').trim();
+    const sub = (b.subtitle_ar || '').trim();
+    const head = (title || sub) ? `<header class="hb-head">${title ? `<h2>${esc(title)}</h2>` : ''}${sub ? `<p>${esc(sub)}</p>` : ''}</header>` : '';
+    return `<section class="hb ${blockPadClass(b)}${s.full_width === true ? ' hb-full' : ''}${cls ? ' ' + cls : ''}" style="${hbStyle(b, s)}" data-hb-block="${esc(b.id)}"${title ? ` aria-label="${esc(title)}"` : ''}>${head}${inner}</section>`;
+  };
+
+  // كل البلوكات أفقية: صف قابل للتمرير بالسحب، بدون شبكة رأسية
+  const hbItemsWrap = (layout, cards, s, wide = false) => {
+    const items = cards.map(c => `<div role="listitem">${c}</div>`).join('');
+    return `<div class="hb-hz${wide ? ' hb-slider-wide' : ''}" role="list">${items}</div>`;
+  };
+
+  const hbCard = (r, s, c = {}) => {
+    const showBadge = boolOpt(s, 'show_badge', boolOpt(c, 'show_badge', true));
+    const showDesc = boolOpt(s, 'show_description', true);
+    const inner = `${r.image ? `<div class="hb-card-img"><img src="${esc(r.image)}" alt="${esc(r.title || '')}" loading="lazy" decoding="async"></div>` : ''}
+      <div class="hb-card-body">${showBadge && r.badge ? `<span class="hb-badge">${esc(r.badge)}</span>` : ''}${r.title ? `<h3>${esc(r.title)}</h3>` : ''}${showDesc && r.subtitle ? `<p>${esc(r.subtitle)}</p>` : ''}${r.note ? `<small class="hb-note">${esc(r.note)}</small>` : ''}${r.ends && shortDate(r.ends) ? `<small class="hb-ends">ينتهي ${esc(shortDate(r.ends))}</small>` : ''}</div>`;
+    return r.target.kind !== 'none'
+      ? `<button type="button" class="hb-card${r.image ? ' has-img' : ''}" data-hb-open="${esc(r.key)}">${inner}</button>`
+      : `<div class="hb-card${r.image ? ' has-img' : ''}">${inner}</div>`;
+  };
+
+  // بطاقة منتج داخل البلوك: نفس الأزرار والوظائف الحالية (فتح المنتج + إضافة سريعة)
+  const hbProductCard = (it, s) => {
+    const showDesc = boolOpt(s, 'show_description', true);
+    const showPrice = boolOpt(s, 'show_price', true);
+    return `<article class="product hb-prod${it.img ? ' has-img' : ''}" data-action="open" data-id="${esc(it.id)}" tabindex="0" role="button" aria-label="${esc(it.name)}">
+      <div class="product-img">
+        ${badgesHtml(it)}
+        ${it.img ? `<img src="${esc(it.img)}" alt="${esc(it.name)}" loading="lazy" decoding="async">` : '<div class="img-missing" aria-hidden="true"></div>'}
+      </div>
+      <div class="product-body">
+        <h3 class="product-name">${esc(it.name)}</h3>
+        ${showDesc && it.desc ? `<p class="product-desc">${esc(it.desc)}</p>` : ''}
+        ${starsHtml(it.id)}
+        <div class="product-foot">
+          ${showPrice ? priceHtml(it) : ''}
+          <button class="add-btn" data-action="quick" data-id="${esc(it.id)}" aria-label="ضيف ${esc(it.name)}">+</button>
+        </div>
+      </div>
+    </article>`;
+  };
+
+  // بانر: صورة + تراكب + عنوان + وصف + شارة + زر CTA (أو كامل البانر قابل للنقر إن أُخفي الزر)
+  const hbBannerHtml = (b, s, o) => {
+    const objD = OBJ_POS[enumOpt(s, 'image_position', POS_KEYS, 'center')];
+    const objM = OBJ_POS[enumOpt(s, 'mobile_image_position', POS_KEYS, 'center')];
+    const minH = numOpt(s, 'min_height', 120, 600, 200);
+    const ovOn = boolOpt(s, 'image_overlay', true);
+    const ovRaw = numOpt(s, 'overlay_opacity', 0, 100, null);
+    const ov = !ovOn ? 0 : (ovRaw == null ? 0.5 : (ovRaw > 1 ? ovRaw / 100 : ovRaw));
+    const style = `${hbStyle(b, s)};min-height:${minH}px;--hb-obj-d:${objD};--hb-obj-m:${objM}`;
+    const clickable = !o.showCta && o.target.kind !== 'none';
+    const media = o.img ? `<div class="hb-banner-media"><img src="${esc(o.img)}" alt="${esc(o.title || '')}" loading="lazy" decoding="async"></div>` : '';
+    const overlay = `<div class="hb-banner-ov" style="opacity:${ov}" aria-hidden="true"></div>`;
+    const sub = boolOpt(s, 'show_description', true) ? o.sub : '';
+    const body = `<span class="hb-banner-body">${o.badge ? `<span class="hb-badge">${esc(o.badge)}</span>` : ''}${o.title ? `<span class="hb-title">${esc(o.title)}</span>` : ''}${sub ? `<span class="hb-sub">${esc(sub)}</span>` : ''}${o.showCta ? `<span class="hb-cta-row"><button type="button" class="hsl-cta" data-hb-open="${esc(o.key)}">${esc(o.ctaLabel)}</button></span>` : ''}</span>`;
+    const inner = media + overlay + body;
+    return clickable
+      ? `<button type="button" class="hb-banner" data-hb-open="${esc(o.key)}" style="${style}" aria-label="${esc(o.title || o.ctaLabel)}">${inner}</button>`
+      : `<div class="hb-banner" style="${style}">${inner}</div>`;
+  };
+
+  const ctaText = c => String(c.button_text_ar || c.cta_text_ar || c.cta_text || '').trim() || 'اكتشف العرض';
+
+  // بانر على مستوى البلوك نفسه (صورة واحدة وعنوان ورابط)
+  const blockLevelBanner = (b, s, c) => {
+    const key = 'blk-' + b.id;
+    const target = resolveNavigationTarget({ target_type: 'url', target_url: b.target_url });
+    blockTargets[key] = target;
+    const img = safeImgUrl(b.image_url);
+    const title = (b.title_ar || '').trim();
+    if (!img && !title) return '';
+    const badge = boolOpt(s, 'show_badge', true) ? String(s.badge_text || c.badge_text_ar || '').trim().slice(0, 40) : '';
+    return `<section class="hb-banner-sec${s.full_width === true ? ' hb-full' : ''}" data-hb-block="${esc(b.id)}">${hbBannerHtml(b, s, {
+      img, title, sub: (b.subtitle_ar || '').trim(), badge, target, key,
+      showCta: boolOpt(s, 'show_cta', true) && target.kind !== 'none', ctaLabel: ctaText(c)
+    })}</section>`;
+  };
+
+  // ─── مُرسِلات كل نوع بلوك (Renderer مستقل لكل block_type) ───
+  const renderCampaignHero = (b, s, c) => blockLevelBanner(b, s, c);
+
+  const renderPromoBanner = (b, s, c, resolved) => {
+    const items = resolved.filter(r => r.kind === 'card');
+    if (!items.length) return blockLevelBanner(b, s, c);
+    const badgeOn = boolOpt(s, 'show_badge', true);
+    const customBadge = String(s.badge_text || '').trim().slice(0, 40);
+    const banners = items.map(r => `<div>${hbBannerHtml(b, s, {
+      img: safeImgUrl(r.image), title: r.title, sub: r.subtitle,
+      badge: badgeOn ? (customBadge || r.badge || '') : '',
+      target: r.target, key: r.key,
+      showCta: boolOpt(s, 'show_cta', true) && r.target.kind !== 'none', ctaLabel: ctaText(c)
+    })}</div>`).join('');
+    const wrapCls = 'hb-hz hb-slider-wide';
+    return `<section class="hb-banner-sec" data-hb-block="${esc(b.id)}"><div class="${wrapCls}" role="list">${banners}</div></section>`;
+  };
+
+  const renderPromotionCards = (b, s, c, resolved) => {
+    const cards = resolved.filter(r => r.kind === 'card').map(r => hbCard(r, s, c));
+    if (!cards.length) return '';
+    return hbSection(b, s, hbItemsWrap(layoutOf(b), cards, s));
+  };
+
+  const renderProductBlock = (b, s, c, resolved) => {
+    let items = resolved.filter(r => r.kind === 'item').map(r => ({
+      ...r.item, name: r.title || r.item.name, desc: r.subtitle || r.item.desc, img: r.image || r.item.img
+    }));
+    if (!items.length && b.block_type === 'products_popular') {
+      // المنتجات المميزة من علامة is_popular في المنيو الحي فقط
+      items = Object.values(ITEM).filter(i => !isSecret(i) && i.tags.includes('popular')).slice(0, 8);
+    }
+    if (!items.length) return '';
+    return hbSection(b, s, hbItemsWrap(layoutOf(b), items.map(it => hbProductCard(it, s)), s));
+  };
+
+  const renderCategoryGrid = (b, s, c, resolved) => {
+    const cards = resolved.filter(r => r.kind === 'card').map(r => hbCard(r, s, c));
+    if (!cards.length) return '';
+    return hbSection(b, s, hbItemsWrap(layoutOf(b), cards, s));
+  };
+
+  const renderTextPromo = (b, s, c) => {
+    const text = String(c.text_ar || c.text || '').trim();
+    const title = (b.title_ar || '').trim();
+    if (!text && !title) return '';
+    const key = 'blk-' + b.id;
+    const ctaType = ['menu', 'url', 'product', 'category', 'promotion'].includes(c.target) ? c.target : 'url';
+    const target = resolveNavigationTarget({ target_type: ctaType, target_id: c.target_id || '', target_url: b.target_url || c.target_url || '' });
+    blockTargets[key] = target;
+    const ctaLabel = String(c.button_text_ar || c.cta_text || '').trim();
+    const showCta = boolOpt(s, 'show_cta', true) && target.kind !== 'none' && !!ctaLabel;
+    const body = `${text && boolOpt(s, 'show_description', true) ? `<p class="hb-text">${esc(text)}</p>` : ''}${showCta ? `<div class="hb-cta-row"><button type="button" class="hsl-cta" data-hb-open="${esc(key)}">${esc(ctaLabel)}</button></div>` : ''}`;
+    return hbSection(b, s, layoutOf(b) === 'cards' ? `<div class="txt-card hb-txt-card">${body}</div>` : body);
+  };
+
+  const BLOCK_RENDERERS = {
+    campaign_hero: renderCampaignHero,
+    promo_banner: renderPromoBanner,
+    promotion_cards: renderPromotionCards,
+    product_carousel: renderProductBlock,
+    product_grid: renderProductBlock,
+    products_popular: renderProductBlock,
+    category_grid: renderCategoryGrid,
+    text_promo: renderTextPromo,
+    text: renderTextPromo
+  };
+
+  // نوع غير معروف لا يُعرض؛ وخطأ بلوك واحد لا يمنع باقي الصفحة
+  const renderOneBlock = b => {
+    const render = BLOCK_RENDERERS[b.block_type];
+    if (!render) return '';
     try {
-      const { data: rows, error } = await sbClient.from('homepage_blocks')
-        .select(HOMEPAGE_BLOCK_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
-      if (error) throw error;
-      // block_type حقل حر في القاعدة، لذلك لا نفلتر عليه؛ البلوك يُعرض فقط إن كان له محتوى صالح
-      const valid = (rows || []).filter(b => b && b.is_active !== false && isWithinSchedule(b))
-        .sort((x, y) => (Number(x.sort_order) || 0) - (Number(y.sort_order) || 0));
-
-      const byBlock = {};
-      if (valid.length) {
-        const { data: items, error: itemsErr } = await sbClient.from('homepage_block_items')
-          .select(BLOCK_ITEM_FIELDS).in('block_id', valid.map(b => b.id)).eq('is_active', true)
-          .order('sort_order', { ascending: true });
-        if (itemsErr) throw itemsErr;
-        (items || []).filter(i => i.is_active !== false).forEach(i => { (byBlock[i.block_id] ||= []).push(i); });
-      }
-      homeBlocks = valid;
-      homeBlockItems = byBlock;
-      homeBlocksState = 'ready';
+      return render(b, blockSettings(b), blockContent(b), blockItemsResolved(b));
     } catch (err) {
-      console.warn('[Blocks] تعذر تحميل بلوكات الرئيسية:', err?.message || err);
-      homeBlocks = [];
-      homeBlocksState = 'error';
+      console.warn('[Blocks] تعذر عرض بلوك', b.id, err?.message || err);
+      return '';
     }
-    renderHomepageBlocks();
-  }
-
-  const buildBlockCards = block => {
-    const resolved = (homeBlockItems[block.id] || []).map(resolveBlockItem).filter(Boolean);
-    if (block.block_type === 'products_popular' && !resolved.length) {
-      // لا بيانات ثابتة: المنتجات المميزة تأتي من علامة is_popular في المنيو الحي
-      return MENU_ITEMS.filter(i => !isSecret(i) && i.tags.includes('popular')).slice(0, 8)
-        .map(it => ({ kind: 'item', item: it, title: it.name, subtitle: it.desc, image: it.img }));
-    }
-    return resolved;
   };
 
-  const renderBlockCard = c => {
-    if (c.kind === 'item') return productCard(c.item);
-    const inner = `${c.image ? `<div class="hb-card-img"><img src="${esc(c.image)}" alt="${esc(c.title || '')}" loading="lazy" decoding="async"></div>` : ''}
-      <div class="hb-card-body">${c.title ? `<h3>${esc(c.title)}</h3>` : ''}${c.subtitle ? `<p>${esc(c.subtitle)}</p>` : ''}</div>`;
-    return c.target.kind !== 'none'
-      ? `<button type="button" class="hb-card" data-hb-open="${esc(c.key)}">${inner}</button>`
-      : `<div class="hb-card">${inner}</div>`;
-  };
 
   /* ═══════════════════════════════════════════════════════════════
      [PROMOTION PAGES] promotion_pages + menu_promotions.promotion_page_id
@@ -2795,34 +3145,44 @@ button.hb-card:hover{border-color:var(--ink-3)}
       : '';
   };
 
-  const renderTextRow = () => {
-    const root = document.querySelector('[data-text-row]');
-    if (!root) return;
-    const TEXT_BLOCK_TYPES = ['text', 'text_promo'];
-    const list = homeBlocks.filter(b => TEXT_BLOCK_TYPES.includes(b.block_type)).map(b => {
-      const c = b.content && typeof b.content === 'object' ? b.content : {};
-      const text = c.text_ar || c.text || (typeof b.content === 'string' ? b.content : '');
-      return { b, text };
-    }).filter(x => x.text || x.b.title_ar);
-    root.innerHTML = list.length
-      ? `<div class="txt-row" role="list">${list.map(({ b, text }) => `<article class="txt-card" role="listitem">
-          ${b.title_ar ? `<h4>${esc(b.title_ar)}</h4>` : ''}
-          ${text ? `<p>${esc(text)}</p>` : ''}
-        </article>`).join('')}</div>`
-      : '';
-  };
-
   const renderHomepageBlocks = () => {
     const root = document.querySelector('[data-home-blocks]');
     if (!root) return;
+    let blocksHtml;
+    if (homeBlocksState === 'error') {
+      blocksHtml = '<div class="hsl-state" role="alert"><p>تعذر تحميل أقسام الرئيسية حاليًا.</p><button type="button" class="btn btn-outline btn-sm" data-hb-retry>إعادة المحاولة</button></div>';
+    } else if (!homeBlocks.length && (homeBlocksState === 'idle' || homeBlocksState === 'loading')) {
+      blocksHtml = '<div class="hb-skeleton" aria-busy="true" aria-label="جارٍ تحميل الأقسام"></div>';
+    } else {
+      // ترتيب البلوكات كما هو في قاعدة البيانات (sort_order)
+      blocksHtml = homeBlocks.map(renderOneBlock).filter(Boolean).join('');
+    }
+    // شريط صفحات العروض (الكروت المربعة) يبقى كما هو بعد البلوكات
     const visible = livePromotionPages.filter(p => (pageOffers[p.id] || []).length);
-    root.innerHTML = visible.length
+    const rail = visible.length
       ? `<div class="hb-rail" role="list">${visible.map(p => `<div role="listitem">${pageTileHtml(p)}</div>`).join('')}</div>`
       : '';
+    root.innerHTML = blocksHtml;
+    const offersRoot = document.querySelector('[data-home-offers]');
+    if (offersRoot) offersRoot.innerHTML = rail;
     renderSaleStrip();
-    renderTextRow();
     renderAnnouncements();
   };
+
+  // أحداث البلوكات: مستمع واحد على الوثيقة، يُسجَّل مرة واحدة فقط
+  document.addEventListener('click', e => {
+    const hb = e.target.closest('[data-hb-open]');
+    if (hb) { openResolved(blockTargets[hb.dataset.hbOpen]); return; }
+    if (e.target.closest('[data-hb-retry]')) { loadHomepageBlocks(); }
+  });
+
+  // صورة فاشلة لا تفسد التخطيط: تُخفى ويبقى خلفية البطاقة/البانر
+  document.addEventListener('error', e => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement) || !img.closest('#app')) return;
+    img.style.display = 'none';
+    img.closest('.hb-banner, .hb-card, .hsl-slide, .hb-tile')?.classList.add('img-failed');
+  }, true);
 
   // شاشة الصفحة: غلافها ووصفها وكل عروضها
   const pageScreenHtml = p => {
@@ -3042,6 +3402,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
         <div data-home-blocks></div>
         <div class="ann-strip" data-ann-strip></div>
         <div data-sale-strip></div>
+        <div data-home-offers></div>
         <div data-text-row></div>
 
         <div class="announce-slot" data-announce-slot="below_hero"></div>
@@ -3121,7 +3482,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
           ${subs.map(s => `<button class="cat-pill ${state.subcat === s.id ? 'active' : ''}" data-action="subfilter" data-val="${esc(s.id)}" style="padding:7px 14px;font-size:12.5px">${esc(s.label)}</button>`).join('')}
         </div>` : ''}
         ${liveMenuError ? `<div role="alert" style="text-align:center;padding:18px;margin-bottom:14px;background:#fff3ef;border:1px solid #f5c2b3;border-radius:16px"><p style="margin:0 0 10px;font-weight:700;color:#8a2a13">تعذر تحميل المنيو الآن. تأكد من اتصالك وجرب تاني.</p><button class="cat-pill" data-action="retry-menu">🔄 إعادة المحاولة</button></div>` : ''}
-        <div class="product-grid" data-grid>
+        <div class="product-grid product-grid-rect" data-grid>
           ${list.length ? list.map(productCard).join('') : (liveMenuError ? '' : '<p style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-2)">مفيش نتايج للبحث</p>')}
         </div>
       </div>`;
@@ -3205,7 +3566,7 @@ button.hb-card:hover{border-color:var(--ink-3)}
           <input type="text" id="coupon" placeholder="قم بإدخال رمز القسيمة هنا" value="${esc(state.couponInput)}">
           <button data-action="apply-coupon">إرسال</button>${state.coupon ? '<button data-action="remove-coupon" aria-label="إزالة الكوبون">×</button>' : ''}
         </div>
-        <p class="coupon-msg ${state.coupon ? 'ok' : ''}" style="font-size:12px; margin-top:-16px; margin-bottom:16px; color:${state.coupon ? 'var(--success)' : 'var(--danger)'}">${state.coupon ? `كوبون ${esc(state.coupon.code)} · ${state.coupon.type === 'fixed' ? `خصم ${money(state.coupon.value)}` : `خصم ${Math.round((state.coupon.pct ?? Number(state.coupon.value || 0) / 100) * 100)}%`}` : esc(state.couponMsg || '')}</p>
+        <p class="coupon-msg ${state.coupon ? 'ok' : ''}" style="font-size:12px; margin-top:-16px; margin-bottom:16px; color:${state.coupon ? 'var(--success)' : 'var(--danger)'}">${state.coupon ? `كوبون ${esc(state.coupon.code)} · ${serverQuote?.quote?.coupon_discount != null ? `خصم ${money(Number(serverQuote.quote.coupon_discount))}` : state.coupon.type === 'fixed' ? `خصم ${money(state.coupon.value)}` : `خصم ${Math.round((state.coupon.pct ?? Number(state.coupon.value || 0) / 100) * 100)}%`}` : esc(state.couponMsg || '')}</p>
 
         <h3 style="font-size:18px; font-weight:900; margin-bottom:16px;">ملخص الدفع</h3>
         <div class="summary-box">
