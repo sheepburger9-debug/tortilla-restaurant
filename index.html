@@ -11,6 +11,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="برجر طازج، بطاطس، ومشروبات. اطلب توصيل لحد باب البيت.">
+<meta property="og:title" content="Sheep & Burger — برجر طازة">
+<meta property="og:description" content="برجر طازج، بطاطس، ومشروبات. اطلب توصيل لحد باب البيت.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_EG">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#FAF5EC">
@@ -1056,6 +1060,111 @@ button.hb-banner{cursor:pointer}
 .ann-img{aspect-ratio:16/9;overflow:hidden;width:100%;border-radius:var(--r-lg);box-shadow:none}
 .ann-img img{display:block;width:100%;height:100%;object-fit:cover}
 @media(min-width:900px){.ann-img{aspect-ratio:16/5}}
+/* ═══════════════════════════════════════════════════════════════
+   [PREMIUM] طبقة التصميم الـ Premium — تعديلات بصرية فقط.
+   لا تغيّر أي سلوك JS ولا أسماء الكلاسات الوظيفية.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --gold:#C9A227;
+  --gold-soft:#F7EFD6;
+  --ink-deep:#140E0A;
+  --brick:#A93A1E;
+  --surface-glass:rgba(255,255,255,.78);
+  --shadow-premium:0 1px 1px rgba(20,14,10,.04),0 10px 30px -12px rgba(20,14,10,.18);
+  --shadow-premium-hover:0 2px 4px rgba(20,14,10,.06),0 24px 48px -16px rgba(20,14,10,.28);
+}
+html{text-size-adjust:100%}
+body{background:radial-gradient(1200px 500px at 90% -10%,#FFF6E6 0%,transparent 60%),var(--bg);}
+::selection{background:var(--gold);color:var(--ink-deep)}
+
+/* هيدر زجاجي أنيق عند التمرير */
+.topbar{background:var(--surface-glass);border-bottom:1px solid rgba(201,162,39,.22);box-shadow:0 1px 0 rgba(255,255,255,.6) inset}
+.brand-text .brand-name{font-family:var(--serif);letter-spacing:.01em}
+.brand-text small{color:var(--gold);font-weight:700}
+.logo-mark{box-shadow:0 0 0 2px #fff,0 0 0 3px var(--gold)}
+.desk-nav a.active::after{background:linear-gradient(90deg,var(--gold),var(--primary))}
+
+/* عناوين الأقسام */
+.sec-head h2{font-family:var(--serif);font-weight:800;letter-spacing:-.01em}
+.sec-head h2 em{font-style:italic;color:var(--brick)}
+.sec-head .more{color:var(--brick)}
+
+/* الهيرو */
+.hero{border-radius:32px;box-shadow:0 30px 60px -28px rgba(20,14,10,.55)}
+.hero::after{background:linear-gradient(115deg,rgba(20,14,10,.85) 0%,rgba(20,14,10,.35) 55%,rgba(20,14,10,.6) 100%)}
+.hero h1{font-family:var(--serif);font-weight:800;letter-spacing:-.02em}
+.hero h1 em{color:var(--gold);font-style:italic}
+.hero-eyebrow{background:rgba(201,162,39,.18);border-color:rgba(201,162,39,.55);color:#F6E7B0;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+.hero-cta{background:linear-gradient(135deg,var(--primary) 0%,var(--brick) 100%);box-shadow:0 12px 28px -8px rgba(169,58,30,.6)}
+
+/* التصنيفات */
+.cat-pill{border-radius:999px;border-color:rgba(20,14,10,.08)}
+.cat-pill.active{background:linear-gradient(135deg,var(--ink-deep),#2B1D14);color:var(--gold-soft);border-color:transparent;box-shadow:0 8px 18px -10px rgba(20,14,10,.6)}
+
+/* كروت المنتجات */
+.product{border-radius:24px;border-color:rgba(20,14,10,.06);box-shadow:var(--shadow-premium);background:#fff}
+.product:hover{box-shadow:var(--shadow-premium-hover)}
+.product-img{border-radius:0;aspect-ratio:5/4}
+.product-img::after{content:'';position:absolute;inset:auto 0 0 0;height:40%;background:linear-gradient(180deg,transparent,rgba(20,14,10,.18));pointer-events:none}
+.product-name{font-family:var(--serif);font-weight:700;font-size:17px}
+.product-price{font-weight:800;color:var(--ink-deep)}
+.product-price .sale{color:var(--brick)}
+.add-btn{background:linear-gradient(135deg,var(--ink-deep),#2B1D14);box-shadow:0 8px 16px -6px rgba(20,14,10,.5)}
+.add-btn:hover{background:linear-gradient(135deg,var(--primary),var(--brick))}
+.badge-tag.hot{background:linear-gradient(135deg,var(--primary),var(--brick))}
+.badge-tag.secret{background:var(--ink-deep);color:var(--gold);border-color:var(--gold)}
+
+/* الأزرار */
+.btn-primary{background:linear-gradient(135deg,var(--primary) 0%,var(--brick) 100%);box-shadow:0 10px 22px -10px rgba(169,58,30,.7)}
+.btn-dark{background:linear-gradient(135deg,var(--ink-deep),#2B1D14);color:var(--gold-soft)}
+.btn-checkout{background:linear-gradient(135deg,var(--primary),var(--brick))!important;box-shadow:0 12px 26px -10px rgba(169,58,30,.7)!important;border-radius:999px}
+
+/* الشيت والمودال */
+.sheet{box-shadow:0 -30px 80px -20px rgba(20,14,10,.45)}
+.sheet-title{font-family:var(--serif);font-weight:800}
+.opt.sel{box-shadow:inset 0 0 0 1px var(--primary)}
+.sticky-cart{background:linear-gradient(135deg,var(--ink-deep),#2B1D14);border:1px solid rgba(201,162,39,.35)}
+.sticky-cart-cta{background:linear-gradient(135deg,var(--primary),var(--brick))}
+
+/* بطاقات عامة */
+.card-block,.summary,.order-card,.address-card,.payment-methods,.menu-list{border-radius:24px;border-color:rgba(20,14,10,.07);box-shadow:var(--shadow-premium)}
+.summary-row.total,.order-total-row{font-family:var(--serif)}
+
+/* السلة والدفع */
+.cart-item-card{border-radius:24px;border-color:rgba(20,14,10,.07);box-shadow:var(--shadow-premium)}
+.cart-item-card .cart-item-img{border-radius:18px}
+.sticky-bottom-bar{background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(201,162,39,.25)}
+.checkout-map{border-radius:24px;box-shadow:var(--shadow-premium)}
+.instruction-btn.active{border-color:var(--gold);background:var(--gold-soft)}
+
+/* التقييم والشارات */
+.product-rating .star,.sheet-meta .rating .star{color:var(--gold)}
+
+/* الشاشات الفارغة */
+.empty-icon{background:linear-gradient(135deg,var(--gold-soft),var(--bg-2));box-shadow:inset 0 0 0 1px rgba(201,162,39,.3)}
+
+/* حركات الظهور: تدرّج خفيف وآمن */
+@keyframes premiumIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.view-anim{animation:premiumIn .55s var(--ease) both}
+
+/* Focus واضح للوصول */
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+/* احترام تقليل الحركة */
+@media (prefers-reduced-motion: reduce){
+  .view-anim{animation:none}
+}
+
+/* الموبايل: مسافات وتباين مريح */
+@media (max-width:359px){
+  .product{border-radius:20px}
+  .hero{border-radius:24px}
+}
+@media (min-width:900px){
+  .hero{border-radius:36px}
+  .product-grid{gap:24px}
+}
+
 </style>
 </head>
 <body>
