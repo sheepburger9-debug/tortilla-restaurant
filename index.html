@@ -1056,6 +1056,8 @@ button.hb-banner{cursor:pointer}
 .ann-img{aspect-ratio:16/9;overflow:hidden;width:100%;border-radius:var(--r-lg);box-shadow:none}
 .ann-img img{display:block;width:100%;height:100%;object-fit:cover}
 @media(min-width:900px){.ann-img{aspect-ratio:16/5}}
+.ann-wrap{position:relative}
+.ann-wrap .ann-close{position:absolute;top:10px;inset-inline-end:10px;z-index:2;width:34px;height:34px;border-radius:50%;background:rgba(20,10,5,.55);color:#fff;display:grid;place-items:center;font-size:20px;line-height:1}
 </style>
 </head>
 <body>
@@ -2396,7 +2398,9 @@ button.hb-banner{cursor:pointer}
      ═══════════════════════════════════════════════════════════════ */
   const BANNER_FIELDS = 'id,title_ar,subtitle_ar,image_url,mobile_image_url,button_text_ar,target_type,target_id,target_url,sort_order,display_seconds,is_active,starts_at,ends_at,promotion_id';
   const ANNOUNCE_FIELDS = 'id,title_ar,message_ar,image_url,mobile_image_url,placement,background_color,text_color,accent_color,icon,target_type,target_id,target_url,sort_order,is_dismissible,is_active,starts_at,ends_at,promotion_id,updated_at';
-  const SLIDE_SECONDS = 5;   // مدة ثابتة لكل شريحة (تتجاهل display_seconds)
+  const SLIDE_SECONDS = 5;   // المدة الافتراضية عند غياب display_seconds أو كونه قيمة غير صالحة
+  // مدة كل شريحة من display_seconds في قاعدة البيانات، محصورة بين 2 و60 ثانية
+  const slideDurationMs = b => { const n = Number(b?.display_seconds); return (Number.isFinite(n) && n > 0 ? Math.min(60, Math.max(2, n)) : SLIDE_SECONDS) * 1000; };
   const PAUSE_AFTER_USER_MS = 8000;
 
   let homeBanners = [];          // الشرائح المعروضة فعليًا
@@ -2419,8 +2423,11 @@ button.hb-banner{cursor:pointer}
   // يقبل فقط ألوان hex لمنع حقن CSS من بيانات الإدارة
   const safeColor = (v, fallback) => (typeof v === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(v.trim())) ? v.trim() : fallback;
 
+  // بيانات الاختبار التي تُنشأ من لوحة الإدارة تبدأ عنوانها بعلامة مثل [اختبار لوحة] أو [تجريبي]؛ لا تُعرض للعملاء
+  const isTestTitle = v => /^\s*\[(?:اختبار|تجريبي|test|demo)/i.test(String(v || ''));
+
   const filterActiveBanners = rows => (rows || []).filter(b =>
-    b && b.is_active !== false && isWithinSchedule(b) && (b.title_ar || b.image_url || b.mobile_image_url)
+    b && b.is_active !== false && isWithinSchedule(b) && !isTestTitle(b.title_ar) && (b.title_ar || b.image_url || b.mobile_image_url)
   );
   const sortHomeBanners = rows => [...rows].sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
 
@@ -2445,7 +2452,8 @@ button.hb-banner{cursor:pointer}
       if (p?.target_category_id) return { kind: 'category', id: p.target_category_id };
       return { kind: 'route', href: '#/menu' };
     }
-    if (type === 'promotion_page') return { kind: 'route', href: '#/menu' };  // صفحة العروض المستقلة لم تُبنَ بعد
+    // صفحة العرض تُفتح في شاشتها الخاصة (openPageScreen)، ولا تُحوَّل إلى المنيو العام
+    if (type === 'promotion_page') return id ? { kind: 'page', id } : { kind: 'none' };
     return { kind: 'none' };
   };
 
@@ -2494,7 +2502,7 @@ button.hb-banner{cursor:pointer}
   }
 
   // عند عدم وجود بانرات مفعّلة نعرض العروض المفعّلة والصالحة من menu_promotions (بيانات حقيقية من القاعدة)
-  const promoFallbackSlides = () => (livePromotions || []).slice(0, 5).map(p => ({
+  const promoFallbackSlides = () => (livePromotions || []).filter(p => !isTestTitle(p.name_ar)).slice(0, 5).map(p => ({
     id: 'promo-' + p.id,
     title_ar: p.name_ar || '',
     subtitle_ar: p.description_ar || '',
@@ -2512,9 +2520,11 @@ button.hb-banner{cursor:pointer}
     const desktop = safeImgUrl(b.image_url) || safeImgUrl(b.mobile_image_url);
     const mobile = safeImgUrl(b.mobile_image_url) || desktop;
     const t = resolveNavigationTarget(b);
+    const linked = t.kind !== 'none';   // البانر كله رابط عند وجود وجهة، بدون إضافة زر
     const active = i === homeBannerIndex;
     const img = mobile ? `<picture class="hsl-pic">${desktop && desktop !== mobile ? `<source media="(min-width: 900px)" srcset="${esc(desktop)}">` : ''}<img class="hsl-img" src="${esc(mobile)}" alt="${esc(b.title_ar || '')}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" data-hsl-img></picture>` : '';
-    return `<div class="hsl-slide${active ? ' is-active' : ''}" data-hsl-slide="${i}" role="group" aria-roledescription="slide" aria-label="${i + 1} من ${homeBanners.length}" aria-hidden="${active ? 'false' : 'true'}">
+    const linkAttrs = linked ? ` data-hsl-open="${i}" role="link" tabindex="${active ? '0' : '-1'}" style="cursor:pointer"` : ' role="group"';
+    return `<div class="hsl-slide${active ? ' is-active' : ''}" data-hsl-slide="${i}"${linkAttrs} aria-roledescription="slide" aria-label="${i + 1} من ${homeBanners.length}" aria-hidden="${active ? 'false' : 'true'}">
       ${img}
       <div class="hsl-content">
         ${b.title_ar ? `<h2>${esc(b.title_ar)}</h2>` : ''}
@@ -2580,7 +2590,7 @@ button.hb-banner{cursor:pointer}
   const startHeroAutoplay = () => {
     stopHeroAutoplay();
     if (homeBanners.length < 2 || document.hidden || currentRoute() !== 'home' || homeBannerResumeTimer) return;
-    homeBannerTimer = setTimeout(() => nextSlide(), SLIDE_SECONDS * 1000);
+    homeBannerTimer = setTimeout(() => nextSlide(), slideDurationMs(homeBanners[homeBannerIndex]));
   };
 
   // إيقاف مؤقت عند تفاعل المستخدم، ثم استئناف بعد فترة
@@ -2612,7 +2622,7 @@ button.hb-banner{cursor:pointer}
   const isDismissed = a => readDismissed().includes(dismissKey(a));
 
   const filterActiveAnnouncements = rows => (rows || []).filter(a =>
-    a && a.is_active !== false && isWithinSchedule(a) && (a.title_ar || a.message_ar || a.image_url || a.mobile_image_url)
+    a && a.is_active !== false && isWithinSchedule(a) && !isTestTitle(a.title_ar) && (a.title_ar || a.message_ar || a.image_url || a.mobile_image_url)
   );
 
   async function loadAnnouncements() {
@@ -2682,13 +2692,15 @@ button.hb-banner{cursor:pointer}
     if (currentRoute() === 'home') {
       const strip = document.querySelector('[data-ann-strip]');
       if (strip) {
-        const slides = announcements.filter(annHasImage).map(renderStripAnnouncement).filter(Boolean);
+        const slides = imageAnnouncementsAt(STRIP_PLACEMENTS).map(renderStripAnnouncement).filter(Boolean);
         strip.innerHTML = slides.length
           ? `<div class="ann-slider" data-ann-slider role="region" aria-roledescription="carousel" aria-label="الإعلانات">${slides.map(s => `<div class="ann-slide">${s}</div>`).join('')}</div>${slides.length > 1 ? `<div class="ann-dots" data-ann-dots aria-hidden="true">${slides.map((_, i) => `<span class="ann-dot${i === 0 ? ' is-active' : ''}"></span>`).join('')}</div>` : ''}`
           : '';
         bindAnnSlider();
       }
     }
+    const footerAnn = document.querySelector('[data-ann-footer]');
+    if (footerAnn) footerAnn.innerHTML = currentRoute() === 'home' ? imageAnnouncementsAt(['above_footer']).map(renderStripAnnouncement).join('') : '';
     // اللافتات النصية تظهر في مكان placement الخاص بها على كل الصفحات
     document.querySelectorAll('[data-announce-slot]').forEach(slot => {
       if (currentRoute() === 'home') { slot.innerHTML = ''; return; }
@@ -2706,10 +2718,17 @@ button.hb-banner{cursor:pointer}
     if (!mobile) return '';
     const clickable = resolveNavigationTarget(a).kind !== 'none';
     const pic = `<picture>${desktop && desktop !== mobile ? `<source media="(min-width: 900px)" srcset="${esc(desktop)}">` : ''}<img src="${esc(mobile)}" alt="${esc(a.title_ar || 'إعلان')}" loading="lazy" decoding="async"></picture>`;
-    return clickable
-      ? `<button type="button" class="ann-img" data-announce-id="${esc(a.id)}" data-announce-open aria-label="${esc(a.title_ar || 'إعلان')}">${pic}</button>`
-      : `<div class="ann-img" data-announce-id="${esc(a.id)}">${pic}</div>`;
+    const media = clickable
+      ? `<button type="button" class="ann-img" data-announce-open aria-label="${esc(a.title_ar || 'إعلان')}">${pic}</button>`
+      : `<div class="ann-img">${pic}</div>`;
+    // زر الإغلاق خارج زر الصورة حتى لا يتداخل الزران
+    const close = a.is_dismissible !== false ? `<button type="button" class="announce-close ann-close" data-announce-close aria-label="إغلاق">×</button>` : '';
+    return `<div class="ann-wrap" data-announce-id="${esc(a.id)}">${media}${close}</div>`;
   };
+
+  // اللافتات المصورة حسب placement: top و below_hero في الشريط، between_blocks بين البلوكات، above_footer أسفل البلوكات
+  const imageAnnouncementsAt = placements => announcements.filter(a => placements.includes(a.placement) && annHasImage(a) && !isDismissed(a));
+  const STRIP_PLACEMENTS = ['top', 'below_hero'];
 
   const dismissAnnouncement = id => {
     const a = announcements.find(x => String(x.id) === String(id));
@@ -2717,7 +2736,7 @@ button.hb-banner{cursor:pointer}
     const list = readDismissed();
     if (!list.includes(dismissKey(a))) list.push(dismissKey(a));
     safeSave(K('dismissed_announcements'), list);
-    renderAnnouncements();
+    if (currentRoute() === 'home') renderHomepageBlocks(); else renderAnnouncements();
   };
 
   // يُستدعى بعد كل رسم للصفحة لتجهيز الأماكن الديناميكية
@@ -2737,6 +2756,8 @@ button.hb-banner{cursor:pointer}
     if (dot) { pauseHeroAutoplay(); goToSlide(Number(dot.dataset.hslDot)); return; }
     const cta = t.closest('[data-hsl-cta]');
     if (cta) { const b = homeBanners[Number(cta.dataset.hslCta)]; if (b) openTarget(b); return; }
+    const linkSlide = t.closest('[data-hsl-open]');
+    if (linkSlide) { const b = homeBanners[Number(linkSlide.dataset.hslOpen)]; if (b) openTarget(b); return; }
     if (t.closest('[data-hsl-retry]')) { loadHomeBanners(); return; }
     const close = t.closest('[data-announce-close]');
     if (close) { dismissAnnouncement(close.closest('[data-announce-id]')?.dataset.announceId); return; }
@@ -2958,11 +2979,32 @@ button.hb-banner{cursor:pointer}
     return `<div class="hb-grid" role="list" style="${vars}">${items}</div>`;
   };
 
+  // مؤقت العرض (show_timer في content): يعرض الوقت المتبقي بدل تاريخ الانتهاء
+  const timeLeftAr = iso => {
+    const ms = new Date(iso).getTime() - Date.now();
+    if (!Number.isFinite(ms) || ms <= 0) return '';
+    const days = Math.floor(ms / 864e5), hours = Math.floor((ms % 864e5) / 36e5), mins = Math.floor((ms % 36e5) / 6e4);
+    return days >= 1 ? `يتبقى ${days} يوم` : `يتبقى ${hours} س ${mins} د`;
+  };
+  const endsLine = (iso, c) => {
+    if (c && c.show_timer === true) { const t = timeLeftAr(iso); return t ? `<small class="hb-ends">${t}</small>` : ''; }
+    return shortDate(iso) ? `<small class="hb-ends">ينتهي ${esc(shortDate(iso))}</small>` : '';
+  };
+  // design_preset من content: كل قيمة معروفة تعدّل الإعدادات؛ القيم غير المعروفة تُتجاهل مع تشخيص
+  const DESIGN_PRESETS = { hero_image_overlay: s => ({ ...s, image_overlay: true }) };
+  const applyDesignPreset = (c, s) => {
+    const name = c && c.design_preset;
+    if (!name) return s;
+    const fn = DESIGN_PRESETS[name];
+    if (!fn) { console.info('[Blocks] design_preset غير مدعوم، يُتجاهل', name); return s; }
+    return fn(s);
+  };
+
   const hbCard = (r, s, c = {}) => {
     const showBadge = boolOpt(s, 'show_badge', boolOpt(c, 'show_badge', true));
     const showDesc = boolOpt(s, 'show_description', true);
     const inner = `${r.image ? `<div class="hb-card-img"><img src="${esc(r.image)}" alt="${esc(r.title || '')}" loading="lazy" decoding="async"></div>` : ''}
-      <div class="hb-card-body">${showBadge && r.badge ? `<span class="hb-badge">${esc(r.badge)}</span>` : ''}${r.title ? `<h3>${esc(r.title)}</h3>` : ''}${showDesc && r.subtitle ? `<p>${esc(r.subtitle)}</p>` : ''}${r.note ? `<small class="hb-note">${esc(r.note)}</small>` : ''}${r.ends && shortDate(r.ends) ? `<small class="hb-ends">ينتهي ${esc(shortDate(r.ends))}</small>` : ''}</div>`;
+      <div class="hb-card-body">${showBadge && r.badge ? `<span class="hb-badge">${esc(r.badge)}</span>` : ''}${r.title ? `<h3>${esc(r.title)}</h3>` : ''}${showDesc && r.subtitle ? `<p>${esc(r.subtitle)}</p>` : ''}${r.note ? `<small class="hb-note">${esc(r.note)}</small>` : ''}${r.ends ? endsLine(r.ends, c) : ''}</div>`;
     return r.target.kind !== 'none'
       ? `<button type="button" class="hb-card" data-hb-open="${esc(r.key)}">${inner}</button>`
       : `<div class="hb-card">${inner}</div>`;
@@ -3013,6 +3055,7 @@ button.hb-banner{cursor:pointer}
 
   // بانر على مستوى البلوك نفسه (صورة واحدة وعنوان ورابط)
   const blockLevelBanner = (b, s, c) => {
+    s = applyDesignPreset(c, s);
     const key = 'blk-' + b.id;
     const target = resolveNavigationTarget({ target_type: 'url', target_url: b.target_url });
     blockTargets[key] = target;
@@ -3030,6 +3073,7 @@ button.hb-banner{cursor:pointer}
   const renderCampaignHero = (b, s, c) => blockLevelBanner(b, s, c);
 
   const renderPromoBanner = (b, s, c, resolved) => {
+    s = applyDesignPreset(c, s);
     const items = resolved.filter(r => r.kind === 'card');
     if (!items.length) return blockLevelBanner(b, s, c);
     const badgeOn = boolOpt(s, 'show_badge', true);
@@ -3135,7 +3179,10 @@ button.hb-banner{cursor:pointer}
      الكارت المربع = صفحة عرض، وشاشته = العروض المرتبطة بها
      ═══════════════════════════════════════════════════════════════ */
   const PAGE_FIELDS = 'id,slug,title_ar,subtitle_ar,description_ar,card_image_url,cover_image_url,sort_order,is_active,starts_at,ends_at';
-  const PAGE_OFFER_FIELDS = 'id,name_ar,description_ar,image_url,promotion_type,value,target_item_id,target_category_id,promotion_page_id,priority,is_active,starts_at,ends_at';
+  const PAGE_OFFER_FIELDS = 'id,name_ar,description_ar,image_url,promotion_type,value,target_item_id,target_category_id,promotion_page_id,priority,is_active,starts_at,ends_at,max_uses,used_count';
+  // صفحة أو عرض تجريبي: عنوان بعلامة اختبار أو slug يحمل demo/test
+  const isTestPage = p => isTestTitle(p.title_ar) || /(^|[-_])(demo|test)([-_]|$)/i.test(String(p.slug || ''));
+  const offerUsable = o => !isTestTitle(o.name_ar) && (o.max_uses == null || Number(o.used_count || 0) < Number(o.max_uses));
   let livePromotionPages = [];
   let pageOffers = {};   // page.id -> [offer]
 
@@ -3145,14 +3192,14 @@ button.hb-banner{cursor:pointer}
       const { data: pages, error } = await sbClient.from('promotion_pages')
         .select(PAGE_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
       if (error) throw error;
-      const valid = (pages || []).filter(p => p && p.is_active !== false && isWithinSchedule(p) && (p.title_ar || p.card_image_url));
+      const valid = (pages || []).filter(p => p && p.is_active !== false && isWithinSchedule(p) && !isTestPage(p) && (p.title_ar || p.card_image_url));
       let offers = [];
       if (valid.length) {
         const { data: rows, error: oErr } = await sbClient.from('menu_promotions')
           .select(PAGE_OFFER_FIELDS).in('promotion_page_id', valid.map(p => p.id)).eq('is_active', true)
           .order('priority', { ascending: false });
         if (oErr) throw oErr;
-        offers = (rows || []).filter(o => o.is_active !== false && isWithinSchedule(o));
+        offers = (rows || []).filter(o => o.is_active !== false && isWithinSchedule(o) && offerUsable(o));
       }
       const byPage = {};
       offers.forEach(o => { (byPage[o.promotion_page_id] ||= []).push(o); });
@@ -3221,26 +3268,38 @@ button.hb-banner{cursor:pointer}
     if (!cardsRoot && !offersRoot && !blocksRoot) return;
     const loading = !homeBlocks.length && (homeBlocksState === 'idle' || homeBlocksState === 'loading');
     const failed = homeBlocksState === 'error';
-    const renderList = list => list.map(renderOneBlock).filter(Boolean).join('');
+    // كل قسم في حماية خاصة: خطأ قسم واحد لا يمنع ظهور باقي الأقسام
+    const guard = (name, fn) => { try { fn(); } catch (err) { console.warn('[Home] تعذر رسم القسم', name, err?.message || err); } };
 
     // 1) كروت الشاشات (صفحات العروض)
-    if (cardsRoot) {
+    guard('page-cards', () => {
+      if (!cardsRoot) return;
       const visible = livePromotionPages.filter(p => (pageOffers[p.id] || []).length);
       cardsRoot.innerHTML = visible.length
         ? `<div class="home-sec-title"><div><h2>اكتشف العروض</h2><p>اختار القسم اللي يعجبك</p></div></div><div class="hb-rail" role="list">${visible.map(p => `<div role="listitem">${pageTileHtml(p)}</div>`).join('')}</div>`
         : '';
-    }
-    // 3) بلوك عروض السيل يُرسم في renderSaleStrip
-    renderSaleStrip();
+    });
+    // 3) شريط عروض السيل: يُرسم في renderSaleStrip
+    guard('sale-strip', () => renderSaleStrip());
     // 4) بلوك العروض
-    if (offersRoot) offersRoot.innerHTML = (loading || failed) ? '' : renderList(homeBlocks.filter(b => OFFER_BLOCK_TYPES.includes(b.block_type)));
-    // 5) باقي البلوكات بترتيب الإدارة
-    if (blocksRoot) {
-      if (failed) blocksRoot.innerHTML = '<div class="hsl-state" role="alert"><p>تعذر تحميل أقسام الرئيسية حاليًا.</p><button type="button" class="btn btn-outline btn-sm" data-hb-retry>إعادة المحاولة</button></div>';
-      else if (loading) blocksRoot.innerHTML = '<div class="hb-skeleton" aria-busy="true" aria-label="جارٍ تحميل الأقسام"></div>';
-      else blocksRoot.innerHTML = renderList(homeBlocks.filter(b => !OFFER_BLOCK_TYPES.includes(b.block_type)));
-    }
-    renderAnnouncements();
+    guard('offers', () => {
+      if (!offersRoot) return;
+      offersRoot.innerHTML = (loading || failed) ? '' : homeBlocks.filter(b => OFFER_BLOCK_TYPES.includes(b.block_type)).map(renderOneBlock).filter(Boolean).join('');
+    });
+    // 5) باقي البلوكات بترتيب الإدارة، مع لافتات between_blocks بين البلوكات
+    guard('blocks', () => {
+      if (!blocksRoot) return;
+      if (failed) { blocksRoot.innerHTML = '<div class="hsl-state" role="alert"><p>تعذر تحميل أقسام الرئيسية حاليًا.</p><button type="button" class="btn btn-outline btn-sm" data-hb-retry>إعادة المحاولة</button></div>'; return; }
+      if (loading) { blocksRoot.innerHTML = '<div class="hb-skeleton" aria-busy="true" aria-label="جارٍ تحميل الأقسام"></div>'; return; }
+      const rendered = homeBlocks.filter(b => !OFFER_BLOCK_TYPES.includes(b.block_type)).map(renderOneBlock).filter(Boolean);
+      const between = imageAnnouncementsAt(['between_blocks']).map(renderStripAnnouncement).filter(Boolean);
+      const parts = [];
+      rendered.forEach((html, i) => { parts.push(html); if (between[i]) parts.push(`<div class="ann-between">${between[i]}</div>`); });
+      // لافتات between_blocks الزائدة عن عدد الفجوات تظهر بعد آخر بلوك حتى لا تضيع
+      between.slice(rendered.length).forEach(html => parts.push(`<div class="ann-between">${html}</div>`));
+      blocksRoot.innerHTML = parts.join('');
+    });
+    guard('announcements', () => renderAnnouncements());
   };
 
   // أحداث البلوكات: مستمع واحد على الوثيقة، يُسجَّل مرة واحدة فقط
@@ -3326,6 +3385,7 @@ button.hb-banner{cursor:pointer}
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && document.body.classList.contains('bs-open')) closeBlockScreen();
+    if (e.key === 'Enter' && e.target.matches && e.target.matches('[data-hsl-open]')) { e.preventDefault(); e.target.click(); }
   });
 
   /* ═══════════════════════════════════════════════════════════════
@@ -3478,6 +3538,7 @@ button.hb-banner{cursor:pointer}
         <div data-sale-strip></div>
         <div data-home-offers></div>
         <div data-home-blocks></div>
+        <div data-ann-footer></div>
         <div data-text-row></div>
 
         ${!state.secretUnlocked ? `
