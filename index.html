@@ -1229,6 +1229,9 @@ button.hb-banner{cursor:pointer}
   let liveSecretItems = [];
   let liveSecretAddonMap = {};
   let livePromotion = null;
+  // بيانات الاختبار: الكلمة تُطابَق ككلمة مستقلة فقط، فلا تُستبعد كلمات مثل "الاختبارات" أو "تجربة"
+  const TEST_TERM = /(^|[^\p{L}\p{N}])(تجريبي|تجريبية|اختبار|للاختبار|test|demo|sample)(?![\p{L}\p{N}])/iu;
+  const isTestTitle = v => TEST_TERM.test(String(v || ''));
   let livePromotions = [];
   let activePromotionIndex = 0;
 
@@ -1270,7 +1273,7 @@ button.hb-banner{cursor:pointer}
       const nowMs = Date.now();
       // اعرض كل العروض النشطة والصالحة زمنيًا، ولا تستبعد الوصف القصير أو المكوّن من كلمة واحدة.
       livePromotions = (promotionResult?.data || []).filter(p =>
-        p.is_active !== false &&
+        p.is_active !== false && !isTestTitle(p.name_ar) &&
         (!p.starts_at || new Date(p.starts_at).getTime() <= nowMs) &&
         (!p.ends_at || new Date(p.ends_at).getTime() >= nowMs) &&
         (p.max_uses == null || Number(p.used_count || 0) < Number(p.max_uses))
@@ -1325,7 +1328,7 @@ button.hb-banner{cursor:pointer}
       });
       const itemAddonSet = {};
       (window.SHEEPBURGER_ITEM_ADDONS || []).forEach(x => (itemAddonSet[x.item_id] ||= new Set()).add(x.addon_id));
-      const liveItems = (rows || []).filter(r => categoryById[r.category_id] && (sizesByItem[r.id] || []).length)
+      const liveItems = (rows || []).filter(r => categoryById[r.category_id] && (sizesByItem[r.id] || []).length && !isTestTitle(r.name_ar))
         .map(r => {
           const c = categoryById[r.category_id];
           const cat = categoryKey(c.slug, c.name_ar);
@@ -2409,6 +2412,7 @@ button.hb-banner{cursor:pointer}
   let homeBannerIndex = 0;
   let homeBannerTimer = null;
   let homeBannerResumeTimer = null;
+  let heroHeld = false;   // المؤشر أو التركيز أو اللمس فوق السلايدر: لا يستأنف التنقل التلقائي
   let announcements = [];
   let announcementsState = 'idle';
 
@@ -2423,8 +2427,6 @@ button.hb-banner{cursor:pointer}
   // يقبل فقط ألوان hex لمنع حقن CSS من بيانات الإدارة
   const safeColor = (v, fallback) => (typeof v === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(v.trim())) ? v.trim() : fallback;
 
-  // بيانات الاختبار التي تُنشأ من لوحة الإدارة تبدأ عنوانها بعلامة مثل [اختبار لوحة] أو [تجريبي]؛ لا تُعرض للعملاء
-  const isTestTitle = v => /^\s*\[(?:اختبار|تجريبي|test|demo)/i.test(String(v || ''));
 
   const filterActiveBanners = rows => (rows || []).filter(b =>
     b && b.is_active !== false && isWithinSchedule(b) && !isTestTitle(b.title_ar) && (b.title_ar || b.image_url || b.mobile_image_url)
@@ -2492,7 +2494,6 @@ button.hb-banner{cursor:pointer}
       if (error) throw error;
       homeBannerRows = sortHomeBanners(filterActiveBanners(data));
       homeBannersState = 'ready';
-      homeBannerIndex = Math.min(homeBannerIndex, Math.max(0, homeBanners.length - 1));
     } catch (err) {
       console.warn('[Banners] تعذر تحميل البانرات:', err?.message || err);
       homeBannersState = 'error';
@@ -2533,21 +2534,29 @@ button.hb-banner{cursor:pointer}
     </div>`;
   };
 
+  let homeBannerKey = null;   // هوية الشرائح المعروضة: تغيّرها يعيد المؤشر إلى الأول
+  const setHeroVisible = (root, on) => { root.style.display = on ? '' : 'none'; };
   const renderHeroSlider = () => {
     const root = document.querySelector('[data-hsl-root]');
     if (!root) return;
     if (homeBannersState === 'idle' || homeBannersState === 'loading') {
+      setHeroVisible(root, true);
       root.innerHTML = '<div class="hsl-skeleton" aria-busy="true" aria-label="جارٍ تحميل العروض"></div>';
       return;
     }
     if (homeBannersState === 'error') {
+      setHeroVisible(root, true);
       root.innerHTML = '<div class="hsl-state"><p>تعذر تحميل العروض حاليًا.</p><button type="button" class="btn btn-outline btn-sm" data-hsl-retry>إعادة المحاولة</button></div>';
       return;
     }
     homeBanners = homeBannerRows.length ? homeBannerRows : promoFallbackSlides();
-    if (!homeBanners.length) { root.innerHTML = ''; return; }   // لا بيانات ثابتة كبديل
+    if (!homeBanners.length) { root.innerHTML = ''; setHeroVisible(root, false); homeBannerKey = null; homeBannerIndex = 0; return; }   // لا بيانات ثابتة كبديل
+    setHeroVisible(root, true);
 
     const n = homeBanners.length;
+    const key = homeBanners.map((b, i) => (b.id ?? i)).join('|');
+    if (key !== homeBannerKey) { homeBannerIndex = 0; homeBannerKey = key; }
+    if (!Number.isInteger(homeBannerIndex) || homeBannerIndex < 0 || homeBannerIndex >= n) homeBannerIndex = 0;
     const controls = n > 1 ? `<div class="hsl-controls"><div class="hsl-dots">${homeBanners.map((_, i) => `<button type="button" class="hsl-dot" data-hsl-dot="${i}" aria-label="الشريحة ${i + 1}" aria-current="${i === homeBannerIndex ? 'true' : 'false'}"></button>`).join('')}</div></div>` : '';
     root.innerHTML = `<div class="hsl-track" data-hsl-track>${homeBanners.map(renderHeroSlide).join('')}</div>${controls}`;
 
@@ -2557,18 +2566,19 @@ button.hb-banner{cursor:pointer}
     if (!root.dataset.bound) {
       root.dataset.bound = '1';
       let startX = null;
-      root.addEventListener('touchstart', e => { startX = e.touches[0].clientX; pauseHeroAutoplay(); }, { passive: true });
+      root.addEventListener('touchstart', e => { heroHeld = true; startX = e.touches[0].clientX; pauseHeroAutoplay(); }, { passive: true });
       root.addEventListener('touchend', e => {
+        heroHeld = false;
         if (startX == null) return;
         const dx = e.changedTouches[0].clientX - startX;
         startX = null;
         if (Math.abs(dx) > 40) (dx < 0 ? previousSlide : nextSlide)();   // RTL: السحب لليسار يعني التالي
         else resumeHeroAutoplayLater();
       }, { passive: true });
-      root.addEventListener('mouseenter', pauseHeroAutoplay);
-      root.addEventListener('mouseleave', resumeHeroAutoplayLater);
-      root.addEventListener('focusin', pauseHeroAutoplay);
-      root.addEventListener('focusout', resumeHeroAutoplayLater);
+      root.addEventListener('mouseenter', () => { heroHeld = true; pauseHeroAutoplay(); });
+      root.addEventListener('mouseleave', () => { heroHeld = false; resumeHeroAutoplayLater(); });
+      root.addEventListener('focusin', () => { heroHeld = true; pauseHeroAutoplay(); });
+      root.addEventListener('focusout', () => { heroHeld = false; resumeHeroAutoplayLater(); });
     }
   };
 
@@ -2589,7 +2599,7 @@ button.hb-banner{cursor:pointer}
 
   const startHeroAutoplay = () => {
     stopHeroAutoplay();
-    if (homeBanners.length < 2 || document.hidden || currentRoute() !== 'home' || homeBannerResumeTimer) return;
+    if (homeBanners.length < 2 || document.hidden || currentRoute() !== 'home' || homeBannerResumeTimer || heroHeld) return;
     homeBannerTimer = setTimeout(() => nextSlide(), slideDurationMs(homeBanners[homeBannerIndex]));
   };
 
@@ -2741,8 +2751,8 @@ button.hb-banner{cursor:pointer}
 
   // يُستدعى بعد كل رسم للصفحة لتجهيز الأماكن الديناميكية
   const mountRouteWidgets = r => {
-    if (r === 'home') { renderHeroSlider(); startHeroAutoplay(); renderHomepageBlocks(); }
-    else { stopHeroAutoplay(); clearInterval(annSliderTimer); }
+    if (r === 'home') { heroHeld = false; renderHeroSlider(); startHeroAutoplay(); renderHomepageBlocks(); }
+    else { stopHeroAutoplay(); clearTimeout(homeBannerResumeTimer); homeBannerResumeTimer = null; clearInterval(annSliderTimer); }
     renderAnnouncements();
     scheduleServerQuote();
   };
@@ -2768,7 +2778,7 @@ button.hb-banner{cursor:pointer}
     }
   });
 
-  document.addEventListener('visibilitychange', () => { if (document.hidden) stopHeroAutoplay(); else startHeroAutoplay(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stopHeroAutoplay(); else { startHeroAutoplay(); tickCountdowns(); } });
 
 
   /* ═══════════════════════════════════════════════════════════════
@@ -2857,7 +2867,7 @@ button.hb-banner{cursor:pointer}
   const ALIGN_MAP = Object.assign(Object.create(null), { start: 'start', right: 'start', center: 'center', end: 'end', left: 'end' });
   const alignOpt = s => ALIGN_MAP[s.text_align] || ALIGN_MAP[s.align] || null;
   // بلوك تجريبي/اختبار يحمل علامة صريحة بأنه لا يظهر للعملاء
-  const isTestBlock = b => { const s = blockSettings(b), c = blockContent(b); return s.test_only === true || s.demo === true || c.demo === true || c.test === true; };
+  const isTestBlock = b => { const s = blockSettings(b), c = blockContent(b); return s.test_only === true || s.demo === true || c.demo === true || c.test === true || isTestTitle(b.title_ar); };
   const POS_KEYS = Object.keys(OBJ_POS);
   const shortDate = v => { if (!v) return ''; const d = new Date(v); return isNaN(d) ? '' : d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }); };
 
@@ -2983,19 +2993,35 @@ button.hb-banner{cursor:pointer}
   const timeLeftAr = iso => {
     const ms = new Date(iso).getTime() - Date.now();
     if (!Number.isFinite(ms) || ms <= 0) return '';
+    if (ms < 6e4) return 'أقل من دقيقة';
     const days = Math.floor(ms / 864e5), hours = Math.floor((ms % 864e5) / 36e5), mins = Math.floor((ms % 36e5) / 6e4);
     return days >= 1 ? `يتبقى ${days} يوم` : `يتبقى ${hours} س ${mins} د`;
   };
+  const showTimerOn = c => !!c && (c.show_timer === true || c.show_timer === 'true');
   const endsLine = (iso, c) => {
-    if (c && c.show_timer === true) { const t = timeLeftAr(iso); return t ? `<small class="hb-ends">${t}</small>` : ''; }
+    if (showTimerOn(c)) {
+      const t = timeLeftAr(iso);
+      return t ? `<small class="hb-ends" data-countdown="${esc(iso)}">${t}</small>` : '';
+    }
     return shortDate(iso) ? `<small class="hb-ends">ينتهي ${esc(shortDate(iso))}</small>` : '';
   };
   // design_preset من content: كل قيمة معروفة تعدّل الإعدادات؛ القيم غير المعروفة تُتجاهل مع تشخيص
   const DESIGN_PRESETS = { hero_image_overlay: s => ({ ...s, image_overlay: true }) };
+  // تحديث العدادات الظاهرة فقط كل 15 ثانية؛ يتوقف أثناء إخفاء الصفحة، والعنصر المنتهي يُزال دون إعادة رسم
+  const tickCountdowns = () => {
+    if (document.hidden) return;
+    document.querySelectorAll('[data-countdown]').forEach(el => {
+      const t = timeLeftAr(el.dataset.countdown);
+      if (!t) { el.remove(); return; }
+      if (el.textContent !== t) el.textContent = t;
+    });
+  };
+  setInterval(tickCountdowns, 15000);
   const applyDesignPreset = (c, s) => {
     const name = c && c.design_preset;
     if (!name) return s;
-    const fn = DESIGN_PRESETS[name];
+    // hasOwnProperty تمنع الوصول إلى خصائص Object.prototype مثل constructor
+    const fn = (typeof name === 'string' && Object.prototype.hasOwnProperty.call(DESIGN_PRESETS, name)) ? DESIGN_PRESETS[name] : null;
     if (!fn) { console.info('[Blocks] design_preset غير مدعوم، يُتجاهل', name); return s; }
     return fn(s);
   };
@@ -3185,9 +3211,18 @@ button.hb-banner{cursor:pointer}
   const offerUsable = o => !isTestTitle(o.name_ar) && (o.max_uses == null || Number(o.used_count || 0) < Number(o.max_uses));
   let livePromotionPages = [];
   let pageOffers = {};   // page.id -> [offer]
+  let promoPagesState = 'idle';   // idle | loading | ready | error
+  let promoPagesRequest = null;   // طلب قيد التنفيذ: يمنع تكرار الاستعلام
 
-  async function loadPromotionPages() {
-    if (!sbClient) return;
+  function loadPromotionPages() {
+    if (promoPagesRequest) return promoPagesRequest;
+    promoPagesRequest = loadPromotionPagesOnce().finally(() => { promoPagesRequest = null; });
+    return promoPagesRequest;
+  }
+
+  async function loadPromotionPagesOnce() {
+    if (!sbClient) { promoPagesState = 'error'; renderHomepageBlocks(); return; }
+    if (promoPagesState !== 'ready') { promoPagesState = 'loading'; }
     try {
       const { data: pages, error } = await sbClient.from('promotion_pages')
         .select(PAGE_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
@@ -3205,10 +3240,12 @@ button.hb-banner{cursor:pointer}
       offers.forEach(o => { (byPage[o.promotion_page_id] ||= []).push(o); });
       livePromotionPages = valid;
       pageOffers = byPage;
+      promoPagesState = 'ready';
     } catch (err) {
       console.warn('[PromotionPages] تعذر تحميل صفحات العروض:', err?.message || err);
-      livePromotionPages = [];
-      pageOffers = {};
+      // فشل تحديث لاحق لا يمسح آخر بيانات صحيحة؛ الفشل الأول يظهر حالة خطأ لا حالة فارغة
+      if (promoPagesState !== 'ready') { livePromotionPages = []; pageOffers = {}; }
+      promoPagesState = 'error';
     }
     renderHomepageBlocks();
   }
@@ -3274,6 +3311,10 @@ button.hb-banner{cursor:pointer}
     // 1) كروت الشاشات (صفحات العروض)
     guard('page-cards', () => {
       if (!cardsRoot) return;
+      if (promoPagesState === 'error' && !livePromotionPages.length) {
+        cardsRoot.innerHTML = '<div class="hsl-state" role="alert"><p>تعذر تحميل صفحات العروض حاليًا.</p><button type="button" class="btn btn-outline btn-sm" data-pages-retry>إعادة المحاولة</button></div>';
+        return;
+      }
       const visible = livePromotionPages.filter(p => (pageOffers[p.id] || []).length);
       cardsRoot.innerHTML = visible.length
         ? `<div class="home-sec-title"><div><h2>اكتشف العروض</h2><p>اختار القسم اللي يعجبك</p></div></div><div class="hb-rail" role="list">${visible.map(p => `<div role="listitem">${pageTileHtml(p)}</div>`).join('')}</div>`
@@ -3307,6 +3348,7 @@ button.hb-banner{cursor:pointer}
     const hb = e.target.closest('[data-hb-open]');
     if (hb) { openResolved(blockTargets[hb.dataset.hbOpen]); return; }
     if (e.target.closest('[data-hb-retry]')) { loadHomepageBlocks(); }
+    if (e.target.closest('[data-pages-retry]')) { loadPromotionPages(); }
   });
 
   // صورة فاشلة لا تفسد التخطيط: تُخفى ويبقى خلفية البطاقة/البانر
