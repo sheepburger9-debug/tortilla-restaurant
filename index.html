@@ -1270,7 +1270,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
      ═══════════════════════════════════════════════ */
   const CONFIG = {
     MAX_QTY: 20,
-    STATUS_STEP_MS: 6000,
     STORAGE_SCHEMA: 6,
     STORAGE_PREFIX: 'sheepburger_v6_'
   };
@@ -1321,7 +1320,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   /* ═══════════════════════════════════════════════════════════════
      [LIVE] ربط منيو العميل بـ Supabase — تحديثات لحظية من لوحة الأدمن
      ═══════════════════════════════════════════════════════════════ */
-  const CUSTOMER_APP_BUILD = 'supabase-live-home-blocks-renderers-2026-11-02-fix8';
+  const CUSTOMER_APP_BUILD = 'supabase-db-only-pricing-2026-11-03';
   const SB_URL = 'https://gwufhitzmupyumdjabnj.supabase.co';
   const SB_KEY = 'sb_publishable_oTZFsXGeGb_PAhI7A-eTAw_MGwsBTGG';
   const sbClient = window.supabase?.createClient
@@ -1364,7 +1363,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         // لا تُرسل الأصناف السرية في الاستعلام العام؛ يتم تحميلها بعد التحقق من الكود على الخادم.
         sbClient.from('menu_items').select('id,slug,category_id,subcategory_id,name_ar,description_ar,image_url,tags,is_spicy,is_available,is_secret,sort_order,subcategory_ar,ingredients_ar,allergens,is_vegetarian,display_badge,is_popular,free_delivery').eq('is_secret', false).order('sort_order'),
         sbClient.from('item_sizes').select('id,item_id,label_ar,price,sale_price,sort_order,is_available').order('sort_order'),
-        sbClient.from('store_settings').select('name_ar,address_text,is_open,accepting_orders,min_order,delivery_fee,free_delivery_threshold,avg_prep_minutes,cash_enabled,currency,loyalty_enabled,loyalty_points_per_currency,loyalty_redeem_points,loyalty_redeem_value,loyalty_stamps_for_reward,show_popular_filter,show_spicy_filter,show_vegetarian_filter,show_free_delivery_filter,chef_special_item_id,chef_special_discount').eq('id', 1).maybeSingle(),
+        sbClient.from('store_settings').select('name_ar,address_text,is_open,accepting_orders,min_order,delivery_fee,free_delivery_threshold,delivery_service_fee,distance_delivery_enabled,delivery_price_per_km,delivery_max_distance_km,latitude,longitude,avg_prep_minutes,cash_enabled,visa_enabled,wallet_enabled,currency,loyalty_enabled,loyalty_points_per_currency,loyalty_redeem_points,loyalty_redeem_value,loyalty_stamps_for_reward,loyalty_stamp_reward_item_id,show_popular_filter,show_spicy_filter,show_vegetarian_filter,show_free_delivery_filter,chef_special_item_id,chef_special_discount').eq('id', 1).maybeSingle(),
         sbClient.from('delivery_zones').select('id,name_ar,fee,min_order,sort_order,is_active').eq('is_active', true).order('sort_order'),
         sbClient.from('addons').select('id,slug,name_ar,price,sale_price,allergens,is_available,sort_order').order('sort_order'),
         sbClient.from('item_addons').select('item_id,addon_id'),
@@ -1376,7 +1375,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         sbClient.from('branch_menu_items').select('branch_id,item_id,is_available'),
         sbClient.from('branch_item_sizes').select('branch_id,size_id,price,sale_price,is_available'),
         sbClient.from('branch_addons').select('branch_id,addon_id,price,sale_price,is_available'),
-        sbClient.from('product_recommendation_placements').select('id,item_type,item_id,placement_key,branch_id,title_override,description_override,sort_order,is_active,starts_at,ends_at').eq('is_active', true).order('sort_order')
+        sbClient.from('active_product_recommendation_placements').select('id,item_type,item_id,placement_key,branch_id,title_override,description_override,sort_order,is_active,starts_at,ends_at').eq('is_active', true).order('sort_order')
       ]);
       if (catsError) throw catsError;
       if (itemsError) throw itemsError;
@@ -1400,7 +1399,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           const value = Number(x.value?.value);
           if (!Number.isFinite(value) || value <= 0) return;
           if (x.item_key === 'max_qty_per_item') CONFIG.MAX_QTY = Math.min(99, Math.max(1, Math.trunc(value)));
-          if (x.item_key === 'status_step_ms') CONFIG.STATUS_STEP_MS = Math.min(3600000, Math.max(1000, Math.trunc(value)));
         });
       } else if (contentResult?.error) console.warn('[Content] تعذر تحميل app_content:', contentResult.error.message);
       const allBranches = Array.isArray(branchResult?.data) ? branchResult.data : [];
@@ -1475,7 +1473,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         id: x.row.id,
         key: x.key,
         label: x.row.name_ar || x.row.slug || 'تصنيف',
-        emoji: x.row.emoji || ({ Burgers:'🍔', Chicken:'🍗', Sides:'🍟', Drinks:'🥤', Desserts:'🍦' })[x.key] || '🍽️'
+        emoji: x.row.emoji || '🍽️'
       })));
       const sizesByItem = {};
       (sizes || []).forEach(z => {
@@ -1521,10 +1519,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       if (settings) {
         const chefId = settings.chef_special_item_id ? String(settings.chef_special_item_id) : '';
         const chefItem = chefId ? ITEM[chefId] : null;
-        state.chefSpecial = chefItem && !chefItem.secret
-          ? { id: chefId, discount: Math.min(0.99, Math.max(0.01, Number(settings.chef_special_discount) || 0.25)) }
-          : null;
-        safeSave(K('chef_special'), state.chefSpecial);
+        state.chefSpecial = chefItem && !chefItem.secret ? { id: chefId } : null;
       }
       // يمنع استخدام عناصر قديمة من التخزين المحلي بمعرّفات لم تعد موجودة في المنيو.
       state.cart = state.cart.map(sanitizeLine).filter(Boolean).map(line => ({
@@ -1679,7 +1674,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     customerNotifications: [],
     notificationsLoadedAt: 0,
     notificationsError: false,
-    freeBurger: false,
+    loyaltyLevels: [],
     points: 0,
     pointsRate: 0,
     redeemPoints: 0,
@@ -1694,7 +1689,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     secretUnlocked: false,
     birthdayApplied: String(safeLoad(K('birthday_applied'), '') || ''),
     ratings: sanitizeReviews(safeLoad(K('ratings'), {})),
-    chefSpecial: (() => { const c = safeLoad(K('chef_special'), null); if (c && typeof c === 'object' && ITEM[c.id] && Number.isFinite(c.discount) && c.discount > 0 && c.discount < 1) return c; return null; })()
+    chefSpecial: null
   };
 
   const app = document.getElementById('app');
@@ -1720,7 +1715,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const it = ITEM[line.id]; if (!it) return 0;
     const sp = it.sizes.find(s => s.key === line.size)?.price ?? 0;
     const ap = line.addons.reduce((s, a) => s + (ADDONS[a] ? (ADDONS[a].sale > 0 && ADDONS[a].sale < ADDONS[a].price ? ADDONS[a].sale : ADDONS[a].price) : 0), 0);
-    let p = sp;
+    const eff = it.sizes.find(s => s.key === line.size); let p = eff && eff.sale > 0 && eff.sale < eff.price ? eff.sale : sp;
     if (line.special?.type === 'free') p = 0;
     else if (line.special?.type === 'fixed') p = Math.min(sp, line.special.price);
     else if (line.special?.type === 'percent') p = sp * (1 - line.special.pct);
@@ -1738,77 +1733,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return v;
   };
   
-  const pricingVouchersFrom = (v) => {
-    if (!v) return [];
-    if (v.voucher_type === 'percent') return [{ type: 'percent', pct: Math.max(0, Math.min(1, (Number(v.value) || 0) / 100)) }];
-    if (v.voucher_type === 'fixed') return [{ type: 'flat', amount: Number(v.value) || 0 }];
-    if (v.voucher_type === 'free_delivery') return [{ type: 'delivery' }];
-    return [];
-  };
-  
-  const calculatePricingLocal = (cart, ctx = {}) => {
-    const coupon = ctx.coupon || null;
-    const vouchers = pricingVouchersFrom(ctx.voucher);
-    const itemLines = cart.map(line => {
-      const base = baseUnitPrice(line);
-      const unit = unitPrice(line, {});
-      return { line, base, unit, total: round2(unit * line.qty) };
-    });
-    const subtotal = round2(itemLines.reduce((s, x) => s + x.total, 0));
-    const itemDiscounts = round2(itemLines.reduce((s, x) => s + (x.base - x.unit) * x.line.qty, 0));
-    let deliveryFee = 0, freeDeliveryReason = null;
-    const liveSettings = window.SHEEPBURGER_STORE || {};
-    const selectedZoneId = document.getElementById('fArea')?.value;
-    const selectedZone = (window.SHEEPBURGER_ZONES || []).find(z => String(z.id) === String(selectedZoneId));
-    const freeDeliveryThreshold = Number(liveSettings.free_delivery_threshold ?? 0);
-    
-    // رسوم إضافية مطلوبة في التصميم الجديد
-    // لا توجد رسوم صغر الطلب أو خدمة في preview_order_quote ولا create_order_with_voucher_secure؛ لذلك تبقى صفرًا حتى لا يختلف الإجمالي المعروض عن الخادم
-    const smallOrderFee = 0;
-    const serviceFee = 0;
-
-    if (subtotal > 0) {
-      if (freeDeliveryThreshold > 0 && subtotal >= freeDeliveryThreshold) freeDeliveryReason = 'threshold';
-      else if (cart.some(l => ITEM[l.id]?.freeDelivery)) freeDeliveryReason = 'item';
-      else if (vouchers.some(v => v.type === 'delivery')) freeDeliveryReason = 'voucher';
-      else deliveryFee = Number(selectedZone?.fee ?? liveSettings.delivery_fee ?? 0);
-    }
-    const appliedVouchers = [];
-    let voucherDiscount = 0;
-    if (coupon && (coupon.type === 'percent' || coupon.type === 'fixed')) {
-      let couponApply = coupon.type === 'percent' ? round2(subtotal * Math.max(0, Number(coupon.value || 0)) / 100) : Math.max(0, Number(coupon.value || 0));
-      if (coupon.max_discount != null) couponApply = Math.min(couponApply, Number(coupon.max_discount));
-      couponApply = Math.min(couponApply, subtotal);
-      if (couponApply > 0) voucherDiscount += round2(couponApply);
-    }
-    for (const v of vouchers.filter(x => x.type === 'percent')) {
-      const pct = Math.max(0, Math.min(1, Number(v.pct) || 0));
-      const remainingSubtotal = Math.max(0, subtotal - voucherDiscount);
-      const apply = round2(remainingSubtotal * pct);
-      if (apply > 0) { voucherDiscount += apply; appliedVouchers.push(v); }
-    }
-    const running = subtotal + deliveryFee + smallOrderFee + serviceFee;
-    for (const v of vouchers.filter(x => x.type === 'flat')) {
-      const apply = round2(Math.min(Number(v.amount) || 0, Math.max(0, running - voucherDiscount)));
-      if (apply > 0) { voucherDiscount += apply; appliedVouchers.push(v); }
-    }
-    const cheeseCount = cart.reduce((n, l) => n + (l.addons.includes('cheese') ? l.qty : 0), 0);
-    const freeItemVouchers = vouchers.filter(v => v.type === 'free_item').slice(0, cheeseCount);
-    if (freeItemVouchers.length) {
-      voucherDiscount += round2(freeItemVouchers.length * (ADDONS.cheese?.price ?? 0));
-      appliedVouchers.push(...freeItemVouchers);
-    }
-    const dv = vouchers.find(v => v.type === 'delivery');
-    if (dv && freeDeliveryReason === 'voucher') appliedVouchers.push(dv);
-    
-    return {
-      subtotal, itemDiscounts, deliveryFee, voucherDiscount,
-      smallOrderFee, serviceFee,
-      total: round2(Math.max(0, subtotal + deliveryFee + smallOrderFee + serviceFee - voucherDiscount)),
-      appliedVouchers, itemLines, freeDeliveryReason
-    };
-  };
-
   /* ═══════════════════════════════════════════════
      [JS] السلة (الأصلي)
      ═══════════════════════════════════════════════ */
@@ -1896,37 +1820,54 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     };
   };
 
-  const pushServerCart = async () => {
-    if (!customerAuthUser || !sbClient) return;
+  // ─── مزامنة السلة: السيرفر هو المرجع عبر sync_customer_cart مع cart_revision ───
+  let cartRevision = null;   // آخر revision قرأه أو كتبه هذا الجهاز
+  let cartDirty = false;     // يوجد تعديل محلي لم يُرسل بعد
+  let cartRealtime = null;
+  let cartRefetchTimer = null;
+  const validZoneId = v => ((window.SHEEPBURGER_ZONES || []).some(z => String(z.id) === String(v)) ? v : null);
+
+  const cartDesiredLines = () => {
     const seen = new Map();
     state.cart.map(cartRowFromLine).filter(Boolean).forEach(r => { if (!seen.has(r.client_line_key)) seen.set(r.client_line_key, r); });
-    const rows = [...seen.values()];
-    const { data: cart, error: cartErr } = await sbClient.from('customer_carts')
-      .upsert({ user_id: customerAuthUser.id }, { onConflict: 'user_id' }).select('id').single();
-    if (cartErr) throw cartErr;
-    const { data: oldRows, error: oldErr } = await sbClient.from('customer_cart_items')
-      .select('id,client_line_key').eq('cart_id', cart.id);
-    if (oldErr) throw oldErr;
-    // upsert أولًا ثم حذف البنود المفقودة؛ لا نمسح السلة كاملة قبل نجاح الكتابة.
-    if (rows.length) {
-      const { error: upsertErr } = await sbClient.from('customer_cart_items')
-        .upsert(rows.map(r => ({ ...r, cart_id: cart.id })), { onConflict: 'cart_id,client_line_key' });
-      if (upsertErr) throw upsertErr;
-    }
-    const desiredKeys = new Set(rows.map(r => String(r.client_line_key)));
-    const staleIds = (oldRows || []).filter(r => !desiredKeys.has(String(r.client_line_key))).map(r => r.id);
-    if (staleIds.length) {
-      const { error: deleteErr } = await sbClient.from('customer_cart_items').delete().in('id', staleIds);
-      if (deleteErr) throw deleteErr;
-    }
+    return [...seen.values()];
   };
 
-  const hydrateServerCart = async () => {
+  // كل الحقول تُرسل دائمًا لأن الدالة تستبدل قيم السلة كاملة
+  const cartPayload = () => ({
+    p_lines: cartDesiredLines(),
+    p_coupon_code: state.selectedVoucherId ? null : (state.coupon?.code || null),
+    p_voucher_id: state.selectedVoucherId || null,
+    p_branch_id: window.SHEEPBURGER_BRANCH_STATE?.selectedId || null,
+    p_zone_id: validZoneId(document.getElementById('fArea')?.value || state.customer.area),
+    p_notes: (state.cartNotes || '').slice(0, 500) || null,
+    p_expected_revision: cartRevision
+  });
+
+  const pushServerCart = async () => {
+    if (!customerAuthUser || !sbClient || !cartHydrated) return;
+    const { data, error } = await sbClient.rpc('sync_customer_cart', cartPayload());
+    if (error) {
+      if (String(error.message || '').includes('CART_REVISION_CONFLICT')) {
+        // تغيّرت السلة من جهاز آخر أثناء التعديل: نقرأ الحالة الحالية من السيرفر
+        cartDirty = false;
+        await hydrateServerCart({ force: true });
+        toast('السلة اتحدثت من جهاز تاني.');
+        return;
+      }
+      throw error;
+    }
+    cartRevision = Number(data?.cart_revision ?? cartRevision);
+    cartDirty = false;
+  };
+
+  const hydrateServerCart = async ({ force = false } = {}) => {
     if (!customerAuthUser || !sbClient) return;
+    if (cartDirty && !force) return;
     const ready = await waitForMenu();
     if (!ready) return;
     const { data: cart, error } = await sbClient.from('customer_carts')
-      .select('id').eq('user_id', customerAuthUser.id).maybeSingle();
+      .select('id,cart_revision,coupon_code,voucher_id,branch_id,zone_id,cart_notes').eq('user_id', customerAuthUser.id).maybeSingle();
     if (error) throw error;
     let serverLines = [];
     if (cart) {
@@ -1936,30 +1877,66 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       if (rowsErr) throw rowsErr;
       serverLines = (rows || []).map(cartLineFromRow).filter(Boolean);
     }
-    // السيرفر هو المرجع لأي عميل لديه سلة محفوظة، حتى لا تعود بنود حُذفت من جهاز آخر.
-    // البنود المحلية تُدمج فقط عند أول تسجيل دخول (لا توجد سلة على السيرفر بعد).
-    if (cart) {
+    const localLines = [...new Map(state.cart.filter(l => ITEM[l.id]).map(l => [lineKey(l), { ...l, uid: uid() }])).values()];
+
+    if (cart && (serverLines.length || !localLines.length)) {
+      // السيرفر هو المرجع: كل جهاز يعرض نفس السلة ونفس الكوبون والملاحظات والمنطقة
+      cartRevision = Number(cart.cart_revision) || 0;
+      cartDirty = false;
       state.cart = serverLines;
+      state.cartNotes = cart.cart_notes || '';
+      state.selectedVoucherId = cart.voucher_id || null;
+      state.coupon = !cart.voucher_id && cart.coupon_code ? { code: cart.coupon_code } : null;
+      state.couponInput = state.coupon?.code || '';
+      if (validZoneId(cart.zone_id)) state.customer.area = cart.zone_id;
+      const bs = window.SHEEPBURGER_BRANCH_STATE;
+      if (bs && cart.branch_id && (bs.active || []).some(b => String(b.id) === String(cart.branch_id))) bs.selectedId = cart.branch_id;
     } else {
-      const merged = new Map();
-      state.cart.forEach(l => { if (ITEM[l.id]) merged.set(lineKey(l), { ...l, uid: uid() }); });
-      state.cart = [...merged.values()];
+      // لا توجد سلة على السيرفر بعد: ندمج سلة الجهاز الحالي (مثلًا سلة الزائر قبل تسجيل الدخول)
+      state.cart = localLines;
+      cartRevision = cart ? (Number(cart.cart_revision) || 0) : null;
+      cartDirty = localLines.length > 0;
     }
     safeSave(K('cart'), state.cart);
+    safeSave(K('customer'), state.customer);
+    safeSave(K('coupon'), state.coupon);
     updateBadges();
     cartHydrated = true;
-    await pushServerCart();
+    startCartRealtime();
+    if (cartDirty) await pushServerCart();
+    scheduleServerQuote();
     if (currentRoute() === 'cart' || currentRoute() === 'checkout') refresh();
   };
 
   const scheduleCartSync = () => {
     if (!customerAuthUser || !sbClient || !cartHydrated) return;
+    cartDirty = true;
     clearTimeout(cartSyncTimer);
     cartSyncTimer = setTimeout(() => {
       cartSyncChain = cartSyncChain
         .then(pushServerCart)
         .catch(e => { console.warn('[Cart] تعذر مزامنة السلة:', e?.message); toast('تعذر حفظ السلة في حسابك. هنحاول تاني.'); });
     }, 400);
+  };
+
+  // تحديث لحظي من أي جهاز آخر لنفس الحساب (RLS يضمن وصول بيانات هذا المستخدم فقط)
+  const startCartRealtime = () => {
+    if (!sbClient || !customerAuthUser || cartRealtime) return;
+    cartRealtime = sbClient.channel(`customer-cart-${customerAuthUser.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'customer_carts', filter: `user_id=eq.${customerAuthUser.id}` }, payload => {
+        const rev = Number(payload?.new?.cart_revision);
+        if (Number.isFinite(rev) && rev === cartRevision) return;  // صدى تعديلنا نفسه
+        if (cartDirty) return;                                       // عندنا تعديل لم يُرسل؛ الإرسال سيكتشف التعارض
+        clearTimeout(cartRefetchTimer);
+        cartRefetchTimer = setTimeout(() => { hydrateServerCart().catch(() => {}); }, 250);
+      })
+      .subscribe();
+  };
+
+  const stopCartRealtime = () => {
+    if (cartRealtime && sbClient) sbClient.removeChannel(cartRealtime);
+    cartRealtime = null;
+    clearTimeout(cartRefetchTimer);
   };
 
   const serverOrderFromRow = (r) => {
@@ -1985,7 +1962,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       voucherDiscount: Number(r.discount_total || 0), discountTotal: Number(r.discount_total || 0),
       total: Number(r.total || 0), payment: r.payment_method === 'cash' ? 'الدفع عند الاستلام' : (r.payment_method || ''),
       name: r.customer_name || '', address: r.delivery_address || '',
-      status: statusNum, statusLabel: r.status === 'cancelled' ? 'تم إلغاء الطلب' : null
+      status: statusNum, remoteStatus: r.status || 'pending', statusLabel: r.status === 'cancelled' ? 'تم إلغاء الطلب' : null
     };
   };
 
@@ -2029,6 +2006,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
   const clearCustomerLocalState = () => {
     cartHydrated = false;
+    cartRevision = null;
+    cartDirty = false;
+    stopCartRealtime();
     clearTimeout(cartSyncTimer);
     state.orders = state.orders.filter(o => !o.ownerId);
     safeSave(K('orders'), state.orders);
@@ -2045,30 +2025,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   let pendingCheckout = null;   // { fp, idempotencyKey, trackingToken } لإعادة المحاولة بنفس الطلب
   let trackingTimer = null;
 
-  const computeStatus = (order) => {
-    if (!false) return order.status ?? 0;
-    if (!order.startedAt) return order.status ?? 3;
-    if (order.status === 3) return 3;
-    return clamp(Math.floor((Date.now() - order.startedAt) / CONFIG.STATUS_STEP_MS), 0, 3);
-  };
-
-  const refreshLive = () => {
-    if (!false) return false;
-    let changed = false;
-    state.orders.forEach(o => {
-      if (o.status < 3) {
-        const c = computeStatus(o);
-        if (c !== o.status) { o.status = c; changed = true; }
-      }
-    });
-    if (changed) safeSave(K('orders'), state.orders);
-    return changed;
-  };
-
   const startTracking = () => {
     if (trackingTimer) return;
     trackingTimer = setInterval(async () => {
-      let changed = false ? refreshLive() : false;
+      let changed = false;
       const tracked = state.orders.filter(o => o.trackingToken && o.id && o.status < 3);
       for (const o of tracked) {
         try {
@@ -2082,7 +2042,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           const statusMap = { pending: 0, confirmed: 1, preparing: 1, ready: 2, out_for_delivery: 2, delivered: 3, cancelled: 3 };
           const next = statusMap[String(remote.status)] ?? o.status;
           if (next !== o.status || remote.total != null) {
-            o.status = next; o.statusLabel = remote.status === 'cancelled' ? 'تم إلغاء الطلب' : null;
+            o.status = next; o.remoteStatus = String(remote.status || o.remoteStatus || 'pending'); o.statusLabel = remote.status === 'cancelled' ? 'تم إلغاء الطلب' : null;
             o.total = Number(remote.total ?? o.total); o.subtotal = Number(remote.subtotal ?? o.subtotal);
             o.deliveryFee = Number(remote.delivery_fee ?? o.deliveryFee); o.discountTotal = Number(remote.discount_total ?? 0);
             o.remoteItems = payload.items || []; o.statusHistory = payload.history || [];
@@ -2101,6 +2061,32 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       if (changed) { safeSave(K('orders'), state.orders); if (currentRoute() === 'orders') refresh(); }
       if (!state.orders.some(o => o.status < 3 && o.trackingToken) && (!false || !state.orders.some(o => o.status < 3))) { clearInterval(trackingTimer); trackingTimer = null; }
     }, 12000);
+  };
+
+  const cancelCustomerOrder = async orderId => {
+    const order = state.orders.find(o => String(o.id) === String(orderId));
+    if (!order || !order.trackingToken) { toast('تعذر إلغاء الطلب من هذا الجهاز؛ افتح الطلب من الجهاز الذي أُنشئ منه.'); return; }
+    const remoteStatus = String(order.remoteStatus || 'pending');
+    if (!['pending', 'confirmed'].includes(remoteStatus)) { toast('لا يمكن إلغاء الطلب بعد بدء التجهيز. تواصل مع المطعم للمساعدة.'); return; }
+    if (!window.confirm(`هل تريد إلغاء الطلب رقم ${order.id}؟`)) return;
+    const button = [...document.querySelectorAll('[data-action="cancel-order"]')].find(b => String(b.dataset.orderId) === String(orderId));
+    if (button) { button.disabled = true; button.textContent = 'جارٍ الإلغاء…'; }
+    try {
+      const response = await fetch(`${SB_URL}/functions/v1/cancel-order`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
+        body: JSON.stringify({ order_number: String(order.id), tracking_token: order.trackingToken, reason: 'إلغاء من تطبيق العميل' })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.error) {
+        const messages = { ORDER_NOT_FOUND: 'الطلب غير موجود أو انتهت صلاحية بيانات تتبعه.', ORDER_CANNOT_BE_CANCELLED: 'لم يعد بالإمكان إلغاء الطلب لأنه انتقل لمرحلة لا تسمح بالإلغاء.', INVALID_TRACKING_TOKEN: 'تعذر التحقق من ملكية الطلب. حدّث صفحة الطلبات.', INVALID_REASON: 'سبب الإلغاء غير مقبول.' };
+        throw new Error(messages[result.error] || 'تعذر إلغاء الطلب حاليًا. حاول مرة أخرى أو تواصل مع المطعم.');
+      }
+      order.remoteStatus = 'cancelled'; order.status = 3; order.statusLabel = 'تم إلغاء الطلب';
+      safeSave(K('orders'), state.orders); refresh(); toast('تم إلغاء الطلب بنجاح.');
+    } catch (error) {
+      toast(error?.message || 'تعذر إلغاء الطلب. حاول مرة أخرى.');
+      if (button) { button.disabled = false; button.textContent = 'إلغاء الطلب'; }
+    }
   };
 
   const readForm = () => {
@@ -2179,7 +2165,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       if (branchState.active.length > 1 && !branchState.selectedId) throw new Error('BRANCH_SELECTION_REQUIRED');
       const settings = window.SHEEPBURGER_STORE || {};
       if (!settings.is_open || !settings.accepting_orders) throw new Error('STORE_CLOSED');
-      if (settings.cash_enabled === false) throw new Error('CASH_PAYMENT_DISABLED');
+      if (settings.cash_enabled === false) throw new Error('NO_SUPPORTED_PAYMENT_METHOD');
+      const selectedPayment = document.querySelector('input[name=\"payment\"]:checked')?.value || 'cash';
+      if (selectedPayment !== 'cash') throw new Error('ONLINE_PAYMENT_NOT_CONFIGURED');
       const zoneSelect = document.getElementById('fArea');
       const zoneId = zoneSelect?.value;
       const zone = (window.SHEEPBURGER_ZONES || []).find(z => String(z.id) === String(zoneId));
@@ -2237,7 +2225,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           INVALID_CUSTOMER_PHONE: 'اكتب رقم موبايل مصري صحيح يبدأ بـ 010 أو 011 أو 012 أو 015.',
           INVALID_DELIVERY_ZONE: 'منطقة التوصيل غير متاحة حالياً.',
           ITEM_OR_SIZE_UNAVAILABLE: 'فيه منتج أو حجم اتوقف من المنيو. حدّث الصفحة وراجع السلة.',
-          CASH_PAYMENT_DISABLED: 'الدفع عند الاستلام غير متاح حالياً.',
+          CASH_PAYMENT_DISABLED: 'الدفع عند الاستلام غير متاح حالياً.', NO_SUPPORTED_PAYMENT_METHOD: 'لا توجد وسيلة دفع متاحة حاليًا. تواصل مع المطعم.', ONLINE_PAYMENT_NOT_CONFIGURED: 'الدفع الإلكتروني غير متصل حاليًا. اختر الدفع عند الاستلام.',
           BRANCH_REQUIRED: 'لا يمكن إنشاء الطلب قبل تفعيل فرع في إعدادات المطعم.', BRANCH_NOT_FOUND: 'الفرع المحدد غير متاح حاليًا. حدّث الصفحة.',
           ADDON_NOT_READY: 'الإضافات لسه بتتحمّل. حدّث المنيو وجرب تاني.',
           INVALID_OR_UNAVAILABLE_ADDON: 'إحدى الإضافات لم تعد متاحة. راجع السلة.'
@@ -2255,7 +2243,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         note: l.note || '', special: l.special ? { ...l.special } : null
       }));
       const order = {
-        id: remote.order_number, dbId: remote.order_id, trackingToken,
+        id: remote.order_number, dbId: remote.order_id, trackingToken, remoteStatus: remote.status || 'pending',
         date: new Date(remote.created_at || Date.now()).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }),
         startedAt: Date.now(), ownerId: customerAuthUser?.id || null, items: itemSnapshot,
         subtotal: Number(remote.subtotal || 0), deliveryFee: Number(remote.delivery_fee || 0),
@@ -2342,12 +2330,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   /* ═══════════════════════════════════════════════
      [JS] التقييمات (الأصلي)
      ═══════════════════════════════════════════════ */
-  const getRating = (itemId) => {
-    const list = state.ratings[itemId] || [];
-    if (!list.length) return { avg: 0, count: 0 };
-    const sum = list.reduce((s, r) => s + r.stars, 0);
-    return { avg: sum / list.length, count: list.length };
+  let liveRatingSummary = {};
+  const loadRatingSummary = async () => {
+    if (!sbClient) return;
+    const { data, error } = await sbClient.from('menu_item_rating_summary').select('item_id,avg_rating,review_count');
+    if (error) return;
+    liveRatingSummary = Object.fromEntries((data || []).map(r => [String(r.item_id), { avg: Number(r.avg_rating) || 0, count: Number(r.review_count) || 0 }]));
+    if (['home', 'menu'].includes(currentRoute())) refresh();
   };
+  const getRating = (itemId) => liveRatingSummary[String(itemId)] || { avg: 0, count: 0 };
 
   const starsHtml = (itemId) => {
     const { avg, count } = getRating(itemId);
@@ -2409,19 +2400,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       refresh();
       toast(`🎉 اتعملت مكافأة بقيمة ${money(Number(result.data?.voucher_value ?? state.redeemValue ?? Math.max(0, Number(window.SHEEPBURGER_STORE?.loyalty_redeem_value || 0))))}.`);
     } catch (e) { toast(e?.message || 'تعذر استبدال النقاط.'); }
-  };
-
-  const claimFreeBurger = () => {
-    if (!state.freeBurger) return;
-    const burgers = MENU_ITEMS.filter(i => i.cat === 'Burgers' && !isSecret(i));
-    if (!burgers.length) return;
-    const cheapest = burgers.reduce((min, it) => fromPrice(it) < fromPrice(min) ? it : min, burgers[0]);
-    if (!addQuickLine(cheapest, { type: 'free' })) return;
-    state.freeBurger = false;
-    safeSave(K('free_burger'), false);
-    showConfetti();
-    toast('🎉 برجر مجاني اتضاف للسلة!');
-    location.hash = '#/cart';
   };
 
   const unlockSecret = async () => {
@@ -2549,7 +2527,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   /* ═══════════════════════════════════════════════
      [JS] مكونات HTML (الأصلي)
      ═══════════════════════════════════════════════ */
-  const fromPrice = it => Math.min(...it.sizes.map(s => s.price));
+  const fromPrice = it => Math.min(...it.sizes.map(s => (s.sale > 0 && s.sale < s.price) ? s.sale : s.price));
 
   const priceHtml = (it) => {
     if (it.off) {
@@ -2617,12 +2595,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   let announcementsState = 'idle';
 
   // يتحقق من فترة العرض (starts_at / ends_at)
-  const isWithinSchedule = row => {
-    const now = Date.now();
-    if (row.starts_at && new Date(row.starts_at).getTime() > now) return false;
-    if (row.ends_at && new Date(row.ends_at).getTime() < now) return false;
-    return true;
-  };
+  // الجدولة (starts_at / ends_at) تُطبّق في الداتا بيز عبر الـ views من نوع active_*
+  const isWithinSchedule = () => true;
 
   // يقبل فقط ألوان hex لمنع حقن CSS من بيانات الإدارة
   const safeColor = (v, fallback) => (typeof v === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(v.trim())) ? v.trim() : fallback;
@@ -2687,7 +2661,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (!sbClient) { homeBannersState = 'error'; renderHeroSlider(); return; }
     if (homeBannersState !== 'ready') { homeBannersState = 'loading'; renderHeroSlider(); }
     try {
-      const { data, error } = await sbClient.from('homepage_banners')
+      const { data, error } = await sbClient.from('active_homepage_banners')
         .select(BANNER_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
       if (error) throw error;
       homeBannerRows = sortHomeBanners(filterActiveBanners(data));
@@ -2829,7 +2803,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   async function loadAnnouncements() {
     if (!sbClient) { announcementsState = 'error'; return; }
     try {
-      const { data, error } = await sbClient.from('homepage_announcements')
+      const { data, error } = await sbClient.from('active_homepage_announcements')
         .select(ANNOUNCE_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
       if (error) throw error;
       announcements = filterActiveAnnouncements(data).sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
@@ -2982,7 +2956,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (!sbClient) { homeBlocksState = 'error'; renderHomepageBlocks(); return; }
     if (homeBlocksState !== 'ready') { homeBlocksState = 'loading'; renderHomepageBlocks(); }
     try {
-      const { data: rows, error } = await sbClient.from('homepage_blocks')
+      const { data: rows, error } = await sbClient.from('active_homepage_blocks')
         .select(HOMEPAGE_BLOCK_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
       if (error) throw error;
       // block_type حقل حر في القاعدة، لذلك لا نفلتر عليه؛ البلوك يُعرض فقط إن كان له محتوى صالح
@@ -3000,7 +2974,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       // مواضع العروض داخل البلوكات؛ فشلها لا يمنع عرض البلوكات
       const placementsByBlock = {};
       if (valid.length) {
-        const { data: placements, error: plErr } = await sbClient.from('promotion_display_placements')
+        const { data: placements, error: plErr } = await sbClient.from('active_promotion_display_placements')
           .select('id,promotion_id,block_id,sort_order,is_active,starts_at,ends_at')
           .eq('placement_type', 'homepage_block').eq('is_active', true)
           .in('block_id', valid.map(b => b.id)).order('sort_order', { ascending: true });
@@ -3333,7 +3307,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   async function loadPromotionPages() {
     if (!sbClient) return;
     try {
-      const { data: pages, error } = await sbClient.from('promotion_pages')
+      const { data: pages, error } = await sbClient.from('active_promotion_pages')
         .select(PAGE_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
       if (error) throw error;
       const valid = (pages || []).filter(p => p && p.is_active !== false && isWithinSchedule(p) && (p.title_ar || p.card_image_url));
@@ -3620,7 +3594,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   const loadItemBadges = async () => {
     if (!sbClient) return;
     try {
-      const { data: badges, error } = await sbClient.from('display_badges')
+      const { data: badges, error } = await sbClient.from('active_display_badges')
         .select('id,name,label_ar,font_family,font_size_px,font_weight,text_color,background_color,border_color,border_width_px,shape,position,icon,animation,priority,is_active,starts_at,ends_at')
         .eq('is_active', true).order('priority', { ascending: false });
       if (error) throw error;
@@ -3674,9 +3648,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const popular = MENU_ITEMS.filter(i => !isSecret(i) && i.tags.includes('popular')).concat(MENU_ITEMS.filter(i => !isSecret(i) && !i.tags.includes('popular'))).slice(0, 6);
     const pricing = calculatePricing(state.cart, { coupon: state.coupon, voucher: selectedRemoteVoucher() });
 
-    const special = state.chefSpecial ? ITEM[state.chefSpecial.id] : null;
-    const specialPrice = special ? fromPrice(special) : 0;
-    const discounted = specialPrice * (1 - (state.chefSpecial?.discount || 0.25));
 
 
     return `
@@ -3790,10 +3761,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         </div>
 
         <div class="cart-items-list">
-            ${state.cart.map(l => {
+            ${state.cart.map((l, idx) => {
               const it = ITEM[l.id];
-              const unit = unitPrice(l, {});
-              const base = baseUnitPrice(l);
+              const ql = freshQuoteItems()?.[idx];
+              const unit = ql ? Number(ql.unit_price) + Number(ql.addons_total || 0) : unitPrice(l, {});
+              const base = ql ? Number(ql.original_unit_price) + Number(ql.original_addons_total || 0) : baseUnitPrice(l);
               const total = round2(unit * l.qty);
               const showOld = base > unit + 0.001;
               return `<div class="cart-item-card" data-line="${esc(l.uid)}">
@@ -3854,7 +3826,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           ${pricing.itemDiscounts > 0.001 ? `<div class="summary-row discount" style="color:var(--success);"><span>خصومات</span><span class="price-ltr">−${money(pricing.itemDiscounts)}</span></div>` : ''}
           ${pricing.smallOrderFee > 0 ? `<div class="summary-row"><span>رسوم الطلبات الصغيرة ⓘ</span><span class="price-ltr">${money(pricing.smallOrderFee)}</span></div>` : ''}
           <div class="summary-row"><span>رسوم التوصيل</span><span class="price-ltr">${pricing.deliveryFee ? money(pricing.deliveryFee) : '<b style="color:var(--success);">مجاني</b>'}</span></div>
-          ${pricing.voucherDiscount > 0 ? `<div class="summary-row discount" style="color:var(--success);"><span>كوبونات</span><span class="price-ltr">−${money(pricing.voucherDiscount)}</span></div>` : ''}
+          ${pricing.promotionDiscount > 0.001 ? `<div class="summary-row discount" style="color:var(--success);"><span>خصم تلقائي من النظام</span><span class="price-ltr">−${money(pricing.promotionDiscount)}</span></div>` : ''}
+          ${pricing.couponDiscount > 0.001 ? `<div class="summary-row discount" style="color:var(--success);"><span>خصم كود الخصم</span><span class="price-ltr">−${money(pricing.couponDiscount)}</span></div>` : ''}
+          ${pricing.loyaltyDiscount > 0.001 ? `<div class="summary-row discount" style="color:var(--success);"><span>خصم مكافأة الولاء</span><span class="price-ltr">−${money(pricing.loyaltyDiscount)}</span></div>` : ''}
           ${pricing.serviceFee > 0 ? `<div class="summary-row"><span>رسوم الخدمة</span><span class="price-ltr">${money(pricing.serviceFee)}</span></div>` : ''}
 
 
@@ -3933,13 +3907,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
         <h3 style="font-size:16px; font-weight:800; margin-bottom:12px;">الدفع من خلال</h3>
         <div class="payment-methods">
-          <div class="payment-option">
-            <label>
-              <input type="radio" name="payment" value="cash" checked>
-              <span>نقداً (الدفع عند الاستلام)</span>
-            </label>
-            <span style="font-size:20px;">💵</span>
-          </div>
+          ${window.SHEEPBURGER_STORE?.cash_enabled !== false ? `<div class="payment-option"><label><input type="radio" name="payment" value="cash" checked><span>نقداً (الدفع عند الاستلام)</span></label><span style="font-size:20px;">💵</span></div>` : ''}
+          ${window.SHEEPBURGER_STORE?.visa_enabled ? `<div class="payment-option" aria-disabled="true"><label style="opacity:.55;cursor:not-allowed"><input type="radio" name="payment" value="visa" disabled><span>بطاقة بنكية — غير متاحة حاليًا</span></label><span>💳</span></div>` : ''}
+          ${window.SHEEPBURGER_STORE?.wallet_enabled ? `<div class="payment-option" aria-disabled="true"><label style="opacity:.55;cursor:not-allowed"><input type="radio" name="payment" value="wallet" disabled><span>محفظة إلكترونية — غير متاحة حاليًا</span></label><span>📱</span></div>` : ''}
+          ${window.SHEEPBURGER_STORE?.cash_enabled === false ? `<p style="padding:14px;color:var(--danger);font-size:13px">الدفع النقدي متوقف. لا يوجد حاليًا مزود دفع إلكتروني متصل لإتمام الطلب.</p>` : ''}
         </div>
 
         <h3 style="font-size:18px; font-weight:900; margin-bottom:16px;">ملخص الدفع</h3>
@@ -3948,8 +3919,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           ${pricing.itemDiscounts > 0.001 ? `<div class="summary-row discount" style="color:var(--success);"><span>خصومات</span><span class="price-ltr">−${money(pricing.itemDiscounts)}</span></div>` : ''}
           ${pricing.smallOrderFee > 0 ? `<div class="summary-row"><span>رسوم الطلبات الصغيرة ⓘ</span><span class="price-ltr">${money(pricing.smallOrderFee)}</span></div>` : ''}
           <div class="summary-row"><span>رسوم التوصيل</span><span class="price-ltr">${pricing.deliveryFee ? money(pricing.deliveryFee) : '<b style="color:var(--success);">مجاني</b>'}</span></div>
-          ${pricing.voucherDiscount > 0 ? `<div class="summary-row discount" style="color:var(--success);"><span>كوبونات</span><span class="price-ltr">−${money(pricing.voucherDiscount)}</span></div>` : ''}
+          ${pricing.promotionDiscount > 0.001 ? `<div class="summary-row discount" style="color:var(--success);"><span>خصم تلقائي من النظام</span><span class="price-ltr">−${money(pricing.promotionDiscount)}</span></div>` : ''}
+          ${pricing.couponDiscount > 0.001 ? `<div class="summary-row discount" style="color:var(--success);"><span>خصم كود الخصم</span><span class="price-ltr">−${money(pricing.couponDiscount)}</span></div>` : ''}
+          ${pricing.loyaltyDiscount > 0.001 ? `<div class="summary-row discount" style="color:var(--success);"><span>خصم مكافأة الولاء</span><span class="price-ltr">−${money(pricing.loyaltyDiscount)}</span></div>` : ''}
           ${pricing.serviceFee > 0 ? `<div class="summary-row"><span>رسوم الخدمة</span><span class="price-ltr">${money(pricing.serviceFee)}</span></div>` : ''}
+          ${window.SHEEPBURGER_STORE?.distance_delivery_enabled ? '<p class="muted" style="font-size:11px;margin-top:8px">إعداد رسوم المسافة موجود في قاعدة البيانات، لكن مسار معاينة الطلب الحالي لا يحسبها بعد؛ لن نضيف رسومًا تقديرية من المتصفح.</p>' : ''}
           ${pricing.serverVerified ? '' : '<p class="pending-note" role="status">السعر قيد التحديث من السيرفر… لن يُسمح بإتمام الطلب قبل تأكيده.</p>'}<div class="summary-row total"><span>المبلغ الإجمالي</span><span class="price-ltr">${pricing.serverVerified ? money(pricing.total) : '<span class="pending-price">جارٍ التحديث…</span>'}</span></div>
         </div>
         
@@ -3997,6 +3971,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
                 </div>`).join('')}
                 <div class="order-total-row"><span>الإجمالي</span><span>${money(o.total)}</span></div>
               </div>
+              ${['pending','confirmed'].includes(String(o.remoteStatus || 'pending')) && o.trackingToken ? `<button class="btn btn-outline btn-sm" style="margin-inline-start:8px;color:var(--danger);border-color:var(--danger)" data-action="cancel-order" data-order-id="${esc(String(o.id))}">إلغاء الطلب</button>` : ''}
               ${canReorder ? `<button class="btn btn-outline btn-sm" data-action="reorder" data-order-id="${esc(String(o.id))}">⚡ اطلب تاني</button>` : ''}
             </div>`;
           }).join('')}
@@ -4005,10 +3980,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   const viewProfile = () => {
-    const lvl = state.points >= 300 ? 'hot' : state.points >= 100 ? 'medium' : 'mild';
-    const next = lvl === 'mild' ? 100 : lvl === 'medium' ? 300 : 500;
-    const progress = Math.min(100, (state.points / Math.max(next, 1)) * 100);
-    const lvlName = { mild: '🌶 هادي', medium: '🌶🌶 وسط', hot: '🌶🌶🌶 حار' }[lvl];
+    const levels = (Array.isArray(state.loyaltyLevels) ? state.loyaltyLevels : []).slice().sort((a, b) => a.min_points - b.min_points);
+    const curLevel = levels.filter(l => state.points >= l.min_points).pop() || null;
+    const nextLevel = levels.find(l => l.min_points > state.points) || null;
+    const lowBound = curLevel ? curLevel.min_points : 0;
+    const progress = nextLevel ? Math.min(100, ((state.points - lowBound) / Math.max(1, nextLevel.min_points - lowBound)) * 100) : 100;
+    const lvlName = curLevel ? curLevel.name_ar : '';
     const nowMs = Date.now();
     const allRemoteVouchers = Array.isArray(state.remoteVouchers) ? state.remoteVouchers : [];
     const activeRemoteVouchers = allRemoteVouchers.filter(v => !v.redeemed_at && !v.redeemed_order_id && (!v.expires_at || Date.parse(v.expires_at) > nowMs));
@@ -4072,7 +4049,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           <div class="points-big">${state.points} نقطة</div>
           <p class="points-sub">${state.pointsRate} نقطة لكل 1 جنيه مؤهل من الطلب</p>
           <div class="points-track"><i style="width:${progress}%"></i></div>
-          <p class="points-sub">${Math.max(0, next - state.points)} نقطة للمستوى اللي بعده</p>
+          <p class="points-sub">${nextLevel ? `${Math.max(0, nextLevel.min_points - state.points)} نقطة للمستوى اللي بعده` : ''}</p>
           ${customerAuthUser && state.loyaltyEnabled && state.points >= state.redeemPoints ? `<button class="btn btn-primary btn-block" data-action="redeem-points" style="margin-top:12px">استبدل ${state.redeemPoints} نقطة بـ ${money(state.redeemValue)}</button>` : ''}
           ${!customerAuthUser ? '<p class="points-sub">رصيد النقاط لا يُحسب من المتصفح؛ لازم توثّق إيميلك.</p>' : ''}
         </div>
@@ -4432,20 +4409,28 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     quoteTimer = setTimeout(() => runServerQuote(sig), 250);
   };
 
-  // الأرقام المعروضة تأتي من الخادم عندما تكون المعاينة مطابقة للسلة الحالية
-  const calculatePricing = (cart, ctx = {}) => {
-    const local = calculatePricingLocal(cart, ctx);
-    if (!serverQuote || !serverQuote.quote || serverQuote.sig !== quoteSignature()) return local;
+  // أسعار بنود السلة من معاينة الخادم (نفس ترتيب السلة) عندما تكون مطابقة للسلة الحالية
+  const freshQuoteItems = () => (serverQuote && serverQuote.quote && serverQuote.sig === quoteSignature() && Array.isArray(serverQuote.quote.items) && serverQuote.quote.items.length === state.cart.length) ? serverQuote.quote.items : null;
+
+  // كل الأرقام المالية (المجموع، التوصيل، الخصومات، الإجمالي) تأتي من الخادم فقط عبر preview_order_quote_with_voucher.
+  // لا يوجد أي حساب محلي للأسعار؛ إن لم تكن المعاينة مطابقة للسلة الحالية تُعرض الأرقام صفرًا ويُمنع الدفع.
+  const EMPTY_PRICING = () => ({ subtotal: 0, itemDiscounts: 0, deliveryFee: 0, smallOrderFee: 0, serviceFee: 0, couponDiscount: 0, loyaltyDiscount: 0, promotionDiscount: 0, voucherDiscount: 0, total: 0, freeDeliveryReason: null, serverVerified: false });
+  const calculatePricing = () => {
+    if (!state.cart.length || !serverQuote || !serverQuote.quote || serverQuote.sig !== quoteSignature()) return EMPTY_PRICING();
     const q = serverQuote.quote;
     return {
-      ...local,
       subtotal: Number(q.subtotal) || 0,
       itemDiscounts: 0,
       smallOrderFee: 0,
-      serviceFee: 0,
-      deliveryFee: Number(q.delivery_fee) || 0,
-      voucherDiscount: Number(q.discount_total) || 0,
+      deliveryFee: Math.max(0, q.zone_delivery_fee != null ? Number(q.zone_delivery_fee) + Number(q.delivery_distance_fee || 0) : Number(q.delivery_fee || 0) - Number(q.delivery_service_fee || 0)),
+      serviceFee: Math.max(0, Number(q.delivery_service_fee || 0)),
+      // discount_total هو إجمالي كل الخصومات؛ نفصل الكوبون والقسيمة حسب حقولهما، والباقي خصم تلقائي من النظام.
+      couponDiscount: Math.max(0, Number(q.coupon_discount || 0)),
+      loyaltyDiscount: Math.max(0, Number(q.voucher_discount || 0)),
+      promotionDiscount: Math.max(0, Number(q.discount_total || 0) - Number(q.coupon_discount || 0) - Number(q.voucher_discount || 0)),
+      voucherDiscount: Math.max(0, Number(q.coupon_discount || 0) + Number(q.voucher_discount || 0)),
       total: Number(q.total) || 0,
+      freeDeliveryReason: null,
       serverVerified: true
     };
   };
@@ -4467,12 +4452,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     state.couponMsg = '';
     serverQuote = { sig: quoteSignature(), quote: res.quote, error: '' };
     safeSave(K('coupon'), { code });
+    scheduleCartSync();
     refresh(); toast('الكوبون اتفعّل 🎉');
   };
 
   const removeCoupon = () => {
     state.coupon = null; state.couponInput = ''; state.couponMsg = '';
     safeSave(K('coupon'), null);
+    scheduleCartSync();
     refresh();
   };
 
@@ -4620,6 +4607,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       state.redeemValue = Math.max(0, Number(settings.loyalty_redeem_value) || 0);
       state.stampsForReward = Math.max(1, Number(settings.loyalty_stamps_for_reward) || Math.max(1, Number(window.SHEEPBURGER_STORE?.loyalty_stamps_for_reward || 1)));
       state.loyaltyEnabled = !!settings.loyalty_enabled;
+      state.loyaltyLevels = Array.isArray(result.loyalty_levels) ? result.loyalty_levels : [];
       await loadCustomerNotifications();
       state.remoteVouchers = Array.isArray(result.vouchers) ? result.vouchers : [];
       state.achievements = (Array.isArray(result.achievements) ? result.achievements : []).map(a => a.achievement_key === 'guac_master' ? 'guac_master' : a.achievement_key).filter(k => k in ACHIEVEMENTS);
@@ -4815,6 +4803,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       case 'apply-coupon': applyCoupon(); break;
       case 'remove-coupon': removeCoupon(); break;
       case 'checkout': checkout(); break;
+      case 'cancel-order': cancelCustomerOrder(el.dataset.orderId); break;
       case 'save-name': saveName(); break;
       case 'customer-signin': customerPasswordAuth('signin'); break;
       case 'customer-signup': customerPasswordAuth('signup'); break;
@@ -4832,11 +4821,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         const voucher = (state.remoteVouchers || []).find(v => v.id === el.dataset.voucherId);
         if (!customerAuthUser || !voucher) { toast('سجّل بإيميلك الأول عشان تستخدم المكافأة.'); return; }
         if (voucher.redeemed_at || voucher.redeemed_order_id || (voucher.expires_at && Date.parse(voucher.expires_at) <= Date.now())) { toast('المكافأة دي مش متاحة للاستخدام.'); return; }
-        state.selectedVoucherId = voucher.id; state.coupon = null; state.couponInput = ''; state.couponMsg = ''; safeSave(K('coupon'), null);
+        state.selectedVoucherId = voucher.id; state.coupon = null; state.couponInput = ''; state.couponMsg = ''; safeSave(K('coupon'), null); scheduleCartSync();
         toast('اتحددت المكافأة للطلب القادم.'); location.hash = state.cart.length ? '#/cart' : '#/menu'; refresh(); break;
       }
       case 'retry-menu': loadLiveMenu(); break;
-      case 'clear-reward-voucher': state.selectedVoucherId = null; refresh(); toast('تم إلغاء اختيار المكافأة.'); break;
+      case 'clear-reward-voucher': state.selectedVoucherId = null; scheduleCartSync(); refresh(); toast('تم إلغاء اختيار المكافأة.'); break;
       case 'unlock-secret': unlockSecret(); break;
       case 'toggle-review': state.reviewFormOpen = !state.reviewFormOpen; renderSheet(); break;
       case 'cancel-review': state.reviewFormOpen = false; state.reviewName = ''; state.reviewText = ''; renderSheet(); break;
@@ -4892,7 +4881,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       return;
     }
     if (id === 'coupon') { state.couponInput = e.target.value.trim(); return; }
-    if (id === 'orderNotes') { state.cartNotes = e.target.value; return; } // حفظ الملاحظات
+    if (id === 'orderNotes') { state.cartNotes = e.target.value; scheduleCartSync(); return; } // حفظ الملاحظات
     
     const map = { fName: 'name', fPhone: 'phone', fArea: 'area', fStreet: 'street', fBuilding: 'building', fFloor: 'floor', fApt: 'apt', fBirthday: 'birthday' };
     if (map[id]) {
@@ -4914,6 +4903,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
     if (e.target?.id === 'fArea') {
       state.customer.area = e.target.value;
+      scheduleCartSync();
       safeSave(K('customer'), state.customer);
       refresh();
     }
@@ -4961,14 +4951,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
      [JS] التشغيل (الأصلي)
      ═══════════════════════════════════════════════ */
   (function boot() {
-    Promise.resolve(loadLiveMenu()).then(() => Promise.all([loadAddonGroups(), loadItemBadges(), loadPromotionPages()])).catch(() => {});
+    Promise.resolve(loadLiveMenu()).then(() => Promise.all([loadAddonGroups(), loadItemBadges(), loadPromotionPages(), loadRatingSummary()])).catch(() => {});
     initAddonGroupGuards();
     loadAchievementDefinitions().then(() => { if (currentRoute() === 'profile') refresh(); }).catch(() => {});
     startLiveMenu();
     loadHomeBanners();
     loadAnnouncements();
     loadHomepageBlocks();
-    setInterval(() => { loadHomeBanners(); loadAnnouncements(); loadHomepageBlocks(); loadPromotionPages(); loadLiveMenu(); loadItemBadges(); }, 5 * 60 * 1000);
+    setInterval(() => { loadHomeBanners(); loadAnnouncements(); loadHomepageBlocks(); loadPromotionPages(); loadLiveMenu(); loadItemBadges(); loadRatingSummary(); }, 5 * 60 * 1000);
     if (!location.hash) location.hash = '#/home';
     state.secretUnlocked = false;
     if (sbClient) {
@@ -5000,7 +4990,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         if (currentRoute() === 'profile' || currentRoute() === 'notifications') setTimeout(() => refresh(), 0);
       });
     }
-    refreshLive();
     if (state.orders.some(o => o.status < 3)) startTracking();
     render();
     if ('serviceWorker' in navigator) {
