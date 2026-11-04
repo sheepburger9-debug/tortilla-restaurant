@@ -243,6 +243,7 @@ svg{width:20px;height:20px;flex-shrink:0}
 .cat-pill:hover{transform:translateY(-2px);border-color:var(--ink-3)}
 .cat-pill.active{background:var(--ink);color:#fff;border-color:var(--ink)}
 .cat-pill .emoji{font-size:17px;line-height:1}
+a.cat-pill{text-decoration:none}
 
 /* ╔═ [CSS] كروت المنتجات */
 .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;margin-bottom:32px}
@@ -2922,9 +2923,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       return;
     }
     if (t.kind === 'category') {
-      state.filter = t.id;
-      state.subcat = 'All';
-      if (currentRoute() === 'menu') refresh(); else location.hash = '#/menu';
+      const target = '#/menu/' + encodeURIComponent(t.id);
+      if (location.hash === target) { state.filter = t.id; state.subcat = 'All'; refresh(); }
+      else location.hash = target;
       return;
     }
     if (t.kind === 'page') { openPageScreen(t.id); return; }
@@ -4115,17 +4116,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const subs = isCat ? (SUBCATS[state.filter] || []) : [];
     return `
       <div class="view-anim">
-        <div class="sec-head" style="margin-top:8px"><h2><em>المنيو</em></h2></div>
+        <div class="sec-head" style="margin-top:8px"><h2><em>${esc((CATS.find(c => c.id === state.filter) || {}).label || 'المنيو')}</em></h2></div>
         <div style="margin-bottom:14px">
           <input type="search" id="search" placeholder="ابحث في البرجر، البطاطس، المشروبات…" value="${esc(state.query)}" aria-label="بحث" style="width:100%;padding:13px 18px;border-radius:var(--r-full);border:1.5px solid var(--line);background:var(--surface);font-size:14.5px;color:var(--ink)">
         </div>
         <div class="cats">
-          <button class="cat-pill ${state.filter === 'All' ? 'active' : ''}" data-action="filter" data-val="All">🍽️ الكل</button>
-          ${CATS.map(c => `<button class="cat-pill ${state.filter === c.id ? 'active' : ''}" data-action="filter" data-val="${esc(c.id)}"><span class="emoji">${c.emoji}</span>${esc(c.label)}${categoryBadgeHtml(c.id)}</button>`).join('')}
-          ${window.SHEEPBURGER_STORE?.show_popular_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:popular' ? 'active' : ''}" data-action="filter" data-val="tag:popular">🔥 الأكثر طلباً</button>` : ''}
-          ${window.SHEEPBURGER_STORE?.show_spicy_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:spicy' ? 'active' : ''}" data-action="filter" data-val="tag:spicy">🌶 حار</button>` : ''}
-          ${window.SHEEPBURGER_STORE?.show_vegetarian_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:veggie' ? 'active' : ''}" data-action="filter" data-val="tag:veggie">🥬 نباتي</button>` : ''}
-          ${window.SHEEPBURGER_STORE?.show_free_delivery_filter !== false ? `<button class="cat-pill ${state.filter === 'tag:free_delivery' ? 'active' : ''}" data-action="filter" data-val="tag:free_delivery">🛵 توصيل مجاني</button>` : ''}
+          <a href="#/menu" class="cat-pill ${state.filter === 'All' ? 'active' : ''}" data-cat="All">🍽️ الكل</a>
+          ${CATS.map(c => `<a href="#/menu/${encodeURIComponent(c.id)}" class="cat-pill ${state.filter === c.id ? 'active' : ''}" data-cat="${esc(c.id)}"><span class="emoji">${c.emoji}</span>${esc(c.label)}${categoryBadgeHtml(c.id)}</a>`).join('')}
+          ${window.SHEEPBURGER_STORE?.show_popular_filter === true ? `<button class="cat-pill ${state.filter === 'tag:popular' ? 'active' : ''}" data-action="filter" data-val="tag:popular">🔥 الأكثر طلباً</button>` : ''}
+          ${window.SHEEPBURGER_STORE?.show_spicy_filter === true ? `<button class="cat-pill ${state.filter === 'tag:spicy' ? 'active' : ''}" data-action="filter" data-val="tag:spicy">🌶 حار</button>` : ''}
+          ${window.SHEEPBURGER_STORE?.show_vegetarian_filter === true ? `<button class="cat-pill ${state.filter === 'tag:veggie' ? 'active' : ''}" data-action="filter" data-val="tag:veggie">🥬 نباتي</button>` : ''}
+          ${window.SHEEPBURGER_STORE?.show_free_delivery_filter === true ? `<button class="cat-pill ${state.filter === 'tag:free_delivery' ? 'active' : ''}" data-action="filter" data-val="tag:free_delivery">🛵 توصيل مجاني</button>` : ''}
         </div>
         ${subs.length ? `<div class="cats" style="padding-top:0">
           <button class="cat-pill ${state.subcat === 'All' ? 'active' : ''}" data-action="subfilter" data-val="All" style="padding:7px 14px;font-size:12.5px">الكل</button>
@@ -4511,7 +4512,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 // • قراءة الـ hash الحالي
   const currentRoute = () => {
     const r = location.hash.replace(/^#\/?/, '');
-    return VIEWS[r] ? r : 'home';
+    const base = r.split('/')[0];
+    return VIEWS[base] ? base : 'home';
+  };
+// • كل تصنيف له شاشة مستقلة: #/menu/<categoryId>، و#/menu = الكل
+  const syncMenuFilterFromHash = () => {
+    const m = location.hash.match(/^#\/menu\/(.+)$/);
+    if (m) {
+      const id = decodeURIComponent(m[1]);
+      if (state.filter !== id) { state.filter = id; state.subcat = 'All'; }
+    } else if (location.hash === '#/menu' || location.hash === '#/menu/') {
+      if (state.filter !== 'All') { state.filter = 'All'; state.subcat = 'All'; }
+    }
   };
 // • آخر مسار
   let lastRoute = null;
@@ -4531,6 +4543,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const r = currentRoute();
     const changed = r !== lastRoute;
     lastRoute = r;
+    if (r === 'menu') syncMenuFilterFromHash();
     setActiveNav(r);
     
     // إخفاء شريط التنقل السفلي في السلة والدفع
@@ -5320,7 +5333,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
   document.addEventListener('click', e => {
     const catLink = e.target.closest('a[data-cat]');
-    if (catLink) { state.filter = catLink.dataset.cat; state.subcat = 'All'; return; }
+    if (catLink) {
+      state.filter = catLink.dataset.cat; state.subcat = 'All';
+      if (location.hash === catLink.getAttribute('href')) refresh();
+      return;
+    }
 
     const el = e.target.closest('[data-action]');
     if (!el) return;
