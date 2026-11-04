@@ -1262,11 +1262,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   <div class="container">
     <a href="#/home" class="brand" aria-label="Sheep & Burger الرئيسية">
       <div class="logo-mark" aria-hidden="true">
-        <img src="logo.png" alt="" onerror="this.style.display='none';this.parentElement.textContent='🐑'">
+        <img id="brandLogo" src="logo.png" alt="" onerror="this.onerror=null;this.style.display='none';document.getElementById('brandEmoji').style.display=''">
+        <span id="brandEmoji" style="display:none">🐑</span>
       </div>
       <div class="brand-text">
-        <span class="brand-name">Sheep &amp; Burger</span>
-        <small>برجر طازة</small>
+        <span class="brand-name" id="brandName">Sheep &amp; Burger</span>
+        <small id="brandTagline">برجر طازة</small>
       </div>
     </a>
     <nav class="desk-nav" aria-label="القائمة الرئيسية">
@@ -1276,6 +1277,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       <a href="#/profile" data-nav="profile">مكافآتي</a>
     </nav>
     <div class="actions">
+      <!-- زر الفرع الحالي: يظهر فقط عند وجود أكثر من فرع مفعّل، والضغط عليه يفتح اختيار الفرع -->
+      <button type="button" class="icon-btn" id="branchChip" data-action="branch-picker" aria-label="اختيار الفرع" style="display:none;width:auto;padding:0 12px;gap:6px;border-radius:99px;font-size:12px;font-weight:700;max-width:150px">
+        <span aria-hidden="true">📍</span><span id="branchChipName" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">اختر الفرع</span>
+      </button>
       <a href="#/notifications" class="icon-btn" aria-label="الإشعارات" title="الإشعارات" data-notification-link>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
         <span class="badge" data-notification-badge style="display:none">0</span>
@@ -1373,11 +1378,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
 // • حالات الطلب ووصفها بالعربية
-  let STATUSES = ['تم الاستلام', 'بيتحضر', 'في الطريق', 'تم التوصيل'];
+  let STATUSES = [];   // أسماء حالات الطلب تُقرأ من app_content (order_status)
 // • مستويات الحار المتاحة
-  let SPICE_LEVELS = ['هادي', 'وسط', 'حار'];
+  let SPICE_LEVELS = [];   // مستويات الحار تُقرأ من app_content (spice_level)
 // • قائمة مسببات الحساسية
-  let ALLERGENS = { gluten: 'جلوتين', dairy: 'ألبان', egg: 'بيض', nuts: 'مكسرات' };
+  let ALLERGENS = {};   // مسببات الحساسية تُقرأ من app_content (allergen)
 
 // • تصنيفات المنيو الثابتة للعرض والترتيب
   const CATS = [];
@@ -1502,7 +1507,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         // لا تُرسل الأصناف السرية في الاستعلام العام؛ يتم تحميلها بعد التحقق من الكود على الخادم.
         sbClient.from('menu_items').select('id,slug,category_id,subcategory_id,name_ar,description_ar,image_url,tags,is_spicy,is_available,is_secret,sort_order,subcategory_ar,ingredients_ar,allergens,is_vegetarian,display_badge,is_popular,free_delivery').eq('is_secret', false).order('sort_order'),
         sbClient.from('item_sizes').select('id,item_id,label_ar,price,sale_price,sort_order,is_available').order('sort_order'),
-        sbClient.from('store_settings').select('name_ar,address_text,is_open,accepting_orders,min_order,delivery_fee,free_delivery_threshold,delivery_service_fee,distance_delivery_enabled,delivery_price_per_km,delivery_max_distance_km,latitude,longitude,avg_prep_minutes,cash_enabled,visa_enabled,wallet_enabled,currency,loyalty_enabled,loyalty_points_per_currency,loyalty_redeem_points,loyalty_redeem_value,loyalty_stamps_for_reward,loyalty_stamp_reward_item_id,show_popular_filter,show_spicy_filter,show_vegetarian_filter,show_free_delivery_filter,chef_special_item_id,chef_special_discount').eq('id', 1).maybeSingle(),
+        sbClient.from('store_settings').select('logo_url,name_ar,address_text,is_open,accepting_orders,min_order,delivery_fee,free_delivery_threshold,delivery_service_fee,distance_delivery_enabled,delivery_price_per_km,delivery_max_distance_km,latitude,longitude,avg_prep_minutes,cash_enabled,visa_enabled,wallet_enabled,currency,loyalty_enabled,loyalty_points_per_currency,loyalty_redeem_points,loyalty_redeem_value,loyalty_stamps_for_reward,loyalty_stamp_reward_item_id,show_popular_filter,show_spicy_filter,show_vegetarian_filter,show_free_delivery_filter,chef_special_item_id,chef_special_discount').eq('id', 1).maybeSingle(),
         sbClient.from('delivery_zones').select('id,name_ar,fee,min_order,sort_order,is_active').eq('is_active', true).order('sort_order'),
         sbClient.from('addons').select('id,slug,name_ar,price,sale_price,allergens,is_available,sort_order').order('sort_order'),
         sbClient.from('item_addons').select('item_id,addon_id'),
@@ -1520,6 +1525,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       if (itemsError) throw itemsError;
       if (sizesError) throw sizesError;
       if (settingsError) throw settingsError;
+      // اسم المطعم ولوجو المطعم من store_settings (لو فاضيين تفضل القيم الافتراضية)
+      applyBrandFromSettings(settings);
       if (zonesError) throw zonesError;
       window.SHEEPBURGER_ZONES = zones || [];
       if (!contentResult?.error && Array.isArray(contentResult?.data)) {
@@ -1540,10 +1547,24 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           if (x.item_key === 'max_qty_per_item') CONFIG.MAX_QTY = Math.min(99, Math.max(1, Math.trunc(value)));
         });
       } else if (contentResult?.error) console.warn('[Content] تعذر تحميل app_content:', contentResult.error.message);
+      const brandRows = !contentResult?.error && Array.isArray(contentResult?.data) ? contentResult.data : [];
+      applyBrandTagline(brandRows);
+      applyBrandMeta(brandRows);
       const allBranches = Array.isArray(branchResult?.data) ? branchResult.data : [];
       const activeBranches = allBranches.filter(b => b.is_active === true);
       // RLS قد يخفي الفروع غير النشطة؛ لا نستنتج العدد الكلي من استعلام العميل.
-      window.SHEEPBURGER_BRANCH_STATE = { loaded: !branchResult?.error, total: activeBranches.length, active: activeBranches, selectedId: activeBranches.length === 1 ? activeBranches[0].id : null };
+      // اختيار الفرع: فرع واحد مفعّل يُختار تلقائياً، وإلا نستعيد آخر اختيار للعميل إن كان ما زال مفعّلاً
+      const storedBranchId = safeLoad(K('branch_id'), null);
+      const pickedBranchId = activeBranches.length === 1
+        ? activeBranches[0].id
+        : (activeBranches.some(b => String(b.id) === String(storedBranchId)) ? storedBranchId : null);
+      window.SHEEPBURGER_BRANCH_STATE = { loaded: !branchResult?.error, total: activeBranches.length, active: activeBranches, selectedId: pickedBranchId };
+      renderBranchChip();
+      // أكثر من فرع ولا يوجد اختيار: نفتح اختيار الفرع مرة واحدة في الجلسة
+      if (activeBranches.length > 1 && !pickedBranchId && !branchPromptShown) {
+        branchPromptShown = true;
+        setTimeout(openBranchPicker, 600);
+      }
       if (branchResult?.error) console.warn('[Branches] تعذر التحقق من الفروع:', branchResult.error.message);
       const selectedBranchId = window.SHEEPBURGER_BRANCH_STATE.selectedId;
       const branchRows = (rows, key) => Object.fromEntries((rows || []).filter(x => !selectedBranchId || String(x.branch_id) === String(selectedBranchId)).map(x => [x[key], x]));
@@ -3916,7 +3937,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   const renderAddonSections = it => {
     const d = state.draft || { addons: [] };
     const opt = a => `<label class="opt ${d.addons.includes(a) ? 'sel' : ''}">
-        <span class="opt-label"><strong>${esc(ADDONS[a].name)}</strong>${ADDONS[a].allergens.length ? `<small>بيحتوي على ${ADDONS[a].allergens.map(x => ALLERGENS[x]).join(', ')}</small>` : ''}</span>
+        <span class="opt-label"><strong>${esc(ADDONS[a].name)}</strong>${ADDONS[a].allergens.length ? `<small>بيحتوي على ${ADDONS[a].allergens.map(x => ALLERGENS[x] || x).join(', ')}</small>` : ''}</span>
         <span class="opt-price">+${money(ADDONS[a].sale > 0 && ADDONS[a].sale < ADDONS[a].price ? ADDONS[a].sale : ADDONS[a].price)}${ADDONS[a].sale > 0 && ADDONS[a].sale < ADDONS[a].price ? ` <del>${money(ADDONS[a].price)}</del>` : ''}</span>
         <input type="checkbox" name="addon" value="${esc(a)}" ${d.addons.includes(a) ? 'checked' : ''}>
       </label>`;
@@ -5209,6 +5230,94 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   /* ═══════════════════════════════════════════════
      [JS] الأحداث (الأصلي + إضافة الإجراءات الجديدة)
      ═══════════════════════════════════════════════ */
+  // ═══ العنوان الفرعي تحت اسم المطعم من app_content (group_key = brand, item_key = tagline) ═══
+  // النص واللون يتحكم فيهم من لوحة الإدارة. لو الصف مش موجود أو مش فعّال يفضل النص الافتراضي في الصفحة
+  const applyBrandTagline = (rows) => {
+    const el = document.getElementById('brandTagline');
+    if (!el) return;
+    const row = (rows || []).find(x => x.group_key === 'brand' && x.item_key === 'tagline');
+    if (!row) return;
+    const text = String(row.label_ar || '').trim();
+    el.textContent = text;
+    el.style.display = text ? '' : 'none';          // فاضي من لوحة الإدارة = مايظهرش
+    const color = row.value && typeof row.value.color === 'string' ? row.value.color.trim() : '';
+    el.style.color = /^#[0-9a-fA-F]{6}$/.test(color) ? color : '';
+  };
+
+  // ═══ وصف الموقع للبحث ومشاركة الروابط من app_content (brand / meta_description) ═══
+  const applyBrandMeta = (rows) => {
+    const row = (rows || []).find(x => x.group_key === 'brand' && x.item_key === 'meta_description');
+    const text = row ? String(row.label_ar || '').trim() : '';
+    if (!text) return;
+    const setMeta = (sel, value) => { const el = document.querySelector(sel); if (el) el.setAttribute('content', value); };
+    setMeta('meta[name="description"]', text);
+    setMeta('meta[property="og:description"]', text);
+    setMeta('meta[property="og:title"]', document.title);
+  };
+
+  // ═══ هوية المطعم من store_settings (الاسم + اللوجو) ═══
+  // اللوجو: لو رابط الـ DB فشل يرجع للإيموجي، ولو مفيش رابط صالح تفضل القيم الافتراضية في الصفحة
+  const applyBrandFromSettings = (settings) => {
+    const nameEl = document.getElementById('brandName');
+    const name = (settings?.name_ar || '').trim();
+    if (nameEl && name) nameEl.textContent = name;
+    if (name) document.title = name + ' — برجر طازة';
+    const brandLink = document.querySelector('.topbar .brand');
+    if (brandLink && name) brandLink.setAttribute('aria-label', name + ' الرئيسية');
+
+    const img = document.getElementById('brandLogo');
+    const emoji = document.getElementById('brandEmoji');
+    if (!img || !emoji) return;
+    const url = typeof settings?.logo_url === 'string' ? settings.logo_url.trim() : '';
+    if (!/^https:\/\//.test(url)) return;
+    img.onerror = () => { img.style.display = 'none'; emoji.style.display = ''; };
+    img.style.display = '';
+    emoji.style.display = 'none';
+    if (img.getAttribute('src') !== url) img.src = url;
+  };
+
+  // ═══ اختيار الفرع للعميل ═══
+  // يظهر الزر في الهيدر فقط عند وجود أكثر من فرع مفعّل. الاختيار محفوظ محلياً ويُرسل مع السلة والطلب.
+  let branchPromptShown = false;
+  const renderBranchChip = () => {
+    const chip = document.getElementById('branchChip');
+    if (!chip) return;
+    const bs = window.SHEEPBURGER_BRANCH_STATE;
+    if (!bs || !bs.loaded || bs.total <= 1) { chip.style.display = 'none'; return; }
+    const cur = (bs.active || []).find(b => String(b.id) === String(bs.selectedId));
+    document.getElementById('branchChipName').textContent = cur ? cur.name_ar : 'اختر الفرع';
+    chip.style.display = '';
+  };
+
+  const openBranchPicker = () => {
+    const bs = window.SHEEPBURGER_BRANCH_STATE;
+    if (!bs || !bs.loaded || bs.total <= 1) return;
+    sheetBody.innerHTML = `
+      <div class="sheet-content">
+        <h2 class="sheet-title" id="sheetTitle">اختر الفرع</h2>
+        <p style="color:var(--ink-2);margin:6px 0 14px">اختيار الفرع بيحدد المنيو والأسعار والمنتجات المتاحة.</p>
+        ${bs.active.map(b => `<button type="button" class="btn ${String(b.id) === String(bs.selectedId) ? 'btn-primary' : 'btn-outline'}" data-action="pick-branch" data-id="${esc(b.id)}" style="width:100%;margin-bottom:10px">${esc(b.name_ar)}</button>`).join('')}
+      </div>`;
+    lastFocused = document.activeElement;
+    sheet.classList.add('show');
+    overlay.classList.add('show');
+    sheet.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const applyBranchChoice = async (id) => {
+    const bs = window.SHEEPBURGER_BRANCH_STATE;
+    if (!bs || !(bs.active || []).some(b => String(b.id) === String(id))) return;
+    safeSave(K('branch_id'), id);
+    await loadLiveMenu();          // يعيد حساب توفر الفرع وأسعاره
+    if (customerAuthUser) scheduleCartSync();
+    serverQuote = null;
+    if (['cart', 'checkout'].includes(currentRoute())) scheduleServerQuote();
+    refresh();
+    const name = (window.SHEEPBURGER_BRANCH_STATE?.active || []).find(b => String(b.id) === String(id))?.name_ar || '';
+    toast('تم اختيار الفرع: ' + name);
+  };
+
   document.addEventListener('click', e => {
     const catLink = e.target.closest('a[data-cat]');
     if (catLink) { state.filter = catLink.dataset.cat; state.subcat = 'All'; return; }
@@ -5236,6 +5345,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       case 'mqty': if (!state.draft) return; state.draft.qty = clamp(state.draft.qty + Number(el.dataset.d), 1, CONFIG.MAX_QTY); updateSheetTotals(); break;
       case 'madd': Anim.flyToCart(el); commitDraft(); closeSheet(); break;
       case 'close-sheet': closeSheet(); break;
+      case 'branch-picker': openBranchPicker(); break;
+      case 'pick-branch': closeSheet(); applyBranchChoice(el.dataset.id); break;
       case 'apply-coupon': applyCoupon(); break;
       case 'remove-coupon': removeCoupon(); break;
       case 'checkout': checkout(); break;
