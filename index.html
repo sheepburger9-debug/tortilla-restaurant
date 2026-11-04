@@ -3591,7 +3591,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 // • رسم بلوك بطاقات العروض
   const renderPromotionCards = (b, s, c, resolved) => {
     const cards = resolved.filter(r => r.kind === 'card').map(r => hbCard(r, s, c));
-    if (!cards.length) return '';
+    if (!cards.length) return resolved.some(r => r.kind === 'item') ? renderProductBlock(b, s, c, resolved) : '';
     return hbSection(b, s, hbItemsWrap(layoutOf(b), cards, s));
   };
 
@@ -3754,6 +3754,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       : '';
   };
 
+// • أنواع البلوكات التي تظهر في قسم العروض المنفصل (فارغة = كل البلوكات تظهر بترتيب الإدارة)
+  const OFFER_BLOCK_TYPES = [];
 // • رسم كل بلوكات الرئيسية
   const renderHomepageBlocks = () => {
     const cardsRoot = document.querySelector('[data-home-cards]');
