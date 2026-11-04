@@ -3223,6 +3223,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (r === 'home') { renderHeroSlider(); startHeroAutoplay(); renderHomepageBlocks(); }
     else { stopHeroAutoplay(); clearInterval(annSliderTimer); }
     renderAnnouncements();
+    applyHomepageSectionOrder();
     scheduleServerQuote();
   };
 
@@ -3254,6 +3255,43 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
      ═══════════════════════════════════════════════════════════════ */
 // • حقول homepage_blocks
   const HOMEPAGE_BLOCK_FIELDS = 'id,block_type,title_ar,subtitle_ar,image_url,target_url,content,sort_order,is_active,starts_at,ends_at,layout_type,background_color,text_color,accent_color,padding_size,settings,updated_at';
+
+// ─ ترتيب أقسام الصفحة الرئيسية من Supabase
+  let homepageSectionOrder = [];
+  const HOME_SECTION_DEFAULT_ORDER = {
+    hero_slider: 10, promotion_pages: 20, announcements: 30,
+    sale_strip: 40, homepage_blocks: 50, text_row: 60, secret_menu: 70
+  };
+  async function loadHomepageSectionOrder() {
+    if (!sbClient) return;
+    try {
+      const { data, error } = await sbClient.from('homepage_section_order')
+        .select('section_key,sort_order,is_visible').order('sort_order', { ascending: true });
+      if (error) throw error;
+      homepageSectionOrder = data || [];
+      applyHomepageSectionOrder();
+    } catch (err) {
+      console.warn('[HomepageOrder] تعذر تحميل ترتيب الأقسام:', err?.message || err);
+    }
+  }
+  const applyHomepageSectionOrder = () => {
+    const root = document.querySelector('#app .view-anim');
+    if (!root || currentRoute() !== 'home') return;
+    const rows = new Map(homepageSectionOrder.map(x => [x.section_key, x]));
+    const nodes = Array.from(root.children).filter(el => el.hasAttribute('data-home-section'));
+    nodes.sort((a, b) => {
+      const ak = a.dataset.homeSection, bk = b.dataset.homeSection;
+      return Number(rows.get(ak)?.sort_order ?? HOME_SECTION_DEFAULT_ORDER[ak] ?? 9999)
+        - Number(rows.get(bk)?.sort_order ?? HOME_SECTION_DEFAULT_ORDER[bk] ?? 9999);
+    });
+    nodes.forEach(el => {
+      const row = rows.get(el.dataset.homeSection);
+      el.hidden = row ? row.is_visible === false : false;
+      root.appendChild(el);
+    });
+  };
+
+
 // • حقول homepage_block_items
   const BLOCK_ITEM_FIELDS = 'id,block_id,item_type,target_id,target_url,title_override_ar,subtitle_override_ar,image_override_url,sort_order,is_active';
 
@@ -3784,6 +3822,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       else blocksRoot.innerHTML = renderList(homeBlocks.filter(b => !OFFER_BLOCK_TYPES.includes(b.block_type)));
     }
     renderAnnouncements();
+    applyHomepageSectionOrder();
   };
 
   // أحداث البلوكات: مستمع واحد على الوثيقة، يُسجَّل مرة واحدة فقط
@@ -4051,17 +4090,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
     return `
       <div class="view-anim">
-        <div class="hsl" data-hsl-root aria-roledescription="carousel" aria-label="العروض الرئيسية"></div>
+        <div class="hsl" data-hsl-root data-home-section="hero_slider" aria-roledescription="carousel" aria-label="العروض الرئيسية"></div>
 
-        <div data-home-cards></div>
-        <div class="ann-strip" data-ann-strip></div>
-        <div data-sale-strip></div>
-        <div data-home-offers></div>
-        <div data-home-blocks></div>
-        <div data-text-row></div>
+        <div data-home-cards data-home-section="promotion_pages"></div>
+        <div class="ann-strip" data-ann-strip data-home-section="announcements"></div>
+        <div data-sale-strip data-home-section="sale_strip"></div>
+        <div data-home-offers data-home-section="homepage_blocks"></div>
+        <div data-home-blocks data-home-section="homepage_blocks"></div>
+        <div data-text-row data-home-section="text_row"></div>
 
         ${!state.secretUnlocked ? `
-          <div class="card-block" style="text-align:center;border-style:dashed">
+          <div class="card-block" data-home-section="secret_menu" style="text-align:center;border-style:dashed">
             <div style="font-size:32px;margin-bottom:8px">🤫</div>
             <h3 style="justify-content:center">المنيو السري</h3>
             <p style="font-size:13.5px;color:var(--ink-2);margin-bottom:14px">ادخل كود صالح من الإدارة لفتح الأصناف السرية</p>
@@ -4072,7 +4111,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           </div>
         ` : ''}
 
-        <div style="height:20px"></div>
+        <div data-home-section="bottom_spacer" style="height:20px"></div>
       </div>`;
   };
 
@@ -5525,7 +5564,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     loadHomeBanners();
     loadAnnouncements();
     loadHomepageBlocks();
-    setInterval(() => { loadHomeBanners(); loadAnnouncements(); loadHomepageBlocks(); loadPromotionPages(); loadLiveMenu(); loadItemBadges(); loadRatingSummary(); }, 5 * 60 * 1000);
+    loadHomepageSectionOrder();
+    setInterval(() => { loadHomeBanners(); loadAnnouncements(); loadHomepageBlocks(); loadHomepageSectionOrder(); loadPromotionPages(); loadLiveMenu(); loadItemBadges(); loadRatingSummary(); }, 5 * 60 * 1000);
     if (!location.hash) location.hash = '#/home';
     state.secretUnlocked = false;
     if (sbClient) {
