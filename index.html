@@ -1,6 +1,53 @@
 <!DOCTYPE html>
 <!--
   ╔════════════════════════════════════════════════════════════════
+  ║ فهرس ملف Sheep & Burger (index.html) — ملف واحد يحتوي CSS و HTML و JavaScript
+  ║ الترتيب: [CSS] ← [HTML] ← [JS]. أرقام الأسطر في هذا الفهرس تخص هذه النسخة.
+  ║ ابحث عن اسم القسم (Ctrl+F) أو استخدم رقم السطر. أي تعديل لاحق يجب أن يلتزم بقواعد الاستقرار:
+  ║ لا تغيير في Supabase/RPC، لا بيانات ثابتة بديلة، لا تغيير في التصميم أو ترتيب التنفيذ.
+  ╠════════════════════════════════════════════════════════════════
+  ║ سطر 1259 الهيدر والشعار والأدوات الثابتة — الشريط العلوي والروابط والأيقونات
+  ║ سطر 1296 حاوية الشاشات #app — كل الشاشات تُرسم هنا بالـ JavaScript
+  ║ سطر 1299 شريط السلة العائم — عدّاد السلة والإجمالي أسفل الشاشة
+  ║ سطر 1308 شريط التنقل السفلي — روابط الموبايل
+  ║ سطر 1335 الشيت والمودال — تفاصيل المنتج والنوافذ المنبثقة
+  ║ سطر 1341 Toast — رسائل قصيرة
+  ║ سطر 1351 زر تثبيت التطبيق — PWA
+  ║ سطر 1357 تحميل Supabase — مكتبة الاتصال بقاعدة البيانات
+  ║ سطر 80 CSS — كل التنسيقات بين <style> و</style> — الأقسام موثّقة بتعليقات [CSS]
+  ║ سطر 1364 JS-1 الإعدادات والثوابت — CONFIG
+  ║ سطر 1425 JS-2 بيانات المنيو — دوال المنيو الثابتة
+  ║ سطر 1438 JS-3 ربط Supabase اللحظي — تحديثات المنيو من لوحة الأدمن
+  ║ سطر 1703 JS-4 الأدوات المساعدة — esc وغيرها
+  ║ سطر 1734 JS-5 التخزين المحلي — K وsafeLoad وsafeSave
+  ║ سطر 1764 JS-6 منظّفات البيانات — sanitizeSpecial
+  ║ سطر 1818 JS-7 الحالة العامة — sessionId وstate
+  ║ سطر 1876 JS-8 التسعير — baseUnitPrice والرسوم
+  ║ سطر 1912 JS-9 السلة — الإضافة والتعديل والحذف
+  ║ سطر 1964 JS-10 مزامنة السلة — sync_customer_cart
+  ║ سطر 2230 JS-11 الطلبات — الإرسال والحالة
+  ║ سطر 2551 JS-12 التقييمات — liveRatingSummary
+  ║ سطر 2609 JS-13 الولاء والمكافآت — redeemPoints
+  ║ سطر 2697 JS-14 مساعدات الواجهة — toast
+  ║ سطر 2763 JS-15 مكونات HTML — fromPrice وقوالب مشتركة
+  ║ سطر 2822 JS-16 بانرات الرئيسية — homepage_banners
+  ║ سطر 3068 JS-17 اللافتات — homepage_announcements
+  ║ سطر 3229 JS-18 بلوكات الرئيسية — homepage_blocks
+  ║ سطر 3640 JS-19 صفحات العروض — promotion_pages
+  ║ سطر 3854 JS-20 الإضافات — addon_groups
+  ║ سطر 3951 JS-21 الشارات — display_badges
+  ║ سطر 4017 JS-22 الشاشات — viewHome وباقي الشاشات
+  ║ سطر 4486 JS-23 الراوتر — currentRoute
+  ║ سطر 4554 JS-24 نافذة المنتج — الشيت والتركيز
+  ║ سطر 4702 JS-25 الكوبونات — التحقق والتطبيق
+  ║ سطر 5090 JS-26 PWA — beforeinstallprompt
+  ║ سطر 5120 JS-27 الأنيميشن — Anim
+  ║ سطر 5208 JS-28 الأحداث — مستمع النقر الرئيسي
+  ║ سطر 5386 JS-29 الـ Boot — تشغيل التطبيق
+  ╚════════════════════════════════════════════════════════════════
+-->
+<!--
+  ╔════════════════════════════════════════════════════════════════
   ║ Sheep & Burger — ملف واحد منظّم (الأصلي + التص.ميم الجديد)
   ║ الترتيب: [CSS] ← [HTML] ← [JS]
   ╚════════════════════════════════════════════════════════════════
@@ -31,6 +78,42 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,700..900;1,9..144,500&display=swap" rel="stylesheet">
 
 <style>
+/* ═══════════════════════════════════════════════════════════════
+   فهرس أقسام CSS الـ 32 — الرقم ثم الاسم ثم موضع القسم الحالي في الملف
+   ملاحظة: قواعد متكررة في آخر الملف (من تحسينات الواجهة) متعمّدة للـ override ولم تُحذف
+    1) المتغيرات والألوان والخطوط والإعدادات العامة — سطر 117
+    2) الهيدر والشعار والأزرار — سطر 162
+    3) البانر الرئيسي — سطر 198
+    4) عناوين الأقسام والتصنيفات — سطر 226
+    5) كروت المنتجات والمطاعم — سطر 247
+    6) الشارات الموجودة على الكروت — سطر 1223
+    7) أزرار إضافة المنتجات — سطر 332
+    8) كارت اختيار الشيف والعروض — سطر 300
+    9) الأزرار العامة — سطر 332
+   10) نافذة تفاصيل المنتج — سطر 350
+   11) مجموعات الإضافات والاختيارات — سطر 350
+   12) اختيار الحجم والكمية — سطر 350
+   13) تنسيقات السلة — سطر 417
+   14) اقتراحات المنتجات — سطر 904
+   15) الكوبونات — سطر 915
+   16) ملخص الحساب والدفع — سطر 922
+   17) الشريط الثابت أسفل الشاشة — سطر 929
+   18) شاشة الدفع والعنوان — سطر 934
+   19) طرق الدفع — سطر 934
+   20) الطلبات وتتبع الطلب — سطر 464
+   21) الحالات الفارغة — سطر 495
+   22) الملف الشخصي (لا يوجد قسم مستقل، وتنسيقه متفرق) — سطر 501
+   23) النقاط والمكافآت والأختام والإنجازات — سطر 501
+   24) القوائم والتنقل السفلي — سطر 554
+   25) رسائل Toast — سطر 569
+   26) السلة العائمة — سطر 579
+   27) زر تثبيت التطبيق — سطر 866
+   28) الحركات والأنيميشن — سطر 595
+   29) البانرات واللافتات — سطر 955
+   30) بلوكات الصفحة الرئيسية — سطر 1050
+   31) صفحات العروض — سطر 1040
+   32) تحسينات الواجهة النهائية (من سطر 590 حتى نهاية CSS) — سطر 673
+   ═══════════════════════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════
    [CSS] الكود الأصلي بالكامل
    ═══════════════════════════════════════════════ */
@@ -1167,10 +1250,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
 </style>
 </head>
+<!-- ===== جسم الصفحة: الهيكل الثابت للتطبيق (الهيدر، الحاوية #app، السلة العائمة، التنقل السفلي، الشيت، Toast، زر التثبيت) =====
+     كل الشاشات (الرئيسية/المنيو/السلة/الدفع/الطلبات/الحساب) تُنشأ بالـ JavaScript داخل <main id="app"> ولا تُكتب هنا ===== -->
 <body>
 
 <a href="#app" class="skip-link">تخطي للمحتوى</a>
 
+<!-- الهيدر: الشعار + روابط سطح المكتب + أيقونات الإشعارات والمنيو والسلة. العداد data-badge يحدّثه JavaScript (قسم السلة) -->
 <!-- ===== الهيدر العلوي ===== -->
 <header class="topbar">
   <div class="container">
@@ -1205,9 +1291,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   </div>
 </header>
 
+<!-- موضع اللافتات العلوية: تملؤه JavaScript من جدول homepage_announcements (placement = top) -->
 <div class="container"><div class="announce-slot" data-announce-slot="top"></div></div>
+<!-- ===== حاوية التطبيق الرئيسية #app: الراوتر يملؤها بالشاشة الحالية حسب الـ hash (#/home ، #/menu ، #/cart ...) ===== -->
 <main id="app" class="container" tabindex="-1"></main>
 
+<!-- شريط السلة العائم: يظهر أسفل الشاشة عند وجود عناصر، والعدّاد والإجمالي يحدّثهما قسم السلة في JavaScript -->
 <div class="sticky-cart" id="stickyCart" role="button" tabindex="0" aria-label="السلة">
   <div class="sticky-cart-info">
     <small id="stickyCount">0 عنصر</small>
@@ -1216,6 +1305,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   <div class="sticky-cart-cta">اعرض السلة ←</div>
 </div>
 
+<!-- شريط التنقل السفلي للموبايل: روابط data-nav تُستخدم لتمييز الشاشة النشطة من الراوتر -->
 <nav class="bottom-nav" aria-label="التنقل">
   <a href="#/home" class="nav-item" data-nav="home">
     <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
@@ -1242,60 +1332,83 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   </a>
 </nav>
 
+<!-- الشيت/المودال: طبقة التعتيم (overlay) + الصندوق (sheet) الذي تملأه JavaScript بتفاصيل المنتج والإضافات والنوافذ -->
 <div class="overlay" data-action="close-sheet"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" aria-hidden="true">
   <div class="sheet-scroll" id="sheetBody"></div>
 </div>
 
+<!-- Toast: رسالة قصيرة تظهر وتختفي، يملؤها قسم رسائل Toast في JavaScript -->
 <div class="toast" id="toast" role="status" aria-live="polite">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
   <span id="toastMsg"></span>
 </div>
 
 <!-- ✅ تحسين a11y: عناصر زخرفية يجب تجاهلها من قارئ الشاشة -->
+<!-- عنصر زخرفي (احتفال) تُملؤه JavaScript عند إتمام الطلب، مخفي عن قارئ الشاشة -->
 <div class="confetti-box" id="confetti" aria-hidden="true"></div>
 
+<!-- زر تثبيت التطبيق كـ PWA: يظهر فقط عندما يسمح المتصفح بالتثبيت (منطق beforeinstallprompt في قسم PWA) -->
 <button class="install-btn" id="installBtn" aria-label="ثبّت التطبيق">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
   ثبّت التطبيق
 </button>
 
+<!-- ===== تحميل مكتبة Supabase (UMD) من CDN، مع مسار احتياطي عبر unpkg عند الفشل. يجب أن تُحمّل قبل سكربت التطبيق ===== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'"></script>
+<!-- ===== سكربت التطبيق (JavaScript) — يبدأ بـ IIFE واحدة. الترتيب داخلها مهم: الثوابت ثم الدوال ثم الراوتر ثم الـ boot ===== -->
 <script>
 (() => {
   'use strict';
 
+// ─ [JS-1] الإعدادات والثوابت: CONFIG (مفاتيح Supabase والبادئة والحدود). لا يعتمد على شيء. يُستخدم في كل الأقسام
   /* ═══════════════════════════════════════════════
      [JS] الإعدادات والثوابت (الأصلي)
      ═══════════════════════════════════════════════ */
+// • إعدادات التطبيق الأساسية: مفاتيح Supabase والبادئة والحدود. يُقرأ من كل الأقسام
   const CONFIG = {
     MAX_QTY: 20,
     STORAGE_SCHEMA: 6,
     STORAGE_PREFIX: 'sheepburger_v6_'
   };
 
+// • حالات الطلب ووصفها بالعربية
   let STATUSES = ['تم الاستلام', 'بيتحضر', 'في الطريق', 'تم التوصيل'];
+// • مستويات الحار المتاحة
   let SPICE_LEVELS = ['هادي', 'وسط', 'حار'];
+// • قائمة مسببات الحساسية
   let ALLERGENS = { gluten: 'جلوتين', dairy: 'ألبان', egg: 'بيض', nuts: 'مكسرات' };
 
+// • تصنيفات المنيو الثابتة للعرض والترتيب
   const CATS = [];
+// • تصنيفات فرعية للمنيو
   const SUBCATS = {};
 
   // بيانات الإضافات والحساسية والأسعار تُقرأ من الجداول الفعلية.
+// • بيانات الإضافات الافتراضية
   const ADDONS = {};
+// • شارات التصنيفات الحية من Supabase
   let liveCategoryBadges = {};
+// • شارات العروض الحية من Supabase
   let livePromotionBadges = {};
+// • اقتراحات المنتجات الحية من Supabase
   let liveProductRecommendations = {};
+// • عناوين العميل المحفوظة
   let liveCustomerAddresses = [];
+// • تجاوزات الفرع (توفر أو سعر حسب الفرع)
   let liveBranchOverrides = { items: {}, sizes: {}, addons: {} };
 
+// • تعريفات الإنجازات
   let ACHIEVEMENTS = {};
 
   // لوحة ألوان متدرجة؛ يحصل كل إنجاز على لون مميز حتى لو أُضيف من الإدارة.
+// • ألوان الإنجازات
   let ACHIEVEMENT_PALETTES = [['#fff0e8','#fbd1bf','#b93816'],['#edf4ff','#cbdfff','#2456a6'],['#fff7d6','#ffe8a1','#946200'],['#e8f8ef','#c4efd6','#167347'],['#f5eaff','#e2ccff','#7137a8'],['#ffeaf2','#ffc9dc','#a9275b'],['#e6f8fb','#bcecf4','#116b7a'],['#f2f2f2','#dedede','#414141']];
+// • تنسيق شارة الإنجاز
   const achievementStyle = i => { const p=ACHIEVEMENT_PALETTES[i % ACHIEVEMENT_PALETTES.length] || ACHIEVEMENT_PALETTES[0]; return `--ach-bg:${p.bg || p[0]};--ach-border:${p.border || p[1]};--ach-color:${p.color || p[2]}`; };
 
   // Achievement definitions are managed in the admin panel and loaded from Supabase.
+// • يحمّل تعريفات الإنجازات من Supabase
   async function loadAchievementDefinitions() {
     if (!sbClient) return false;
     const { data, error } = await sbClient.from('achievements')
@@ -1309,39 +1422,63 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return true;
   }
 
+// ─ [JS-2] بيانات المنيو: الدوال الثابتة للمنيو (مثل img). الأسعار والمنتجات تأتي من Supabase لاحقاً وليست ثابتة هنا
   /* ═══════════════════════════════════════════════
      [JS] بيانات المنيو (الأصلي)
      ═══════════════════════════════════════════════ */
+// • دالة صورة المنتج الافتراضية
   const img = () => '';
+// • قائمة المنتجات (تُملأ من Supabase عبر loadLiveMenu)
   const MENU_ITEMS = [];
+// • الوصول إلى منتج بالمعرف
   const ITEM = Object.create(null);
+// • هل المنتج سري (يُفتح بكود)
   const isSecret = it => it.secret === true;
 
+// ─ [JS-3] ربط المنيو بـ Supabase: CUSTOMER_APP_BUILD وتحديثات لحظية من لوحة الأدمن (Realtime). يعتمد على CONFIG
   /* ═══════════════════════════════════════════════════════════════
      [LIVE] ربط منيو العميل بـ Supabase — تحديثات لحظية من لوحة الأدمن
      ═══════════════════════════════════════════════════════════════ */
+// • رقم نسخة واجهة العميل
   const CUSTOMER_APP_BUILD = 'supabase-db-only-pricing-2026-11-03';
+// • رابط مشروع Supabase
   const SB_URL = 'https://gwufhitzmupyumdjabnj.supabase.co';
+// • مفتاح Supabase العام (anon)
   const SB_KEY = 'sb_publishable_oTZFsXGeGb_PAhI7A-eTAw_MGwsBTGG';
+// • عميل Supabase المُنشأ
   const sbClient = window.supabase?.createClient
     ? window.supabase.createClient(SB_URL, SB_KEY, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'sheepburger-customer-auth-v1' }
       })
     : null;
+// • المستخدم المسجّل الحالي
   let customerAuthUser = null;
+// • حالة إرسال رمز التحقق
   let customerOtpSent = false;
+// • هل الدفع يتطلب تسجيل الدخول
   let checkoutLoginRequired = false;
+// • قفل أثناء عملية المصادقة
   let customerAuthBusy = false;
+// • قناة Realtime للمنيو
   let liveMenuChannel = null;
+// • هل المنيو جاهز
   let liveMenuReady = false;
+// • خطأ تحميل المنيو
   let liveMenuError = false;
+// • رمز فتح المنتجات السرية
   let secretMenuToken = '';
+// • المنتجات السرية الحية
   let liveSecretItems = [];
+// • ربط الإضافات بالمنتجات السرية
   let liveSecretAddonMap = {};
+// • العرض الحي الحالي
   let livePromotion = null;
+// • قائمة العروض الحية
   let livePromotions = [];
+// • فهرس العرض النشط
   let activePromotionIndex = 0;
 
+// • مفتاح تصنيف للمقارنة
   const categoryKey = (slug, name, id = null) => {
     const value = String(slug || '').toLowerCase();
     const label = String(name || '').toLowerCase();
@@ -1352,8 +1489,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (value.includes('dessert') || value.includes('sweet') || label.includes('حلويات')) return 'Desserts';
     return id ? `dbcat:${id}` : 'dbcat:uncategorized';
   };
+// • معرفات الإضافات الحية
   const liveAddonIds = Object.create(null);
 
+// • يحمّل المنيو من Supabase
   const loadLiveMenu = async () => {
     if (!sbClient) return;
     liveMenuError = false;
@@ -1540,6 +1679,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • يبدأ الاشتراك اللحظي في تحديثات المنيو من لوحة الأدمن
   const startLiveMenu = () => {
     if (!sbClient || liveMenuChannel) return;
     liveMenuChannel = sbClient.channel('customer-live-menu')
@@ -1560,18 +1700,29 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   window.addEventListener('online', loadLiveMenu);
 
 
+// ─ [JS-4] الأدوات المساعدة: esc (حماية HTML)، uid، والتحويلات العامة المستخدمة في كل الشاشات
   /* ═══════════════════════════════════════════════
      [JS] الأدوات المساعدة (الأصلي)
      ═══════════════════════════════════════════════ */
+// • حماية النصوص من حقن HTML
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+// • تقريب لمنزلتين عشريتين
   const round2 = n => Math.round((Number(n) || 0) * 100) / 100;
+// • تنسيق مبلغ كنص
   const money = n => round2(n).toFixed(2) + (window.SHEEPBURGER_STORE?.currency ? ' ' + window.SHEEPBURGER_STORE.currency : '');
+// • تنسيق مبلغ كـ HTML
   const moneyHtml = n => `<span class="price-ltr">${money(n)}</span>`;
+// • معرّف عشوائي
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+// • تاريخ اليوم
   const today = () => new Date().toDateString();
+// • حصر قيمة بين حدين
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+// • هل الوقت ليلاً
   const isNight = () => { const h = new Date().getHours(); return h >= 22 || h < 6; };
+// • هل المستخدم يفضّل تقليل الحركة
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+// • هل اليوم عيد ميلاد العميل
   const isBirthday = bd => {
     if (!bd) return false;
     const b = new Date(bd);
@@ -1580,18 +1731,23 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return b.getMonth() === n.getMonth() && b.getDate() === n.getDate();
   };
 
+// ─ [JS-5] التخزين المحلي: K() يضيف بادئة المفاتيح، وsafeLoad/safeSave. يُستخدم للسلة والجلسة وبيانات العميل
   /* ═══════════════════════════════════════════════
      [JS] التخزين المحلي (الأصلي)
      ═══════════════════════════════════════════════ */
+// • إضافة بادئة المفتاح في التخزين المحلي
   const K = k => CONFIG.STORAGE_PREFIX + k;
+// • قراءة آمنة من التخزين المحلي
   const safeLoad = (k, fb) => {
     try { const r = localStorage.getItem(k); if (r === null) return fb; return JSON.parse(r) ?? fb; }
     catch { return fb; }
   };
+// • حفظ آمن في التخزين المحلي
   const safeSave = (k, v) => {
     try { localStorage.setItem(k, JSON.stringify(v)); return true; }
     catch (e) { console.warn('[storage] تعذر الحفظ:', k, e?.message); return false; }
   };
+// • حذف من التخزين المحلي
   const safeRemove = k => { try { localStorage.removeItem(k); } catch {} };
 
   (function migrate() {
@@ -1605,9 +1761,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     safeSave(K('schema'), CONFIG.STORAGE_SCHEMA);
   })();
 
+// ─ [JS-6] منظّفات البيانات: sanitizeSpecial وغيرها، لتنظيف القيم القادمة من التخزين أو الشبكة قبل استخدامها
   /* ═══════════════════════════════════════════════
      [JS] منظّفات البيانات (الأصلي)
      ═══════════════════════════════════════════════ */
+// • تنظيف بيانات الطلبات الخاصة
   const sanitizeSpecial = raw => {
     if (!raw || typeof raw !== 'object') return null;
     if (raw.type === 'free') return { type: 'free' };
@@ -1616,6 +1774,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return null;
   };
 
+// • تنظيف سطر سلة واحد
   const sanitizeLine = raw => {
     if (!raw || typeof raw !== 'object' || !ITEM[raw.id]) return null;
     const it = ITEM[raw.id];
@@ -1627,6 +1786,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return { uid: typeof raw.uid === 'string' ? raw.uid.slice(0, 20) : uid(), id: it.id, size: raw.size, spice, addons, note: String(raw.note ?? '').slice(0, 80), qty, special: sanitizeSpecial(raw.special) };
   };
 
+// • تنظيف بيانات الكوبون
   const sanitizeVoucher = v => {
     if (!v || typeof v !== 'object' || v.used) return null;
     if (v.type === 'percent' && Number.isFinite(v.pct) && v.pct > 0 && v.pct < 1) return { ...v, id: v.id || uid() };
@@ -1635,6 +1795,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return null;
   };
 
+// • تنظيف التقييمات
   const sanitizeReviews = raw => {
     if (!raw || typeof raw !== 'object') return {};
     const out = {};
@@ -1654,11 +1815,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return out;
   };
 
+// ─ [JS-7] الحالة العامة: sessionId وstate للتطبيق (السلة، الحساب، الشاشة الحالية) — يعتمد على التخزين المحلي
   /* ═══════════════════════════════════════════════
      [JS] الحالة العامة (الأصلي + إضافات جديدة)
      ═══════════════════════════════════════════════ */
+// • معرّف الجلسة
   const sessionId = safeLoad(K('session_id'), null) || (() => { const s = uid(); safeSave(K('session_id'), s); return s; })();
 
+// • الحالة العامة للتطبيق
   const state = {
     cart: (safeLoad(K('cart'), []) || []).filter(Boolean),
     orders: (safeLoad(K('orders'), []) || []).filter(o => o && Array.isArray(o.items) && (typeof o.id === 'number' || typeof o.id === 'string')).map(o => ({ ...o, status: clamp(o.status ?? 0, 0, 3), startedAt: o.startedAt || Date.now() })),
@@ -1692,18 +1856,28 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     chefSpecial: null
   };
 
+// • عنصر #app
   const app = document.getElementById('app');
+// • عنصر الشيت
   const sheet = document.getElementById('sheet');
+// • محتوى الشيت
   const sheetBody = document.getElementById('sheetBody');
+// • طبقة التعتيم
   const overlay = document.querySelector('.overlay');
+// • عنصر Toast
   const toastEl = document.getElementById('toast');
+// • حاوية الاحتفال
   const confettiBox = document.getElementById('confetti');
+// • شريط السلة العائم
   const stickyCart = document.getElementById('stickyCart');
+// • مؤقت Toast
   let toastTimer;
 
+// ─ [JS-8] التسعير: baseUnitPrice وحساب سعر الوحدة والإضافات ورسوم الخدمة والطلب الصغير. لا تُغيّر منطقه دون اتفاق
   /* ═══════════════════════════════════════════════
      [JS] التسعير (تم التعديل لإضافة رسوم الخدمة والطلب الصغير للتصميم الجديد)
      ═══════════════════════════════════════════════ */
+// • سعر الوحدة الأساسي
   const baseUnitPrice = line => {
     const it = ITEM[line.id]; if (!it) return 0;
     const sp = it.sizes.find(s => s.key === line.size)?.price ?? 0;
@@ -1711,6 +1885,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return round2(sp + ap);
   };
 
+// • سعر الوحدة بعد الإضافات
   const unitPrice = (line, ctx = {}) => {
     const it = ITEM[line.id]; if (!it) return 0;
     const sp = it.sizes.find(s => s.key === line.size)?.price ?? 0;
@@ -1726,6 +1901,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return round2(p + ap);
   };
 
+// • الكوبون المختار
   const selectedRemoteVoucher = () => {
     if (!state.selectedVoucherId) return null;
     const v = (state.remoteVouchers || []).find(x => x.id === state.selectedVoucherId);
@@ -1733,21 +1909,26 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return v;
   };
   
+// ─ [JS-9] منطق السلة: lineKey وإضافة/تعديل/حذف السطور وحساب الإجمالي. يؤثر على شريط السلة العائم وعدّاد الهيدر
   /* ═══════════════════════════════════════════════
      [JS] السلة (الأصلي)
      ═══════════════════════════════════════════════ */
+// • مفتاح فريد لسطر السلة
   const lineKey = line => JSON.stringify({
     id: line.id, size: line.size, spice: line.spice ?? '',
     addons: [...line.addons].sort(), note: (line.note || '').trim(),
     special: line.special ? { type: line.special.type, price: line.special.price ?? null, pct: line.special.pct ?? null } : null
   });
+// • عدد عناصر السلة
   const cartCount = () => state.cart.reduce((s, l) => s + l.qty, 0);
+// • حفظ السلة وتحديث الواجهة
   const commitCart = () => {
     if (!safeSave(K('cart'), state.cart)) toast('تعذر حفظ السلة على هذا الجهاز. ممكن تكون مساحة التخزين ممتلئة.');
     scheduleCartSync();
     updateBadges();
   };
 
+// • إضافة سطر للسلة
   const addLineToCart = (newLine) => {
     const key = lineKey(newLine);
     const existing = state.cart.find(l => lineKey(l) === key);
@@ -1756,6 +1937,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     commitCart(); bumpIcon();
   };
 
+// • إضافة سريعة بدون تخصيص
   const addQuickLine = (item, special = null) => {
     if (!item || !item.sizes?.length) return false;
     if (!liveAddonGroupsReady) { toast('خيارات الإضافات لسه بتتحمّل. حاول بعد لحظات.'); return false; }
@@ -1769,6 +1951,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return true;
   };
 
+// • تغيير كمية سطر
   const changeQty = (uidVal, delta) => {
     const l = state.cart.find(x => x.uid === uidVal);
     if (!l) return;
@@ -1778,22 +1961,31 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (currentRoute() === 'cart' || currentRoute() === 'checkout') render();
   };
 
+// ─ [JS-10] مزامنة السلة وحساب العميل: cartSyncTimer ومزامنة مع sync_customer_cart عبر Supabase (السيرفر هو المرجع)
   /* ═══════════════════════════════════════════════
      [JS] مزامنة حساب العميل (الأصلي)
      ═══════════════════════════════════════════════ */
+// • مؤقت مزامنة السلة
   let cartSyncTimer = null;
+// • سلسلة المزامنة (تنفيذ متسلسل)
   let cartSyncChain = Promise.resolve();
+// • هل حُمّلت السلة من السيرفر
   let cartHydrated = false;
+// • حالة المزامنة الجارية
   let customerSyncing = false;
+// • مستويات الحار للسلة
   let CART_SPICE_LEVELS = [...SPICE_LEVELS];
 
+// • ينتظر جاهزية المنيو
   const waitForMenu = async () => {
     for (let i = 0; i < 75 && !liveMenuReady; i++) await new Promise(r => setTimeout(r, 200));
     return liveMenuReady;
   };
 
+// • مفتاح إضافة
   const addonKeyForId = (id) => Object.keys(liveAddonIds).find(k => String(liveAddonIds[k]) === String(id)) || null;
 
+// • تحويل صف السيرفر إلى سطر سلة
   const cartLineFromRow = (row) => {
     const item = ITEM[row.item_id];
     if (!item || !Array.isArray(item.sizes) || !item.sizes.length) return null;
@@ -1807,6 +1999,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     };
   };
 
+// • تحويل سطر السلة إلى صف للسيرفر
   const cartRowFromLine = (l) => {
     if (!ITEM[l.id]) return null;
     return {
@@ -1821,12 +2014,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // ─── مزامنة السلة: السيرفر هو المرجع عبر sync_customer_cart مع cart_revision ───
+// • رقم مراجعة السلة على السيرفر (cart_revision)
   let cartRevision = null;   // آخر revision قرأه أو كتبه هذا الجهاز
+// • هل توجد تغييرات لم تُرسل
   let cartDirty = false;     // يوجد تعديل محلي لم يُرسل بعد
+// • قناة Realtime للسلة
   let cartRealtime = null;
+// • مؤقت إعادة جلب السلة
   let cartRefetchTimer = null;
+// • التحقق من منطقة التوصيل
   const validZoneId = v => ((window.SHEEPBURGER_ZONES || []).some(z => String(z.id) === String(v)) ? v : null);
 
+// • السطور المطلوب إرسالها للسيرفر
   const cartDesiredLines = () => {
     const seen = new Map();
     state.cart.map(cartRowFromLine).filter(Boolean).forEach(r => { if (!seen.has(r.client_line_key)) seen.set(r.client_line_key, r); });
@@ -1834,6 +2033,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // كل الحقول تُرسل دائمًا لأن الدالة تستبدل قيم السلة كاملة
+// • حمولة الإرسال للسيرفر
   const cartPayload = () => ({
     p_lines: cartDesiredLines(),
     p_coupon_code: state.selectedVoucherId ? null : (state.coupon?.code || null),
@@ -1844,6 +2044,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     p_expected_revision: cartRevision
   });
 
+// • يرسل السلة إلى السيرفر (sync_customer_cart)
   const pushServerCart = async () => {
     if (!customerAuthUser || !sbClient || !cartHydrated) return;
     const { data, error } = await sbClient.rpc('sync_customer_cart', cartPayload());
@@ -1861,6 +2062,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     cartDirty = false;
   };
 
+// • يحمّل السلة من السيرفر
   const hydrateServerCart = async ({ force = false } = {}) => {
     if (!customerAuthUser || !sbClient) return;
     if (cartDirty && !force) return;
@@ -1908,6 +2110,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (currentRoute() === 'cart' || currentRoute() === 'checkout') refresh();
   };
 
+// • يجدول مزامنة السلة
   const scheduleCartSync = () => {
     if (!customerAuthUser || !sbClient || !cartHydrated) return;
     cartDirty = true;
@@ -1920,6 +2123,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // تحديث لحظي من أي جهاز آخر لنفس الحساب (RLS يضمن وصول بيانات هذا المستخدم فقط)
+// • يبدأ الاستماع لتغييرات السلة
   const startCartRealtime = () => {
     if (!sbClient || !customerAuthUser || cartRealtime) return;
     cartRealtime = sbClient.channel(`customer-cart-${customerAuthUser.id}`)
@@ -1933,12 +2137,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       .subscribe();
   };
 
+// • يوقف الاستماع لتغييرات السلة
   const stopCartRealtime = () => {
     if (cartRealtime && sbClient) sbClient.removeChannel(cartRealtime);
     cartRealtime = null;
     clearTimeout(cartRefetchTimer);
   };
 
+// • تحويل صف طلب من السيرفر
   const serverOrderFromRow = (r) => {
     const statusNum = ({ pending: 0, confirmed: 1, preparing: 1, ready: 2, out_for_delivery: 2, delivered: 3, cancelled: 3 })[r.status] ?? 0;
     const created = new Date(r.created_at || Date.now());
@@ -1966,6 +2172,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     };
   };
 
+// • يحمّل طلبات العميل من Supabase
   const loadServerOrders = async () => {
     if (!customerAuthUser || !sbClient) return;
     const { data, error } = await sbClient.from('orders')
@@ -1990,6 +2197,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (currentRoute() === 'orders') refresh();
   };
 
+// • يزامن بيانات العميل
   const syncCustomerData = async () => {
     if (!customerAuthUser || !sbClient || customerSyncing) return;
     customerSyncing = true;
@@ -2004,6 +2212,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • يمسح بيانات العميل المحلية عند الخروج
   const clearCustomerLocalState = () => {
     cartHydrated = false;
     cartRevision = null;
@@ -2018,13 +2227,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (!document.hidden && customerAuthUser) syncCustomerData();
   });
 
+// ─ [JS-11] الطلبات: checkingOut وإرسال الطلب ومزامنة حالته مع Supabase. يعتمد على السلة والتسعير
   /* ═══════════════════════════════════════════════
      [JS] الطلبات (الأصلي)
      ═══════════════════════════════════════════════ */
+// • قفل أثناء الدفع
   let checkingOut = false;
+// • طلب دفع معلّق
   let pendingCheckout = null;   // { fp, idempotencyKey, trackingToken } لإعادة المحاولة بنفس الطلب
+// • مؤقت تتبع الطلب
   let trackingTimer = null;
 
+// • يبدأ تتبع حالة الطلب
   const startTracking = () => {
     if (trackingTimer) return;
     trackingTimer = setInterval(async () => {
@@ -2063,6 +2277,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }, 12000);
   };
 
+// • إلغاء طلب من العميل
   const cancelCustomerOrder = async orderId => {
     const order = state.orders.find(o => String(o.id) === String(orderId));
     if (!order || !order.trackingToken) { toast('تعذر إلغاء الطلب من هذا الجهاز؛ افتح الطلب من الجهاز الذي أُنشئ منه.'); return; }
@@ -2089,6 +2304,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • قراءة بيانات نموذج الدفع
   const readForm = () => {
     const map = { name:'fName', phone:'fPhone', area:'fArea', street:'fStreet', building:'fBuilding', floor:'fFloor', apt:'fApt', birthday:'fBirthday' };
     for (const [k, id] of Object.entries(map)) {
@@ -2101,6 +2317,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (notesEl) state.cartNotes = notesEl.value.trim();
   };
 
+// • تحميل عناوين العميل
   const loadCustomerAddresses = async () => {
     if (!sbClient || !customerAuthUser) { liveCustomerAddresses = []; return []; }
     try {
@@ -2113,6 +2330,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     } catch (e) { console.warn('[Addresses] تعذر تحميل العناوين المحفوظة:', e?.message || e); liveCustomerAddresses = []; return []; }
   };
 
+// • التحقق من نموذج الدفع
   const validateForm = () => {
     readForm();
     const c = state.customer;
@@ -2124,6 +2342,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return { ok: true };
   };
 
+// • توحيد رقم الهاتف المصري
   const normalizeEgyptPhone = raw => {
     let p = String(raw || '').replace(/[\s()-]/g, '');
     if (p.startsWith('+20')) p = '0' + p.slice(3);
@@ -2131,6 +2350,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return /^01[0125][0-9]{8}$/.test(p) ? p : null;
   };
 
+// • إتمام الطلب وإرساله للسيرفر
   const checkout = async () => {
     if (checkingOut || !state.cart.length) return;
     if (!customerAuthUser) {
@@ -2276,6 +2496,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • إعادة طلب طلب سابق
   const reorder = (orderId) => {
     if (!liveAddonGroupsReady) { toast('خيارات الإضافات لسه بتتحمّل. حاول بعد لحظات.'); return; }
     const order = state.orders.find(o => String(o.id) === String(orderId));
@@ -2327,10 +2548,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// ─ [JS-12] التقييمات: liveRatingSummary وعرض التقييمات من Supabase
   /* ═══════════════════════════════════════════════
      [JS] التقييمات (الأصلي)
      ═══════════════════════════════════════════════ */
+// • ملخص التقييمات الحي
   let liveRatingSummary = {};
+// • تحميل ملخص التقييمات
   const loadRatingSummary = async () => {
     if (!sbClient) return;
     const { data, error } = await sbClient.from('menu_item_rating_summary').select('item_id,avg_rating,review_count');
@@ -2338,8 +2562,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     liveRatingSummary = Object.fromEntries((data || []).map(r => [String(r.item_id), { avg: Number(r.avg_rating) || 0, count: Number(r.review_count) || 0 }]));
     if (['home', 'menu'].includes(currentRoute())) refresh();
   };
+// • تقييم منتج
   const getRating = (itemId) => liveRatingSummary[String(itemId)] || { avg: 0, count: 0 };
 
+// • عرض النجوم
   const starsHtml = (itemId) => {
     const { avg, count } = getRating(itemId);
     if (count === 0) return '';
@@ -2348,6 +2574,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return `<div class="product-rating">${stars}<span>${avg.toFixed(1)} (${count})</span></div>`;
   };
 
+// • إرسال تقييم
   const submitReview = async (itemId) => {
     const nameEl = document.getElementById('reviewName');
     const textEl = document.getElementById('reviewText');
@@ -2379,9 +2606,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     } catch (e) { console.warn('[Reviews] تعذر حفظ التقييم',e?.message); toast('تعذر حفظ التقييم. تأكد من اتصالك وحاول مرة أخرى.'); }
   };
 
+// ─ [JS-13] الولاء والمكافآت: redeemPoints واستبدال النقاط عبر RPC في Supabase
   /* ═══════════════════════════════════════════════
      [JS] الولاء والمكافآت (الأصلي)
      ═══════════════════════════════════════════════ */
+// • استبدال النقاط بمكافأة (RPC)
   const redeemPoints = async () => {
     if (!customerAuthUser || !sbClient) { toast('وثّق إيميلك الأول عشان تستخدم نقاط الولاء 📧'); location.hash = '#/profile'; return; }
     if (state.cart.length === 0) { toast('ضيف حاجة للسلة الأول'); return; }
@@ -2402,6 +2631,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     } catch (e) { toast(e?.message || 'تعذر استبدال النقاط.'); }
   };
 
+// • فتح منتج سري بكود
   const unlockSecret = async () => {
     const input = document.getElementById('secretCode');
     const code = (input ? input.value : '').trim();
@@ -2464,9 +2694,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     finally { if (button) { button.disabled = false; button.textContent = 'افتح'; } }
   };
 
+// ─ [JS-14] مساعدات الواجهة: toast (رسائل Toast) وأدوات عرض عامة
   /* ═══════════════════════════════════════════════
      [JS] مساعدات الواجهة (الأصلي)
      ═══════════════════════════════════════════════ */
+// • عرض رسالة Toast
   const toast = (msg) => {
     const el = document.getElementById('toastMsg');
     if (!el) return;
@@ -2476,6 +2708,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
   };
 
+// • تحديث عدّاد السلة والإشعارات
   const updateBadges = () => {
     const unreadNotifications = (state.customerNotifications || []).filter(n => !n.read_at).length;
     document.querySelectorAll('[data-notification-badge]').forEach(b => {
@@ -2493,6 +2726,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     updateStickyCart();
   };
 
+// • تحديث شريط السلة العائم
   const updateStickyCart = () => {
     const n = cartCount();
     if (n === 0 || currentRoute() === 'cart' || currentRoute() === 'checkout') { stickyCart.classList.remove('show'); return; }
@@ -2502,6 +2736,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     stickyCart.classList.add('show');
   };
 
+// • حركة نبض لأيقونة
   const bumpIcon = () => {
     if (reduceMotion.matches) return;
     document.querySelectorAll('a[href="#/cart"] .ic, a[href="#/cart"].icon-btn').forEach(el =>
@@ -2509,6 +2744,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     );
   };
 
+// • عرض احتفال
   const showConfetti = () => {
     if (reduceMotion.matches) return;
     const colors = ['#D9401F', '#E8A425', '#2F7D32', '#1F1610', '#FCEAE4'];
@@ -2524,11 +2760,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// ─ [JS-15] مكونات HTML: fromPrice وقوالب عرض مشتركة للكروت والأسعار
   /* ═══════════════════════════════════════════════
      [JS] مكونات HTML (الأصلي)
      ═══════════════════════════════════════════════ */
+// • أقل سعر للمنتج
   const fromPrice = it => Math.min(...it.sizes.map(s => (s.sale > 0 && s.sale < s.price) ? s.sale : s.price));
 
+// • عرض السعر
   const priceHtml = (it) => {
     if (it.off) {
       const p = fromPrice(it);
@@ -2537,6 +2776,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return `<span class="product-price">${it.sizes.length > 1 ? '<span class="from">من</span>' : ''}${money(fromPrice(it))}</span>`;
   };
 
+// • عرض شارات الكرت
   const badgesHtml = (it) => {
     const b = [];
     if (it.tags.includes('popular')) b.push('<span class="badge-tag hot">🔥 الأكثر طلباً</span>');
@@ -2549,6 +2789,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return b.length ? `<div class="product-badges">${b.join('')}</div>` : '';
   };
 
+// • كرت المنتج
   const productCard = (it) => `
     <article class="product" data-action="open" data-id="${esc(it.id)}" tabindex="0" role="button" aria-label="${esc(it.name)}">
       <div class="product-img">
@@ -2566,6 +2807,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       </div>
     </article>`;
 
+// • خيارات سطر السلة
   const lineOptions = (line) => {
     const it = ITEM[line.id]; if (!it) return '';
     const parts = [it.sizes.find(s => s.key === line.size)?.label || ''];
@@ -2577,42 +2819,62 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
 
+// ─ [JS-16] بانرات الصفحة الرئيسية: BANNER_FIELDS وسلايدر homepage_banners من Supabase (ديناميكي، لا بيانات ثابتة)
   /* ═══════════════════════════════════════════════════════════════
      [BANNERS] homepage_banners — سلايدر ديناميكي من Supabase
      ═══════════════════════════════════════════════════════════════ */
+// • الحقول المطلوبة من homepage_banners
   const BANNER_FIELDS = 'id,title_ar,subtitle_ar,image_url,mobile_image_url,button_text_ar,target_type,target_id,target_url,sort_order,display_seconds,is_active,starts_at,ends_at,promotion_id';
+// • الحقول المطلوبة من homepage_announcements
   const ANNOUNCE_FIELDS = 'id,title_ar,message_ar,image_url,mobile_image_url,placement,background_color,text_color,accent_color,icon,target_type,target_id,target_url,sort_order,is_dismissible,is_active,starts_at,ends_at,promotion_id,updated_at';
+// • مدة الشريحة
   const SLIDE_SECONDS = 5;   // قيمة احتياطية فقط عند غياب display_seconds
+// • مدة الإيقاف بعد تفاعل المستخدم
   const PAUSE_AFTER_USER_MS = 8000;
 
+// • بانرات الرئيسية
   let homeBanners = [];          // الشرائح المعروضة فعليًا
+// • صفوف البانرات الخام
   let homeBannerRows = [];       // البانرات المفعّلة من homepage_banners
+// • حالة السلايدر
   let homeBannersState = 'idle';        // idle | loading | ready | error
+// • الشريحة الحالية
   let homeBannerIndex = 0;
+// • مؤقت التبديل
   let homeBannerTimer = null;
+// • مؤقت استئناف التبديل
   let homeBannerResumeTimer = null;
+// • اللافتات
   let announcements = [];
+// • حالة اللافتات
   let announcementsState = 'idle';
 
   // يتحقق من فترة العرض (starts_at / ends_at)
   // الجدولة (starts_at / ends_at) تُطبّق في الداتا بيز عبر الـ views من نوع active_*
+// • هل ضمن جدول الظهور
   const isWithinSchedule = () => true;
 
   // يقبل فقط ألوان hex لمنع حقن CSS من بيانات الإدارة
+// • لون آمن
   const safeColor = (v, fallback) => (typeof v === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(v.trim())) ? v.trim() : fallback;
 
+// • فلترة البانرات النشطة
   const filterActiveBanners = rows => (rows || []).filter(b =>
     b && b.is_active !== false && isWithinSchedule(b) && (b.title_ar || b.image_url || b.mobile_image_url)
   );
+// • ترتيب البانرات
   const sortHomeBanners = rows => [...rows].sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
 
   // ─── الوجهات حسب القيم الفعلية في قاعدة البيانات ───
   // homepage_banners.target_type:        url | product | category | promotion | menu
   // homepage_announcements.target_type:  none | url | product | category | promotion | menu
   // homepage_block_items.item_type:      product | category | promotion | promotion_page | url
+// • البحث عن عرض بالمعرف
   const promotionById = id => livePromotions.find(p => String(p.id) === String(id)) || null;
+// • رابط آمن
   const isSafeHref = href => /^(https?:\/\/|#\/|\/)/.test(href);
 
+// • تحويل الهدف إلى مسار
   const resolveNavigationTarget = (row, typeOverride) => {
     const type = typeOverride || row.target_type || 'none';
     const url = (row.target_url || '').trim();
@@ -2631,6 +2893,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return { kind: 'none' };
   };
 
+// • فتح هدف محسوب
   const openResolved = t => {
     if (!t || t.kind === 'none') return;
     if (t.kind === 'item') {
@@ -2655,8 +2918,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • فتح هدف
   const openTarget = row => openResolved(resolveNavigationTarget(row));
 
+// • تحميل البانرات من Supabase
   async function loadHomeBanners() {
     if (!sbClient) { homeBannersState = 'error'; renderHeroSlider(); return; }
     if (homeBannersState !== 'ready') { homeBannersState = 'loading'; renderHeroSlider(); }
@@ -2676,6 +2941,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   }
 
   // عند عدم وجود بانرات مفعّلة نعرض العروض المفعّلة والصالحة من menu_promotions (بيانات حقيقية من القاعدة)
+// • شرائح احتياطية
   const promoFallbackSlides = () => (livePromotions || []).slice(0, 5).map(p => ({
     id: 'promo-' + p.id,
     title_ar: p.name_ar || '',
@@ -2690,6 +2956,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     promotion_id: p.id
   }));
 
+// • رسم شريحة
   const renderHeroSlide = (b, i) => {
     const desktop = safeImgUrl(b.image_url) || safeImgUrl(b.mobile_image_url);
     const mobile = safeImgUrl(b.mobile_image_url) || desktop;
@@ -2705,6 +2972,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     </div>`;
   };
 
+// • رسم السلايدر
   const renderHeroSlider = () => {
     const root = document.querySelector('[data-hsl-root]');
     if (!root) return;
@@ -2744,6 +3012,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • تحديث الشريحة في DOM
   const updateHeroSlideDom = () => {
     const root = document.querySelector('[data-hsl-root]');
     if (!root) return;
@@ -2757,8 +3026,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     });
   };
 
+// • إيقاف نهائي للتشغيل التلقائي
   const stopHeroAutoplay = () => { clearTimeout(homeBannerTimer); homeBannerTimer = null; };
 
+// • تشغيل السلايدر تلقائياً
   const startHeroAutoplay = () => {
     stopHeroAutoplay();
     if (homeBanners.length < 2 || document.hidden || currentRoute() !== 'home' || homeBannerResumeTimer) return;
@@ -2769,16 +3040,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // إيقاف مؤقت عند تفاعل المستخدم، ثم استئناف بعد فترة
+// • إيقاف التشغيل التلقائي
   const pauseHeroAutoplay = () => {
     stopHeroAutoplay();
     clearTimeout(homeBannerResumeTimer);
     homeBannerResumeTimer = setTimeout(() => { homeBannerResumeTimer = null; startHeroAutoplay(); }, PAUSE_AFTER_USER_MS);
   };
+// • استئناف التشغيل بعد تأخير
   const resumeHeroAutoplayLater = () => {
     clearTimeout(homeBannerResumeTimer);
     homeBannerResumeTimer = setTimeout(() => { homeBannerResumeTimer = null; startHeroAutoplay(); }, 2000);
   };
 
+// • الانتقال لشريحة محددة
   const goToSlide = i => {
     const n = homeBanners.length;
     if (!n) return;
@@ -2786,20 +3060,28 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     updateHeroSlideDom();
     startHeroAutoplay();
   };
+// • الشريحة التالية
   const nextSlide = () => goToSlide(homeBannerIndex + 1);
+// • الشريحة السابقة
   const previousSlide = () => goToSlide(homeBannerIndex - 1);
 
+// ─ [JS-17] اللافتات الإعلانية: homepage_announcements حسب placement، مع dismissKey لإخفائها بعد الإغلاق
   /* ═══════════════════════════════════════════════════════════════
      [ANNOUNCEMENTS] homepage_announcements — لافتات حسب placement
      ═══════════════════════════════════════════════════════════════ */
+// • مفتاح إخفاء اللافتة
   const dismissKey = a => `${a.id}:${a.updated_at || ''}`;
+// • قراءة اللافتات المخفية
   const readDismissed = () => { try { return JSON.parse(localStorage.getItem(K('dismissed_announcements')) || '[]'); } catch { return []; } };
+// • هل اللافتة مخفية
   const isDismissed = a => readDismissed().includes(dismissKey(a));
 
+// • فلترة اللافتات النشطة
   const filterActiveAnnouncements = rows => (rows || []).filter(a =>
     a && a.is_active !== false && isWithinSchedule(a) && (a.title_ar || a.message_ar || a.image_url || a.mobile_image_url)
   );
 
+// • تحميل اللافتات من Supabase
   async function loadAnnouncements() {
     if (!sbClient) { announcementsState = 'error'; return; }
     try {
@@ -2816,6 +3098,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     renderAnnouncements();
   }
 
+// • رسم لافتة
   const renderAnnouncement = a => {
     if (!a.title_ar && !a.message_ar) return '';
     const t = resolveNavigationTarget(a);
@@ -2830,8 +3113,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     </aside>`;
   };
 
+// • مؤقت سلايدر اللافتات
   let annSliderTimer = null;
+// • إيقاف سلايدر اللافتات مؤقتاً
   let annPausedUntil = 0;
+// • ربط أحداث سلايدر اللافتات
   const bindAnnSlider = () => {
     clearInterval(annSliderTimer);
     const sl = document.querySelector('[data-ann-slider]');
@@ -2862,7 +3148,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • هل للافتة صورة
   const annHasImage = a => !!(safeImgUrl(a.image_url) || safeImgUrl(a.mobile_image_url));
+// • رسم اللافتات
   const renderAnnouncements = () => {
     if (currentRoute() === 'home') {
       const strip = document.querySelector('[data-ann-strip]');
@@ -2885,6 +3173,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
   // لافتة الصور: الهاتف يبدأ بـ mobile_image_url ثم image_url، والكمبيوتر يفضّل image_url
   // اللافتة بلا صورة صالحة تُتجاهل بالكامل
+// • رسم لافتة الشريط
   const renderStripAnnouncement = a => {
     const desktop = safeImgUrl(a.image_url);
     const mobile = safeImgUrl(a.mobile_image_url) || desktop;
@@ -2896,6 +3185,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       : `<div class="ann-img" data-announce-id="${esc(a.id)}">${pic}</div>`;
   };
 
+// • إخفاء لافتة
   const dismissAnnouncement = id => {
     const a = announcements.find(x => String(x.id) === String(id));
     if (!a) return;
@@ -2906,6 +3196,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // يُستدعى بعد كل رسم للصفحة لتجهيز الأماكن الديناميكية
+// • تركيب الأدوات على الشاشة الحالية
   const mountRouteWidgets = r => {
     if (r === 'home') { renderHeroSlider(); startHeroAutoplay(); renderHomepageBlocks(); }
     else { stopHeroAutoplay(); clearInterval(annSliderTimer); }
@@ -2935,23 +3226,34 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopHeroAutoplay(); else startHeroAutoplay(); });
 
 
+// ─ [JS-18] بلوكات الصفحة الرئيسية: HOMEPAGE_BLOCK_FIELDS وتحميل homepage_blocks وhomepage_block_items من Supabase
   /* ═══════════════════════════════════════════════════════════════
      [HOMEPAGE BLOCKS] homepage_blocks + homepage_block_items
      ═══════════════════════════════════════════════════════════════ */
+// • حقول homepage_blocks
   const HOMEPAGE_BLOCK_FIELDS = 'id,block_type,title_ar,subtitle_ar,image_url,target_url,content,sort_order,is_active,starts_at,ends_at,layout_type,background_color,text_color,accent_color,padding_size,settings,updated_at';
+// • حقول homepage_block_items
   const BLOCK_ITEM_FIELDS = 'id,block_id,item_type,target_id,target_url,title_override_ar,subtitle_override_ar,image_override_url,sort_order,is_active';
 
+// • بلوكات الرئيسية
   let homeBlocks = [];
+// • عناصر البلوكات
   let homeBlockItems = {};
+// • توزيع البلوكات حسب الموضع
   let homePlacementsByBlock = {};   // block.id -> مواضع عروض من promotion_display_placements
+// • حالة البلوكات
   let homeBlocksState = 'idle';
+// • أهداف البلوك
   const blockTargets = {};   // block_item.id -> وجهة الضغط
 
+// • تباعد البلوك
   const blockPadClass = b => ({ small: 'hb-pad-sm', medium: 'hb-pad-md', large: 'hb-pad-lg' }[b.padding_size] || 'hb-pad-md');
 
   // homepage_block_items.item_type -> target_type المستخدم في resolveNavigationTarget
+// • أنواع هدف عنصر البلوك
   const BLOCK_ITEM_TARGET_TYPE = { product: 'product', category: 'category', promotion: 'promotion', promotion_page: 'promotion_page', url: 'url' };
 
+// • تحميل البلوكات من Supabase
   async function loadHomepageBlocks() {
     if (!sbClient) { homeBlocksState = 'error'; renderHomepageBlocks(); return; }
     if (homeBlocksState !== 'ready') { homeBlocksState = 'loading'; renderHomepageBlocks(); }
@@ -2993,13 +3295,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     renderHomepageBlocks();
   }
 
+// ─ [JS-18أ] أدوات قراءة آمنة: parseJsonObject وغيرها — تمنع توقف الصفحة عند JSON غير صحيح
   /* ── أدوات قراءة آمنة: JSON غير صحيح أو قيمة غير متوقعة لا توقف الصفحة ── */
+// • تحليل JSON بأمان
   const parseJsonObject = v => {
     if (v && typeof v === 'object' && !Array.isArray(v)) return v;
     if (typeof v !== 'string' || !v.trim()) return {};
     try { const p = JSON.parse(v); return (p && typeof p === 'object' && !Array.isArray(p)) ? p : {}; } catch { return {}; }
   };
+// • إعدادات البلوك
   const blockSettings = b => parseJsonObject(b.settings);
+// • محتوى البلوك
   const blockContent = b => {
     if (b.content && typeof b.content === 'object') return b.content;
     if (typeof b.content === 'string') {
@@ -3008,29 +3314,44 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
     return {};
   };
+// • قراءة خيار منطقي آمن
   const boolOpt = (s, k, fb) => (typeof s[k] === 'boolean' ? s[k] : fb);
+// • قراءة خيار رقمي آمن
   const numOpt = (s, k, min, max, fb) => {
     if (s[k] === '' || s[k] == null) return fb;
     const n = Number(s[k]);
     return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fb;
   };
+// • قراءة خيار من قائمة
   const enumOpt = (s, k, allowed, fb) => (allowed.includes(s[k]) ? s[k] : fb);
+// • رابط صورة آمن
   const safeImgUrl = v => (typeof v === 'string' && /^(https?:\/\/|\/(?!\/))/.test(v.trim())) ? v.trim() : '';
+// • مواضع الصورة
   const OBJ_POS = { center: '50% 50%', background: '50% 50%', top: '50% 0%', bottom: '50% 100%', left: '0% 50%', right: '100% 50%' };
   // المحاذاة في القاعدة: right/left/center/start/end (right = بداية السطر في RTL)
+// • خريطة المحاذاة
   const ALIGN_MAP = Object.assign(Object.create(null), { start: 'start', right: 'start', center: 'center', end: 'end', left: 'end' });
+// • قراءة المحاذاة
   const alignOpt = s => ALIGN_MAP[s.text_align] || ALIGN_MAP[s.align] || null;
   // بلوك تجريبي/اختبار يحمل علامة صريحة بأنه لا يظهر للعملاء
+// • هل البلوك تجريبي
   const isTestBlock = b => { const s = blockSettings(b), c = blockContent(b); return s.test_only === true || s.demo === true || c.demo === true || c.test === true; };
+// • مفاتيح المواضع
   const POS_KEYS = Object.keys(OBJ_POS);
+// • تنسيق تاريخ قصير
   const shortDate = v => { if (!v) return ''; const d = new Date(v); return isNaN(d) ? '' : d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }); };
 
   // نوع الوظيفة (block_type) منفصل عن شكل العرض (layout_type)
+// • تخطيطات البلوك
   const HB_LAYOUTS = ['banner', 'cards', 'carousel', 'grid', 'list', 'text'];
+// • التخطيط الافتراضي
   const HB_DEFAULT_LAYOUT = { campaign_hero: 'banner', promo_banner: 'banner', promotion_cards: 'grid', product_carousel: 'carousel', product_grid: 'grid', products_popular: 'grid', category_grid: 'grid', text_promo: 'text', text: 'text' };
+// • تخطيط البلوك
   const layoutOf = b => (HB_LAYOUTS.includes(b.layout_type) ? b.layout_type : (HB_DEFAULT_LAYOUT[b.block_type] || 'grid'));
 
+// ─ [JS-18ب] تحويل عناصر البلوك إلى بيانات جاهزة للعرض (من الكاش الحي فقط)
   // ─── تحويل عناصر البلوك إلى بيانات جاهزة للعرض (من الكاش الحي فقط) ───
+// • هدف العرض
   const resolvePromotionTarget = p => {
     if (p.target_item_id) return { kind: 'item', id: p.target_item_id };
     const offer = Object.values(pageOffers).flat().find(o => String(o.id) === String(p.id));
@@ -3039,11 +3360,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return { kind: 'route', href: '#/menu' };
   };
 
+// • ملاحظة العرض
   const promoNote = p => [
     Number(p.min_order) > 0 ? `الحد الأدنى للطلب ${money(Number(p.min_order))}` : '',
     Number(p.max_discount) > 0 ? `أقصى خصم ${money(Number(p.max_discount))}` : ''
   ].filter(Boolean).join(' · ');
 
+// • حل عنصر بلوك
   const resolveBlockItem = bi => {
     const titleOv = (bi.title_override_ar || '').trim();
     const subOv = (bi.subtitle_override_ar || '').trim();
@@ -3094,6 +3417,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // عناصر البلوك بترتيبها المسجّل، بدون تكرار منتج داخل نفس البلوك
+// • عناصر البلوك بعد الحل
   const blockItemsResolved = block => {
     const seen = new Set();
     const rows = [...(homeBlockItems[block.id] || [])];
@@ -3110,7 +3434,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     });
   };
 
+// ─ [JS-18ج] عناصر HTML مشتركة بين بلوكات الصفحة الرئيسية
   // ─── عناصر HTML مشتركة ───
+// • تنسيق البلوك
   const hbStyle = (b, s) => {
     const parts = [];
     const bg = safeColor(b.background_color, '');
@@ -3126,6 +3452,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return parts.join(';');
   };
 
+// • قالب قسم البلوك
   const hbSection = (b, s, inner, cls = '') => {
     const title = (b.title_ar || '').trim();
     const sub = (b.subtitle_ar || '').trim();
@@ -3133,6 +3460,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return `<section class="hb ${blockPadClass(b)}${s.full_width === true ? ' hb-full' : ''}${cls ? ' ' + cls : ''}" style="${hbStyle(b, s)}" data-hb-block="${esc(b.id)}"${title ? ` aria-label="${esc(title)}"` : ''}>${head}${inner}</section>`;
   };
 
+// • حاوية عناصر البلوك
   const hbItemsWrap = (layout, cards, s, wide = false) => {
     const items = cards.map(c => `<div role="listitem">${c}</div>`).join('');
     if (layout === 'carousel') return `<div class="hb-slider${wide ? ' hb-slider-wide' : ''}" role="list">${items}</div>`;
@@ -3144,6 +3472,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return `<div class="hb-grid" role="list" style="${vars}">${items}</div>`;
   };
 
+// • قالب كرت البلوك
   const hbCard = (r, s, c = {}) => {
     const showBadge = boolOpt(s, 'show_badge', boolOpt(c, 'show_badge', true));
     const showDesc = boolOpt(s, 'show_description', true);
@@ -3155,6 +3484,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // بطاقة منتج داخل البلوك: نفس الأزرار والوظائف الحالية (فتح المنتج + إضافة سريعة)
+// • قالب كرت منتج في البلوك
   const hbProductCard = (it, s) => {
     const showDesc = boolOpt(s, 'show_description', true);
     const showPrice = boolOpt(s, 'show_price', true);
@@ -3176,6 +3506,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // بانر: صورة + تراكب + عنوان + وصف + شارة + زر CTA (أو كامل البانر قابل للنقر إن أُخفي الزر)
+// • قالب بانر البلوك
   const hbBannerHtml = (b, s, o) => {
     const objD = OBJ_POS[enumOpt(s, 'image_position', POS_KEYS, 'center')];
     const objM = OBJ_POS[enumOpt(s, 'mobile_image_position', POS_KEYS, 'center')];
@@ -3195,9 +3526,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       : `<div class="hb-banner" style="${style}">${inner}</div>`;
   };
 
+// • نص زر البلوك
   const ctaText = c => String(c.button_text_ar || c.cta_text_ar || c.cta_text || '').trim() || 'اكتشف العرض';
 
   // بانر على مستوى البلوك نفسه (صورة واحدة وعنوان ورابط)
+// • بانر على مستوى البلوك
   const blockLevelBanner = (b, s, c) => {
     const key = 'blk-' + b.id;
     const target = resolveNavigationTarget({ target_type: 'url', target_url: b.target_url });
@@ -3212,9 +3545,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     })}</section>`;
   };
 
+// ─ [JS-18د] مُرسِلات كل نوع بلوك (Renderer مستقل لكل block_type)
   // ─── مُرسِلات كل نوع بلوك (Renderer مستقل لكل block_type) ───
+// • رسم بلوك بانر الحملة
   const renderCampaignHero = (b, s, c) => blockLevelBanner(b, s, c);
 
+// • رسم بلوك بانر العرض
   const renderPromoBanner = (b, s, c, resolved) => {
     const items = resolved.filter(r => r.kind === 'card');
     if (!items.length) return blockLevelBanner(b, s, c);
@@ -3230,12 +3566,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return `<section class="hb-banner-sec" data-hb-block="${esc(b.id)}"><div class="${wrapCls}" role="list">${banners}</div></section>`;
   };
 
+// • رسم بلوك بطاقات العروض
   const renderPromotionCards = (b, s, c, resolved) => {
     const cards = resolved.filter(r => r.kind === 'card').map(r => hbCard(r, s, c));
     if (!cards.length) return '';
     return hbSection(b, s, hbItemsWrap(layoutOf(b), cards, s));
   };
 
+// • رسم بلوك المنتجات
   const renderProductBlock = (b, s, c, resolved) => {
     let items = resolved.filter(r => r.kind === 'item').map(r => ({
       ...r.item, name: r.title || r.item.name, desc: r.subtitle || r.item.desc, img: r.image || r.item.img
@@ -3248,12 +3586,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return hbSection(b, s, hbItemsWrap(layoutOf(b), items.map(it => hbProductCard(it, s)), s));
   };
 
+// • رسم شبكة التصنيفات
   const renderCategoryGrid = (b, s, c, resolved) => {
     const cards = resolved.filter(r => r.kind === 'card').map(r => hbCard(r, s, c));
     if (!cards.length) return '';
     return hbSection(b, s, hbItemsWrap(layoutOf(b), cards, s));
   };
 
+// • رسم بلوك النص الترويجي
   const renderTextPromo = (b, s, c) => {
     const text = String(c.text_ar || c.text || '').trim();
     const title = (b.title_ar || '').trim();
@@ -3270,6 +3610,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return hbSection(b, s, layoutOf(b) === 'cards' ? `<div class="txt-card hb-txt-card">${body}</div>` : body);
   };
 
+// • خريطة رسم أنواع البلوكات
   const BLOCK_RENDERERS = {
     campaign_hero: renderCampaignHero,
     promo_banner: renderPromoBanner,
@@ -3283,6 +3624,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // نوع غير معروف لا يُعرض؛ وخطأ بلوك واحد لا يمنع باقي الصفحة
+// • رسم بلوك واحد
   const renderOneBlock = b => {
     const render = BLOCK_RENDERERS[b.block_type];
     if (!render) return '';
@@ -3295,15 +3637,21 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
 
+// ─ [JS-19] صفحات العروض: promotion_pages وmenu_promotions.promotion_page_id. الكارت المربع يفتح صفحة العرض
   /* ═══════════════════════════════════════════════════════════════
      [PROMOTION PAGES] promotion_pages + menu_promotions.promotion_page_id
      الكارت المربع = صفحة عرض، وشاشته = العروض المرتبطة بها
      ═══════════════════════════════════════════════════════════════ */
+// • حقول promotion_pages
   const PAGE_FIELDS = 'id,slug,title_ar,subtitle_ar,description_ar,card_image_url,cover_image_url,sort_order,is_active,starts_at,ends_at';
+// • حقول عروض الصفحة
   const PAGE_OFFER_FIELDS = 'id,name_ar,description_ar,image_url,promotion_type,value,target_item_id,target_category_id,promotion_page_id,priority,is_active,starts_at,ends_at';
+// • صفحات العروض الحية
   let livePromotionPages = [];
+// • عروض كل صفحة
   let pageOffers = {};   // page.id -> [offer]
 
+// • تحميل صفحات العروض من Supabase
   async function loadPromotionPages() {
     if (!sbClient) return;
     try {
@@ -3331,10 +3679,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     renderHomepageBlocks();
   }
 
+// • هدف عرض الصفحة
   const promoOfferTarget = o => o.target_item_id
     ? { kind: 'item', id: o.target_item_id }
     : o.target_category_id ? { kind: 'category', id: o.target_category_id } : { kind: 'route', href: '#/menu' };
 
+// • نص قيمة العرض
   const offerValueLabel = o => {
     const v = Number(o.value) || 0;
     switch (o.promotion_type) {
@@ -3348,17 +3698,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // الرئيسية: صف أفقي من الكروت المربعة (صفحات العروض التي لها عروض فعلية)
+// • قالب كرت صفحة العرض
   const pageTileHtml = p => `<button type="button" class="hb-tile" data-page-open="${esc(p.id)}" aria-label="${esc(p.title_ar || 'عروض')}">
       <span class="hb-tile-img">${p.card_image_url ? `<img src="${esc(p.card_image_url)}" alt="" loading="lazy" decoding="async">` : ''}</span>
       ${p.title_ar ? `<span class="hb-tile-title">${esc(p.title_ar)}</span>` : ''}
       ${p.subtitle_ar ? `<span class="hb-tile-sub">${esc(p.subtitle_ar)}</span>` : ''}
     </button>`;
 
+// • المنتجات المرشحة للتخفيض
   const saleCandidates = () => Object.values(ITEM).map(it => {
     const sz = (it.sizes || []).filter(z => z.sale > 0 && z.price > 0 && z.sale < z.price).sort((a, b) => a.sale - b.sale)[0];
     return sz ? { it, sz } : null;
   }).filter(Boolean);
 
+// • رسم شريط التخفيضات
   const renderSaleStrip = () => {
     const root = document.querySelector('[data-sale-strip]');
     if (!root) return;
@@ -3379,6 +3732,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       : '';
   };
 
+// • رسم كل بلوكات الرئيسية
   const renderHomepageBlocks = () => {
     const cardsRoot = document.querySelector('[data-home-cards]');
     const offersRoot = document.querySelector('[data-home-offers]');
@@ -3424,6 +3778,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   }, true);
 
   // شاشة الصفحة: غلافها ووصفها وكل عروضها
+// • محتوى شاشة صفحة العرض
   const pageScreenHtml = p => {
     const offers = pageOffers[p.id] || [];
     const head = `<header class="bs-head">
@@ -3445,6 +3800,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return `<div class="bs-inner">${head}${cover}<div class="bs-grid">${cards}</div></div>`;
   };
 
+// • شاشة بلوك
   const blockScreen = () => {
     let el = document.getElementById('blockScreen');
     if (!el) {
@@ -3458,6 +3814,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return el;
   };
 
+// • فتح شاشة صفحة العرض
   const openPageScreen = id => {
     const page = livePromotionPages.find(p => String(p.id) === String(id));
     if (!page) return;
@@ -3468,6 +3825,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     document.body.classList.add('bs-open');
   };
 
+// • إغلاق شاشة البلوك
   const closeBlockScreen = () => {
     const el = document.getElementById('blockScreen');
     if (el) el.classList.remove('show');
@@ -3493,13 +3851,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (e.key === 'Escape' && document.body.classList.contains('bs-open')) closeBlockScreen();
   });
 
+// ─ [JS-20] مجموعات الإضافات: addon_groups وaddon_group_options. التحقق في الواجهة للتجربة فقط، والخادم يطبّق القاعدة نفسها
   /* ═══════════════════════════════════════════════════════════════
      [ADDON GROUPS] addon_groups + addon_group_options
      التحقق في الواجهة للتجربة فقط؛ الخادم يطبّق القاعدة نفسها عند الطلب.
      ═══════════════════════════════════════════════════════════════ */
+// • مجموعات الإضافات الحية
   let liveAddonGroups = {};   // item.id -> [{ id, name, required, min, max, options: [addonKey] }]
+// • هل مجموعات الإضافات جاهزة
   let liveAddonGroupsReady = false;
 
+// • تحميل مجموعات الإضافات من Supabase
   const loadAddonGroups = async () => {
     if (!sbClient) return;
     try {
@@ -3533,6 +3895,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // يرجع رسالة عربية إذا لم تكتمل الاختيارات، أو null إذا كانت صحيحة
+// • التحقق من قواعد المجموعة (للتجربة فقط)
   const addonGroupProblem = (itemId, addons) => {
     const item = ITEM[itemId];
     const selected = [...new Set(Array.isArray(addons) ? addons : [])];
@@ -3549,6 +3912,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return null;
   };
 
+// • رسم أقسام الإضافات
   const renderAddonSections = it => {
     const d = state.draft || { addons: [] };
     const opt = a => `<label class="opt ${d.addons.includes(a) ? 'sel' : ''}">
@@ -3568,6 +3932,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // يمنع تجاوز الحد الأقصى من الواجهة قبل تغيير الحالة
+// • تفعيل حراس قواعد الإضافات
   const initAddonGroupGuards = () => {
     sheet.addEventListener('change', e => {
       const t = e.target;
@@ -3583,14 +3948,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }, true);
   };
 
+// ─ [JS-21] الشارات: display_badges وmenu_item_badges، مرتبة حسب sort_order
   /* ═══════════════════════════════════════════════════════════════
      [DISPLAY BADGES] display_badges + menu_item_badges
      ═══════════════════════════════════════════════════════════════ */
+// • شارات المنتجات الحية
   let liveItemBadges = {};   // item.id -> [badge] مرتبة حسب sort_order
 
+// • شكل الشارة
   const BADGE_SHAPE_RADIUS = { pill: '999px', rounded: '10px', square: '0', ribbon: '0', circle: '50%' };
+// • حركة الشارة
   const BADGE_ANIMATION = { pulse: 'pulse', bounce: 'bounce', shake: 'shake', shimmer: 'shimmer' };
 
+// • تحميل شارات المنتجات
   const loadItemBadges = async () => {
     if (!sbClient) return;
     try {
@@ -3621,6 +3991,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • قالب شارة من قاعدة البيانات
   const dbBadgeHtml = (it) => (liveItemBadges[it.id] || []).map(b => {
     const size = Math.min(40, Math.max(8, Number(b.font_size_px) || 12));
     const weight = ['400', '500', '600', '700', '800', '900'].includes(String(b.font_weight)) ? String(b.font_weight) : '700';
@@ -3638,12 +4009,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return `<span class="badge-tag db-badge"${anim} style="${style}">${b.icon ? `<span aria-hidden="true">${esc(b.icon)}</span> ` : ''}${esc(b.label_ar)}</span>`;
   }).join('');
 
+// • قالب شارة التصنيف
   const categoryBadgeHtml = id => (liveCategoryBadges[id] || []).map(b => `<span class="badge-tag db-badge" style="background:${safeColor(b.background_color, '#dc2626')};color:${safeColor(b.text_color, '#fff')};font-size:${Math.min(20,Math.max(8,Number(b.font_size_px)||10))}px;border-radius:${BADGE_SHAPE_RADIUS[b.shape]||'999px'}">${b.icon ? esc(b.icon)+' ' : ''}${esc(b.label_ar)}</span>`).join('');
+// • نص شارة العرض
   const promotionBadgeLabel = id => (livePromotionBadges[id] || []).map(b => b.label_ar).filter(Boolean).join(' · ');
 
+// ─ [JS-22] الشاشات (الصفحات): viewHome وviewMenu وviewCart وviewCheckout وviewOrders وviewProfile... كل دالة تكتب في #app
   /* ═══════════════════════════════════════════════
      [JS] الصفحات (الأصلي)
      ═══════════════════════════════════════════════ */
+// • شاشة الرئيسية
   const viewHome = () => {
     const popular = MENU_ITEMS.filter(i => !isSecret(i) && i.tags.includes('popular')).concat(MENU_ITEMS.filter(i => !isSecret(i) && !i.tags.includes('popular'))).slice(0, 6);
     const pricing = calculatePricing(state.cart, { coupon: state.coupon, voucher: selectedRemoteVoucher() });
@@ -3677,6 +4052,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       </div>`;
   };
 
+// • تحديث شريحة الهيرو
   const updateHeroSlide = () => {
     const root = document.querySelector('[data-hero-root]');
     if (!root || !livePromotions.length) return;
@@ -3697,6 +4073,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if(count) count.textContent=`${activePromotionIndex+1} / ${livePromotions.length}`;
   };
 
+// • المنتجات بعد الفلترة
   const filteredItems = () => {
     const q = state.query.trim().toLowerCase();
     const isCat = state.filter !== 'All' && !state.filter.startsWith('tag:');
@@ -3710,6 +4087,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     });
   };
 
+// • شاشة المنيو
   const viewMenu = () => {
     const list = filteredItems();
     const isCat = state.filter !== 'All' && !state.filter.startsWith('tag:');
@@ -3740,6 +4118,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // --- [JS] صفحة السلة الجديدة (تم دمجها بالكامل) ---
+// • شاشة السلة
   const viewCart = () => {
     if (!state.cart.length) {
       return `<div class="empty view-anim">
@@ -3844,6 +4223,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // --- [JS] صفحة الدفع الجديدة (Checkout) ---
+// • شاشة الدفع
   const viewCheckout = () => {
     if (!state.cart.length) { setTimeout(() => location.hash = '#/cart', 0); return ''; }
     const pricing = calculatePricing(state.cart, { coupon: state.coupon, voucher: selectedRemoteVoucher() });
@@ -3936,6 +4316,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     `;
   };
 
+// • شاشة الطلبات
   const viewOrders = () => {
     if (!state.orders.length) {
       return `<div class="empty view-anim">
@@ -3979,6 +4360,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       </div>`;
   };
 
+// • شاشة المكافآت والحساب
   const viewProfile = () => {
     const levels = (Array.isArray(state.loyaltyLevels) ? state.loyaltyLevels : []).slice().sort((a, b) => a.min_points - b.min_points);
     const curLevel = levels.filter(l => state.points >= l.min_points).pop() || null;
@@ -4084,6 +4466,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       </div>`;
   };
 
+// • شاشة الإشعارات
   const viewNotifications = () => {
     const notes = Array.isArray(state.customerNotifications) ? state.customerNotifications : [];
     const unread = notes.filter(n => !n.read_at).length;
@@ -4097,17 +4480,22 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     </div>`;
   };
 
+// • خريطة الشاشات حسب الـ hash
   const VIEWS = { home: viewHome, menu: viewMenu, cart: viewCart, checkout: viewCheckout, orders: viewOrders, profile: viewProfile, notifications: viewNotifications };
 
+// ─ [JS-23] الراوتر: currentRoute يقرأ الـ hash ويختار الشاشة. الروابط يجب أن تبقى hash routes (#/home ...)
   /* ═══════════════════════════════════════════════
      [JS] الراوتر (الأصلي)
      ═══════════════════════════════════════════════ */
+// • قراءة الـ hash الحالي
   const currentRoute = () => {
     const r = location.hash.replace(/^#\/?/, '');
     return VIEWS[r] ? r : 'home';
   };
+// • آخر مسار
   let lastRoute = null;
 
+// • تمييز الرابط النشط
   const setActiveNav = r => {
     document.querySelectorAll('[data-nav]').forEach(el => {
       const on = el.dataset.nav === r;
@@ -4117,6 +4505,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     });
   };
 
+// • رسم الشاشة الحالية في #app
   const render = () => {
     const r = currentRoute();
     const changed = r !== lastRoute;
@@ -4140,6 +4529,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     Anim.afterRender(changed);
   };
 
+// • إعادة رسم الشاشة
   const refresh = () => {
     readForm();
     const y = window.scrollY;
@@ -4161,11 +4551,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     Anim.afterRender(false);
   };
 
+// ─ [JS-24] نافذة تفاصيل المنتج: lastFocused وفتح/إغلاق الشيت مع إدارة التركيز (a11y)
   /* ═══════════════════════════════════════════════
      [JS] نافذة تفاصيل المنتج (الأصلي)
      ═══════════════════════════════════════════════ */
+// • العنصر المُركّز قبل فتح الشيت
   let lastFocused = null;
 
+// • فتح نافذة المنتج
   const openItem = (id) => {
     const it = ITEM[id];
     if (!it || (isSecret(it) && !state.secretUnlocked)) return;
@@ -4181,6 +4574,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (close) close.focus({ preventScroll: true });
   };
 
+// • إغلاق الشيت
   const closeSheet = () => {
     sheet.classList.remove('show');
     overlay.classList.remove('show');
@@ -4191,11 +4585,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     lastFocused = null;
   };
 
+// • سعر المسودة قبل الإضافة
   const draftPrice = () => {
     if (!state.draft) return 0;
     return round2(unitPrice({ ...state.draft, qty: 1 }, {}) * state.draft.qty);
   };
 
+// • رسم محتوى نافذة المنتج
   const renderSheet = () => {
     if (!state.draft) return;
     const d = state.draft, it = ITEM[d.id];
@@ -4285,6 +4681,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (noteInput) noteInput.addEventListener('input', e => { if (state.draft) state.draft.note = e.target.value.slice(0, 80); });
   };
 
+// • تحديث إجمالي الشيت
   const updateSheetTotals = () => {
     const q = document.getElementById('mQty');
     const p = document.getElementById('mPrice');
@@ -4292,6 +4689,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (p) p.textContent = money(draftPrice());
   };
 
+// • إضافة المسودة للسلة
   const commitDraft = () => {
     const d = state.draft; if (!d) return;
     if (!liveAddonGroupsReady) { toast('خيارات الإضافات لسه بتتحمّل. حاول بعد لحظات.'); return; }
@@ -4301,6 +4699,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     toast(`${d.qty}× ${ITEM[d.id].name} اتضاف`);
   };
 
+// ─ [JS-25] الكوبونات: التحقق من الكوبون وتطبيقه على ملخص الحساب
   /* ═══════════════════════════════════════════════
      [JS] الكوبونات (الأصلي)
      ═══════════════════════════════════════════════ */
@@ -4308,6 +4707,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
      [COUPONS] التحقق من الكوبون والقسائم من الخادم فقط
      المرجع: preview_order_quote_with_voucher (معاينة) ← create_order_secure (التنفيذ)
      ═══════════════════════════════════════════════════════════════ */
+// • رسائل أخطاء التسعير
   const QUOTE_ERROR_MESSAGES = [
     ['INVALID_OR_EXPIRED_COUPON', 'الكود غير صحيح أو منتهي الصلاحية.'],
     ['COUPON_LIMIT_REACHED', 'وصل هذا الكود للحد الأقصى للاستخدام.'],
@@ -4334,19 +4734,25 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     ['ITEM_OR_SIZE_UNAVAILABLE', 'بعض المنتجات غير متاحة حاليًا، راجع السلة.'],
     ['INVALID_DELIVERY_ZONE', 'منطقة التوصيل غير متاحة.'],
   ];
+// • نص خطأ التسعير
   const quoteErrorMessage = raw => {
     const msg = String(raw || '');
     const hit = QUOTE_ERROR_MESSAGES.find(([key]) => msg.includes(key));
     return hit ? hit[1] : 'تعذر حساب الطلب حاليًا. جرّب تاني.';
   };
 
+// • آخر تسعير من السيرفر
   let serverQuote = null;     // { sig, quote, error }  — آخر معاينة من الخادم
+// • مؤقت التسعير
   let quoteTimer = null;
+// • تسلسل طلبات التسعير
   let quoteSeq = 0;
 
+// • منطقة التوصيل الحالية
   const currentZoneId = () => document.getElementById('fArea')?.value || (window.SHEEPBURGER_ZONES || [])[0]?.id || '';
 
   // نفس شكل البنود الذي يرسله create_order_secure
+// • بناء عناصر طلب التسعير
   const buildQuoteItems = () => {
     const branchState = window.SHEEPBURGER_BRANCH_STATE || { loaded: false, total: 0, active: [], selectedId: null };
     if (!branchState.loaded || (branchState.total > 0 && !branchState.selectedId)) return null;
@@ -4361,6 +4767,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     return items;
   };
 
+// • توقيع الطلب لمنع التكرار
   const quoteSignature = () => JSON.stringify({
     lines: state.cart.map(l => [l.id, l.size, l.qty, [...(l.addons || [])].sort()]),
     zone: currentZoneId(),
@@ -4370,6 +4777,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     phone: state.coupon || state.selectedVoucherId ? (normalizeEgyptPhone(state.customer.phone) || '') : ''
   });
 
+// • جلب التسعير من السيرفر
   const fetchServerQuote = async ({ couponCode = null, voucherId = null } = {}) => {
     if (!liveAddonGroupsReady) return { ok: false, error: 'ADDON_GROUPS_NOT_READY' };
     const branchState = window.SHEEPBURGER_BRANCH_STATE || { loaded: false, total: 0, active: [], selectedId: null };
@@ -4391,6 +4799,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • تشغيل التسعير من السيرفر
   const runServerQuote = async sig => {
     const seq = ++quoteSeq;
     const res = await fetchServerQuote({ couponCode: state.coupon?.code || null, voucherId: state.selectedVoucherId || null });
@@ -4401,6 +4810,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // يُستدعى بعد كل رسم؛ لا يطلب من الخادم إلا إذا تغيّرت السلة أو الكوبون أو القسيمة أو المنطقة
+// • جدولة التسعير من السيرفر
   const scheduleServerQuote = () => {
     if (!['cart', 'checkout'].includes(currentRoute()) || !state.cart.length) return;
     const sig = quoteSignature();
@@ -4410,11 +4820,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
 
   // أسعار بنود السلة من معاينة الخادم (نفس ترتيب السلة) عندما تكون مطابقة للسلة الحالية
+// • عناصر تسعير محدّثة
   const freshQuoteItems = () => (serverQuote && serverQuote.quote && serverQuote.sig === quoteSignature() && Array.isArray(serverQuote.quote.items) && serverQuote.quote.items.length === state.cart.length) ? serverQuote.quote.items : null;
 
   // كل الأرقام المالية (المجموع، التوصيل، الخصومات، الإجمالي) تأتي من الخادم فقط عبر preview_order_quote_with_voucher.
   // لا يوجد أي حساب محلي للأسعار؛ إن لم تكن المعاينة مطابقة للسلة الحالية تُعرض الأرقام صفرًا ويُمنع الدفع.
+// • قيمة تسعير فارغة
   const EMPTY_PRICING = () => ({ subtotal: 0, itemDiscounts: 0, deliveryFee: 0, smallOrderFee: 0, serviceFee: 0, couponDiscount: 0, loyaltyDiscount: 0, promotionDiscount: 0, voucherDiscount: 0, total: 0, freeDeliveryReason: null, serverVerified: false });
+// • حساب الأسعار والإجمالي
   const calculatePricing = () => {
     if (!state.cart.length || !serverQuote || !serverQuote.quote || serverQuote.sig !== quoteSignature()) return EMPTY_PRICING();
     const q = serverQuote.quote;
@@ -4435,6 +4848,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     };
   };
 
+// • تطبيق كوبون
   const applyCoupon = async () => {
     readForm();
     const code = (state.couponInput || '').trim().toUpperCase();
@@ -4456,6 +4870,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     refresh(); toast('الكوبون اتفعّل 🎉');
   };
 
+// • إزالة الكوبون
   const removeCoupon = () => {
     state.coupon = null; state.couponInput = ''; state.couponMsg = '';
     safeSave(K('coupon'), null);
@@ -4463,14 +4878,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     refresh();
   };
 
+// • تطبيق عرض عيد الميلاد إن وُجد
   const maybeApplyBirthday = () => { /* خصم عيد الميلاد يتم إصداره من الخادم لحساب موثّق فقط. */ };
 
+// • رسالة المصادقة
   const authMessage = (message, isError = true) => {
     const el = document.getElementById('customerAuthMessage');
     if (el) { el.textContent = message; el.style.color = isError ? 'var(--danger, #b42318)' : 'var(--success, #16794b)'; }
     else if (message) toast(message);
   };
 
+// • تسجيل الدخول بكلمة المرور
   const customerPasswordAuth = async (mode) => {
     if (!sbClient || customerAuthBusy) return;
     const email = String(document.getElementById('customerAuthEmail')?.value || '').normalize('NFKC').replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF\u00A0]/g, '').trim().toLowerCase();
@@ -4536,6 +4954,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     } finally { customerAuthBusy = false; }
   };
 
+// • تحميل إشعارات العميل
   const loadCustomerNotifications = async ({ quiet = true, notifyNew = true } = {}) => {
     if (!sbClient || !customerAuthUser) { state.customerNotifications = []; state.notificationsError = false; updateBadges(); return; }
     const hadLoaded = state.notificationsLoadedAt > 0;
@@ -4563,6 +4982,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+// • تعليم إشعار كمقروء
   const markCustomerNotificationRead = async (id) => {
     if (!sbClient || !customerAuthUser || !id) return;
     const readAt = new Date().toISOString();
@@ -4575,6 +4995,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     } catch (e) { toast('تعذر تحديث الإشعار. جرّب مرة تانية.'); }
   };
 
+// • تعليم كل الإشعارات كمقروءة
   const markAllCustomerNotificationsRead = async () => {
     if (!sbClient || !customerAuthUser) return;
     const readAt = new Date().toISOString();
@@ -4587,6 +5008,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     } catch (e) { toast('تعذر تحديث الإشعارات. جرّب مرة تانية.'); }
   };
 
+// • تحميل النقاط والمكافآت
   const loadCustomerRewards = async () => {
     if (!sbClient || !customerAuthUser) return;
     try {
@@ -4616,6 +5038,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     } catch (e) { console.warn('[Rewards] تعذر تحديث رصيد الولاء'); }
   };
 
+// • حفظ بيانات الحساب
   const saveCustomerProfile = async () => {
     if (!sbClient || !customerAuthUser) { authMessage('وثّق إيميلك الأول عشان تحفظ بيانات الولاء.'); return; }
     const birthday = String(document.getElementById('pBirthday')?.value || '').trim();
@@ -4635,6 +5058,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     } catch (e) { authMessage('تعذر حفظ البيانات. اتأكد إنك مسجل دخول وجرب تاني.'); }
   };
 
+// • تسجيل الخروج
   const customerSignOut = async () => {
     if (sbClient) await sbClient.auth.signOut();
     clearCustomerLocalState(); customerAuthUser = null; customerOtpSent = false; checkoutLoginRequired = false; state.points = 0; state.stamps = 0; state.achievements = []; state.remoteVouchers = []; state.selectedVoucherId = null; state.loyaltyEnabled = false;
@@ -4643,6 +5067,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     refresh(); toast('تم تسجيل الخروج');
   };
 
+// • حفظ الاسم
   const saveName = () => {
     const input = document.getElementById('pName');
     const name = (input ? input.value : '').trim().slice(0, 40);
@@ -4653,6 +5078,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     refresh();
   };
 
+// • إضافة اختيار الشيف للسلة
   const addChefSpecial = () => {
     if (!state.chefSpecial) return;
     const it = ITEM[state.chefSpecial.id];
@@ -4661,13 +5087,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     toast('اتضاف للسلة');
   };
 
+// ─ [JS-26] تثبيت PWA: deferredPrompt وزر التثبيت (beforeinstallprompt)
   /* ═══════════════════════════════════════════════
      [JS] تثبيت PWA (الأصلي)
      ═══════════════════════════════════════════════ */
+// • حدث التثبيت المؤجل
   let deferredPrompt = null;
+// • زر التثبيت
   const installBtn = document.getElementById('installBtn');
+// • إظهار زر التثبيت
   const showInstall = () => installBtn.classList.add('show');
+// • إخفاء زر التثبيت
   const hideInstall = () => installBtn.classList.remove('show');
+// • تنفيذ التثبيت
   const triggerInstall = async () => {
     if (!deferredPrompt) {
       const ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -4685,9 +5117,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) hideInstall();
   installBtn.addEventListener('click', triggerInstall);
 
+// ─ [JS-27] الأنيميشن: كائن Anim للحركات الخفيفة. يحترم تقليل الحركة
   /* ═══════════════════════════════════════════════
      [JS] الأنيميشن (الأصلي)
      ═══════════════════════════════════════════════ */
+// • كائن الأنيميشن
   const Anim = {
     lastCount: 0, vals: {}, io: null,
 
@@ -4763,6 +5197,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   };
   document.addEventListener('pointerdown', e => Anim.ripple(e));
 
+// • تبديل التحديث
   const swapRefresh = () => {
     const sc = [...app.querySelectorAll('.cats')].map(c => c.scrollLeft);
     refresh();
@@ -4770,6 +5205,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     Anim.gridSwap();
   };
 
+// ─ [JS-28] الأحداث: مستمع النقر الرئيسي document.addEventListener('click') لكل data-action في الصفحة
   /* ═══════════════════════════════════════════════
      [JS] الأحداث (الأصلي + إضافة الإجراءات الجديدة)
      ═══════════════════════════════════════════════ */
@@ -4947,6 +5383,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (document.visibilityState === 'visible' && customerAuthUser) loadCustomerNotifications({ quiet: currentRoute() !== 'notifications' });
   });
 
+// ─ [JS-29] الـ Boot: تشغيل التطبيق والتهيئة النهائية. يُنفَّذ آخراً بعد تعريف كل الدوال والثوابت
   /* ═══════════════════════════════════════════════
      [JS] التشغيل (الأصلي)
      ═══════════════════════════════════════════════ */
