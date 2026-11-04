@@ -3260,7 +3260,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   let homepageSectionOrder = [];
   const HOME_SECTION_DEFAULT_ORDER = {
     hero_slider: 10, promotion_pages: 20, announcements: 30,
-    sale_strip: 40, homepage_blocks: 50, text_row: 60, secret_menu: 70
+    sale_strip: 40, homepage_blocks: 50, secret_menu: 60
   };
   async function loadHomepageSectionOrder() {
     if (!sbClient) return;
@@ -4097,7 +4097,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         <div data-sale-strip data-home-section="sale_strip"></div>
         <div data-home-offers data-home-section="homepage_blocks"></div>
         <div data-home-blocks data-home-section="homepage_blocks"></div>
-        <div data-text-row data-home-section="text_row"></div>
 
         ${!state.secretUnlocked ? `
           <div class="card-block" data-home-section="secret_menu" style="text-align:center;border-style:dashed">
