@@ -960,6 +960,22 @@ body.hide-nav .sticky-cart { display: none !important; }
 .hsl-track{display:grid;height:100%}
 .hsl-slide{grid-area:1/1;position:relative;height:100%;display:flex;align-items:flex-end;color:#fff;isolation:isolate;background:linear-gradient(135deg,var(--primary-dark),var(--ink));opacity:0;visibility:hidden;transition:opacity .6s var(--ease),visibility .6s}
 .hsl-slide.is-active{opacity:1;visibility:visible}
+.hsl-clickable{cursor:pointer}.hsl-clickable:focus-visible{outline:3px solid var(--primary);outline-offset:-4px}
+.hsl-content{pointer-events:none}
+.cart-promo-placement,.cart-recommendations{margin:18px 0 22px}
+.cart-promo-placement>h3,.cart-recommendations-head h3{font-size:17px;font-weight:900;margin:0 0 10px}
+.cart-promo-row{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 1px 8px;scrollbar-width:none}
+.cart-promo-row::-webkit-scrollbar,.cart-recommendations-row::-webkit-scrollbar{display:none}
+.cart-promo-card{flex:0 0 min(78vw,320px);display:flex;align-items:center;gap:10px;text-align:start;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:9px;color:var(--ink);scroll-snap-align:start;box-shadow:var(--shadow-sm)}
+.cart-promo-card img,.cart-promo-icon{width:76px;height:76px;flex:0 0 76px;object-fit:cover;border-radius:12px;background:var(--bg-2);display:grid;place-items:center;font-size:28px}
+.cart-promo-card>span:last-child{display:flex;flex-direction:column;gap:4px;min-width:0}
+.cart-promo-card strong{font-size:14px;font-weight:900}.cart-promo-card small{font-size:12px;color:var(--ink-2);line-height:1.4}.cart-promo-card em{font-style:normal;color:var(--primary);font-weight:900;font-size:13px}
+.cart-recommendations-head p{font-size:12px;color:var(--ink-2);margin-top:3px}
+.cart-recommendations-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 1px 10px;scrollbar-width:none}
+.cart-recommendations-row>div{flex:0 0 min(68vw,230px);scroll-snap-align:start}
+.cart-recommendations-row .product{height:100%;margin:0}
+.bs-offer-group{margin:18px 0 26px}.bs-offer-group>header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}.bs-offer-group h3{font-size:17px;font-weight:900}.bs-offer-group p{font-size:13px;color:var(--ink-2);margin-top:4px}.bs-offer-group em{font-style:normal;font-weight:900;color:var(--primary);white-space:nowrap;font-size:13px}.bs-products-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.bs-empty{padding:28px 16px;text-align:center;color:var(--ink-2);background:var(--surface);border-radius:16px}
+@media(min-width:700px){.bs-products-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .hsl-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
 .hsl-slide.img-failed .hsl-img{display:none}
 .hsl-slide::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,10,5,.1) 0%,rgba(20,10,5,.78) 100%);z-index:-1}
@@ -989,11 +1005,13 @@ body.hide-nav .sticky-cart { display: none !important; }
 .hb-rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .hb-rail::-webkit-scrollbar{display:none}
 .hb-rail>div{flex:0 0 auto;scroll-snap-align:start}
-.hb-tile{width:40vw;min-width:132px;max-width:170px;display:flex;flex-direction:column;gap:6px;text-align:start;background:none;padding:0;cursor:pointer;color:var(--ink)}
-.hb-tile-img{display:block;aspect-ratio:1/1;border-radius:var(--r-md);overflow:hidden;background:linear-gradient(135deg,var(--bg-2),var(--line));box-shadow:var(--shadow-sm)}
+.hb-tile{width:40vw;min-width:132px;max-width:170px;display:block;text-align:start;background:var(--surface);padding:0;cursor:pointer;color:#fff;border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-sm)}
+.hb-tile-img{position:relative;display:block;aspect-ratio:1/1;overflow:hidden;background:linear-gradient(135deg,var(--bg-2),var(--line))}
+.hb-tile-img::after{content:'';position:absolute;inset:35% 0 0;background:linear-gradient(180deg,transparent,rgba(16,10,7,.88));pointer-events:none}
 .hb-tile-img img{width:100%;height:100%;object-fit:cover}
-.hb-tile-title{font-weight:800;font-size:14px;line-height:1.3}
-.hb-tile-sub{font-size:12px;color:var(--ink-2);line-height:1.4}
+.hb-tile-content{position:absolute;z-index:1;inset:auto 0 0;display:flex;flex-direction:column;gap:4px;padding:11px;text-align:start}
+.hb-tile-content strong{font-size:14px;font-weight:900;line-height:1.3;color:#fff}
+.hb-tile-content small{font-size:11px;line-height:1.35;color:rgba(255,255,255,.9)}
 .hb-tile:focus-visible{outline:3px solid var(--primary);outline-offset:3px;border-radius:var(--r-md)}
 @media(min-width:900px){.hb-tile{width:200px;max-width:200px}}
 .bs{position:fixed;inset:0;z-index:950;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;transition:opacity .25s var(--ease),visibility .25s;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -1481,6 +1499,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   let livePromotion = null;
 // • قائمة العروض الحية
   let livePromotions = [];
+// • معرّفات العروض المخصصة لصفحات الحملات، حتى لو لم تكن ضمن أول 20 عرضًا محمّلًا
+  let campaignOnlyPromotionIds = new Set();
 // • فهرس العرض النشط
   let activePromotionIndex = 0;
 
@@ -1513,7 +1533,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         sbClient.from('addons').select('id,slug,name_ar,price,sale_price,allergens,is_available,sort_order').order('sort_order'),
         sbClient.from('item_addons').select('item_id,addon_id'),
         sbClient.from('subcategories').select('id,category_id,name_ar,sort_order,is_active').eq('is_active',true).order('sort_order'),
-        sbClient.from('menu_promotions').select('id,name_ar,description_ar,image_url,promotion_type,target_item_id,target_category_id,reward_item_id,value,max_discount,min_order,priority,starts_at,ends_at,max_uses,used_count,is_active').eq('is_active', true).order('priority',{ascending:false}).limit(20),
+        sbClient.from('menu_promotions').select('id,name_ar,description_ar,image_url,promotion_type,target_item_id,target_category_id,reward_item_id,promotion_page_id,value,max_discount,min_order,priority,starts_at,ends_at,max_uses,used_count,is_active').eq('is_active', true).order('priority',{ascending:false}).limit(20),
         sbClient.from('reviews').select('id,item_id,rating,comment,display_name,created_at').eq('is_hidden', false).order('created_at',{ascending:false}).limit(500),
         sbClient.from('app_content').select('group_key,item_key,label_ar,value,sort_order').eq('is_active', true).order('group_key').order('sort_order'),
         sbClient.from('branches').select('id,name_ar,is_active,sort_order').order('sort_order'),
@@ -1591,6 +1611,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       livePromotion = livePromotions[0] || null;
       window.SHEEPBURGER_PROMOTIONS = livePromotions;
       window.SHEEPBURGER_PROMOTION = livePromotion;
+      if (homeBannersState === 'ready') renderHeroSlider();
+      if (announcementsState === 'ready') renderAnnouncements();
       if (!reviewsResult?.error) {
         const ratingMap = {};
         (reviewsResult?.data || []).forEach(r => { (ratingMap[r.item_id] ||= []).push({ uid:r.id, name:r.display_name || 'عميل', stars:Number(r.rating)||5, text:r.comment || '', date:r.created_at ? new Date(r.created_at).toLocaleDateString('ar-EG',{day:'numeric',month:'short'}) : '', sessionId:'' }); });
@@ -2893,6 +2915,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   // homepage_block_items.item_type:      product | category | promotion | promotion_page | url
 // • البحث عن عرض بالمعرف
   const promotionById = id => livePromotions.find(p => String(p.id) === String(id)) || null;
+  // العرض المرتبط بصفحة حملة مخصص لهذه الصفحة فقط، ولا يظهر تلقائيًا في الرئيسية أو السلة.
+  const isCampaignPageOnlyPromotion = p => !!(p && (p.promotion_page_id || campaignOnlyPromotionIds.has(String(p.id))));
+  const isCampaignPageOnlyTarget = row => {
+    const linkedId = row?.promotion_id || (row?.target_type === 'promotion' ? row?.target_id : null);
+    return !!(linkedId && (campaignOnlyPromotionIds.has(String(linkedId)) || isCampaignPageOnlyPromotion(promotionById(linkedId))));
+  };
+  const homepagePromotions = () => (livePromotions || []).filter(p => !isCampaignPageOnlyPromotion(p));
 // • رابط آمن
   const isSafeHref = href => /^(https?:\/\/|#\/|\/)/.test(href);
 
@@ -2907,6 +2936,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (type === 'menu') return { kind: 'route', href: '#/menu' };
     if (type === 'promotion') {
       const p = promotionById(id || row.promotion_id);
+      if (p?.promotion_page_id && livePromotionPages.some(page => String(page.id) === String(p.promotion_page_id))) return { kind: 'page', id: p.promotion_page_id };
       if (p?.target_item_id) return { kind: 'item', id: p.target_item_id };
       if (p?.target_category_id) return { kind: 'category', id: p.target_category_id };
       return { kind: 'route', href: '#/menu' };
@@ -2951,7 +2981,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       const { data, error } = await sbClient.from('active_homepage_banners')
         .select(BANNER_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
       if (error) throw error;
-      homeBannerRows = sortHomeBanners(filterActiveBanners(data));
+      homeBannerRows = sortHomeBanners(filterActiveBanners(data).filter(b => !isCampaignPageOnlyTarget(b)));
       homeBannersState = 'ready';
       homeBannerIndex = Math.min(homeBannerIndex, Math.max(0, homeBanners.length - 1));
     } catch (err) {
@@ -2964,7 +2994,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
   // عند عدم وجود بانرات مفعّلة نعرض العروض المفعّلة والصالحة من menu_promotions (بيانات حقيقية من القاعدة)
 // • شرائح احتياطية
-  const promoFallbackSlides = () => (livePromotions || []).slice(0, 5).map(p => ({
+  const promoFallbackSlides = () => homepagePromotions().slice(0, 5).map(p => ({
     id: 'promo-' + p.id,
     title_ar: p.name_ar || '',
     subtitle_ar: p.description_ar || '',
@@ -2985,7 +3015,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const t = resolveNavigationTarget(b);
     const active = i === homeBannerIndex;
     const img = mobile ? `<picture class="hsl-pic">${desktop && desktop !== mobile ? `<source media="(min-width: 900px)" srcset="${esc(desktop)}">` : ''}<img class="hsl-img" src="${esc(mobile)}" alt="${esc(b.title_ar || '')}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" data-hsl-img></picture>` : '';
-    return `<div class="hsl-slide${active ? ' is-active' : ''}" data-hsl-slide="${i}" role="group" aria-roledescription="slide" aria-label="${i + 1} من ${homeBanners.length}" aria-hidden="${active ? 'false' : 'true'}">
+    const clickable = t.kind !== 'none';
+    return `<div class="hsl-slide${active ? ' is-active' : ''}${clickable ? ' hsl-clickable' : ''}" data-hsl-slide="${i}" ${clickable ? `data-hsl-open="${esc(b.id)}" role="link" tabindex="0" aria-label="افتح ${esc(b.title_ar || 'العرض')}"` : 'role="group"'} aria-roledescription="slide" aria-label="${i + 1} من ${homeBanners.length}" aria-hidden="${active ? 'false' : 'true'}">
       ${img}
       <div class="hsl-content">
         ${b.title_ar ? `<h2>${esc(b.title_ar)}</h2>` : ''}
@@ -3006,12 +3037,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       root.innerHTML = '<div class="hsl-state"><p>تعذر تحميل العروض حاليًا.</p><button type="button" class="btn btn-outline btn-sm" data-hsl-retry>إعادة المحاولة</button></div>';
       return;
     }
-    homeBanners = homeBannerRows.length ? homeBannerRows : promoFallbackSlides();
+    // حتى البانر الرئيسي المُعد يدويًا لا يعرض عرضًا مخصصًا لصفحة حملة فقط.
+    const homepageBannerRows = homeBannerRows.filter(b => !isCampaignPageOnlyTarget(b));
+    homeBanners = homepageBannerRows.length ? homepageBannerRows : promoFallbackSlides();
     if (!homeBanners.length) { root.innerHTML = ''; return; }   // لا بيانات ثابتة كبديل
 
-    const n = homeBanners.length;
-    const controls = n > 1 ? `<div class="hsl-controls"><div class="hsl-dots">${homeBanners.map((_, i) => `<button type="button" class="hsl-dot" data-hsl-dot="${i}" aria-label="الشريحة ${i + 1}" aria-current="${i === homeBannerIndex ? 'true' : 'false'}"></button>`).join('')}</div></div>` : '';
-    root.innerHTML = `<div class="hsl-track" data-hsl-track>${homeBanners.map(renderHeroSlide).join('')}</div>${controls}`;
+    root.innerHTML = `<div class="hsl-track" data-hsl-track>${homeBanners.map(renderHeroSlide).join('')}</div>`;
 
     root.querySelectorAll('[data-hsl-img]').forEach(im => {
       im.addEventListener('error', () => im.closest('.hsl-slide')?.classList.add('img-failed'), { once: true });
@@ -3110,7 +3141,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       const { data, error } = await sbClient.from('active_homepage_announcements')
         .select(ANNOUNCE_FIELDS).eq('is_active', true).order('sort_order', { ascending: true });
       if (error) throw error;
-      announcements = filterActiveAnnouncements(data).sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
+      announcements = filterActiveAnnouncements(data).filter(a => !isCampaignPageOnlyTarget(a)).sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
       announcementsState = 'ready';
     } catch (err) {
       console.warn('[Announcements] تعذر تحميل اللافتات:', err?.message || err);
@@ -3177,7 +3208,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (currentRoute() === 'home') {
       const strip = document.querySelector('[data-ann-strip]');
       if (strip) {
-        const slides = announcements.filter(annHasImage).map(renderStripAnnouncement).filter(Boolean);
+        const slides = announcements.filter(a => !isCampaignPageOnlyTarget(a)).filter(annHasImage).map(renderStripAnnouncement).filter(Boolean);
         strip.innerHTML = slides.length
           ? `<div class="ann-slider" data-ann-slider role="region" aria-roledescription="carousel" aria-label="الإعلانات">${slides.map(s => `<div class="ann-slide">${s}</div>`).join('')}</div>${slides.length > 1 ? `<div class="ann-dots" data-ann-dots aria-hidden="true">${slides.map((_, i) => `<span class="ann-dot${i === 0 ? ' is-active' : ''}"></span>`).join('')}</div>` : ''}`
           : '';
@@ -3188,8 +3219,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     document.querySelectorAll('[data-announce-slot]').forEach(slot => {
       if (currentRoute() === 'home') { slot.innerHTML = ''; return; }
       const placement = slot.dataset.announceSlot;
-      const list = announcements.filter(a => a.placement === placement && !annHasImage(a) && !isDismissed(a));
-      slot.innerHTML = list.map(renderAnnouncement).join('');
+      const list = announcements.filter(a => !isCampaignPageOnlyTarget(a) && a.placement === placement && !isDismissed(a));
+      slot.innerHTML = list.map(a => {
+        if (!annHasImage(a)) return renderAnnouncement(a);
+        return `<div data-announce-id="${esc(a.id)}" style="position:relative;margin-bottom:8px">
+          ${renderStripAnnouncement(a)}
+          ${a.is_dismissible !== false ? '<button type="button" data-announce-close aria-label="إغلاق الإعلان" style="position:absolute;top:8px;left:8px;width:30px;height:30px;border:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:20px;line-height:1;cursor:pointer">×</button>' : ''}
+        </div>`;
+      }).filter(Boolean).join('');
     });
   };
 
@@ -3230,6 +3267,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   // أحداث السلايدر واللافتات (مستقلة عن معالج data-action)
   document.addEventListener('click', e => {
     const t = e.target;
+    const hero = t.closest('[data-hsl-open]');
+    if (hero) { const banner = homeBanners.find(x => String(x.id) === String(hero.dataset.hslOpen)); if (banner) openTarget(banner); return; }
     if (t.closest('[data-hsl-prev]')) { pauseHeroAutoplay(); previousSlide(); return; }
     if (t.closest('[data-hsl-next]')) { pauseHeroAutoplay(); nextSlide(); return; }
     const dot = t.closest('[data-hsl-dot]');
@@ -3244,6 +3283,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       const a = announcements.find(x => String(x.id) === open.closest('[data-announce-id]')?.dataset.announceId);
       if (a) openTarget(a);
     }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const hero = e.target.closest?.('[data-hsl-open]');
+    if (!hero) return;
+    e.preventDefault();
+    const banner = homeBanners.find(x => String(x.id) === String(hero.dataset.hslOpen));
+    if (banner) openTarget(banner);
   });
 
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopHeroAutoplay(); else startHeroAutoplay(); });
@@ -3279,10 +3327,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (!root || currentRoute() !== 'home') return;
     const rows = new Map(homepageSectionOrder.map(x => [x.section_key, x]));
     const nodes = Array.from(root.children).filter(el => el.hasAttribute('data-home-section'));
+    // ترتيب ثابت لأول ثلاثة أقسام: البانر ثم بطاقات صفحات الحملات ثم اللافتة.
+    // لا نسمح لأي ترتيب قديم محفوظ في قاعدة البيانات بنقل اللافتة أسفل البانر مباشرة.
+    const pinnedHomeOrder = { hero_slider: 10, promotion_pages: 20, announcements: 30 };
     nodes.sort((a, b) => {
       const ak = a.dataset.homeSection, bk = b.dataset.homeSection;
-      return Number(rows.get(ak)?.sort_order ?? HOME_SECTION_DEFAULT_ORDER[ak] ?? 9999)
-        - Number(rows.get(bk)?.sort_order ?? HOME_SECTION_DEFAULT_ORDER[bk] ?? 9999);
+      const ao = pinnedHomeOrder[ak] ?? Number(rows.get(ak)?.sort_order ?? HOME_SECTION_DEFAULT_ORDER[ak] ?? 9999);
+      const bo = pinnedHomeOrder[bk] ?? Number(rows.get(bk)?.sort_order ?? HOME_SECTION_DEFAULT_ORDER[bk] ?? 9999);
+      return ao - bo;
     });
     nodes.forEach(el => {
       const row = rows.get(el.dataset.homeSection);
@@ -3301,6 +3353,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   let homeBlockItems = {};
 // • توزيع البلوكات حسب الموضع
   let homePlacementsByBlock = {};   // block.id -> مواضع عروض من promotion_display_placements
+  let cartPromotionPlacements = []; // عروض مخصصة لموضع السلة من الجدول نفسه
 // • حالة البلوكات
   let homeBlocksState = 'idle';
 // • أهداف البلوك
@@ -3333,17 +3386,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         if (itemsErr) throw itemsErr;
         (items || []).filter(i => i.is_active !== false).forEach(i => { (byBlock[i.block_id] ||= []).push(i); });
       }
-      // مواضع العروض داخل البلوكات؛ فشلها لا يمنع عرض البلوكات
+      // مواضع العروض: داخل بلوكات الرئيسية أو أعلى ملخص السلة.
       const placementsByBlock = {};
-      if (valid.length) {
-        const { data: placements, error: plErr } = await sbClient.from('active_promotion_display_placements')
-          .select('id,promotion_id,block_id,sort_order,is_active,starts_at,ends_at')
-          .eq('placement_type', 'homepage_block').eq('is_active', true)
-          .in('block_id', valid.map(b => b.id)).order('sort_order', { ascending: true });
-        if (plErr) console.warn('[Blocks] تعذر تحميل مواضع العروض:', plErr.message);
-        (placements || []).filter(p => isWithinSchedule(p)).forEach(p => { (placementsByBlock[p.block_id] ||= []).push(p); });
-      }
+      let cartPlacements = [];
+      const { data: placements, error: plErr } = await sbClient.from('active_promotion_display_placements')
+        .select('id,promotion_id,placement_type,block_id,sort_order,is_active,starts_at,ends_at')
+        .in('placement_type', ['homepage_block', 'cart']).eq('is_active', true)
+        .order('sort_order', { ascending: true });
+      if (plErr) console.warn('[Blocks] تعذر تحميل مواضع العروض:', plErr.message);
+      (placements || []).filter(p => isWithinSchedule(p)).forEach(p => {
+        if (p.placement_type === 'homepage_block' && p.block_id && valid.some(b => String(b.id) === String(p.block_id))) (placementsByBlock[p.block_id] ||= []).push(p);
+        if (p.placement_type === 'cart') cartPlacements.push(p);
+      });
       homePlacementsByBlock = placementsByBlock;
+      cartPromotionPlacements = cartPlacements;
       homeBlocks = valid;
       homeBlockItems = byBlock;
       homeBlocksState = 'ready';
@@ -3353,6 +3409,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       homeBlocksState = 'error';
     }
     renderHomepageBlocks();
+    if (currentRoute() === 'cart') refresh();
   }
 
 // ─ [JS-18أ] أدوات قراءة آمنة: parseJsonObject وغيرها — تمنع توقف الصفحة عند JSON غير صحيح
@@ -3405,7 +3462,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 // • تخطيطات البلوك
   const HB_LAYOUTS = ['banner', 'cards', 'carousel', 'grid', 'list', 'text'];
 // • التخطيط الافتراضي
-  const HB_DEFAULT_LAYOUT = { campaign_hero: 'banner', promo_banner: 'banner', promotion_cards: 'grid', product_carousel: 'carousel', product_grid: 'grid', products_popular: 'grid', category_grid: 'grid', text_promo: 'text', text: 'text' };
+  const HB_DEFAULT_LAYOUT = { campaign_hero: 'banner', promo_banner: 'banner', promotion_cards: 'grid', product_carousel: 'carousel', product_grid: 'grid', products_popular: 'grid', products_discounted: 'carousel', products_new: 'carousel', category_grid: 'grid', text_promo: 'text', text: 'text' };
 // • تخطيط البلوك
   const layoutOf = b => (HB_LAYOUTS.includes(b.layout_type) ? b.layout_type : (HB_DEFAULT_LAYOUT[b.block_type] || 'grid'));
 
@@ -3413,6 +3470,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   // ─── تحويل عناصر البلوك إلى بيانات جاهزة للعرض (من الكاش الحي فقط) ───
 // • هدف العرض
   const resolvePromotionTarget = p => {
+    if (p.promotion_page_id && livePromotionPages.some(page => String(page.id) === String(p.promotion_page_id))) return { kind: 'page', id: p.promotion_page_id };
     if (p.target_item_id) return { kind: 'item', id: p.target_item_id };
     const offer = Object.values(pageOffers).flat().find(o => String(o.id) === String(p.id));
     const catId = p.target_category_id || offer?.target_category_id;
@@ -3441,8 +3499,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
     if (bi.item_type === 'promotion') {
       const p = promotionById(bi.target_id);
-      if (!p) return null;
-      const title = titleOv || p.name_ar || '';
+      // لو العرض مربوط بصفحة حملة، لا نعرضه كعنصر عرض مستقل داخل أي بلوك رئيسية.
+      if (!p || isCampaignPageOnlyPromotion(p)) return null;
+      const title = titleOv;
       const image = imgOv || safeImgUrl(p.image_url);
       if (!title && !image) return null;
       const target = resolvePromotionTarget(p);
@@ -3455,10 +3514,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
     if (bi.item_type === 'promotion_page') {
       const page = livePromotionPages.find(p => String(p.id) === String(bi.target_id));
-      if (!page || !(pageOffers[page.id] || []).length) return null;
+      // صفحة الحملة يمكن أن تظهر ككارت حتى لو لم تُربط بها عروض نشطة بعد؛
+      // شرط وجود عرض كان يخفي البلوك كله عند إعداد الصفحة قبل إضافة العروض.
+      if (!page) return null;
       const target = { kind: 'page', id: page.id };
       blockTargets[bi.id] = target;
-      return { kind: 'card', key: bi.id, target, title: titleOv || page.title_ar || '', subtitle: subOv || page.subtitle_ar || '', image: imgOv || safeImgUrl(page.card_image_url) };
+      return { kind: 'card', key: bi.id, target, title: titleOv, subtitle: subOv, image: imgOv || safeImgUrl(page.card_image_url) };
     }
 
     const type = BLOCK_ITEM_TARGET_TYPE[bi.item_type];
@@ -3469,7 +3530,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     if (target.kind === 'category') {
       const c = CATS.find(x => String(x.id) === String(bi.target_id));
       if (!c) return null;
-      title = title || c.label;
+      title = title;
     }
     if (!title && !imgOv) return null;
     blockTargets[bi.id] = target;
@@ -3536,8 +3597,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   const hbCard = (r, s, c = {}) => {
     const showBadge = boolOpt(s, 'show_badge', boolOpt(c, 'show_badge', true));
     const showDesc = boolOpt(s, 'show_description', true);
-    const inner = `${r.image ? `<div class="hb-card-img"><img src="${esc(r.image)}" alt="${esc(r.title || '')}" loading="lazy" decoding="async"></div>` : ''}
-      <div class="hb-card-body">${showBadge && r.badge ? `<span class="hb-badge">${esc(r.badge)}</span>` : ''}${r.title ? `<h3>${esc(r.title)}</h3>` : ''}${showDesc && r.subtitle ? `<p>${esc(r.subtitle)}</p>` : ''}${r.note ? `<small class="hb-note">${esc(r.note)}</small>` : ''}${r.ends && shortDate(r.ends) ? `<small class="hb-ends">ينتهي ${esc(shortDate(r.ends))}</small>` : ''}</div>`;
+    const body = `${showBadge && r.badge ? `<span class="hb-badge">${esc(r.badge)}</span>` : ''}${r.title ? `<h3>${esc(r.title)}</h3>` : ''}${showDesc && r.subtitle ? `<p>${esc(r.subtitle)}</p>` : ''}${r.note ? `<small class="hb-note">${esc(r.note)}</small>` : ''}${r.ends && shortDate(r.ends) ? `<small class="hb-ends">ينتهي ${esc(shortDate(r.ends))}</small>` : ''}`;
+    const inner = `${r.image ? `<div class="hb-card-img"><img src="${esc(r.image)}" alt="${esc(r.title || '')}" loading="lazy" decoding="async"></div>` : ''}${body ? `<div class="hb-card-body">${body}</div>` : ''}`;
     return r.target.kind !== 'none'
       ? `<button type="button" class="hb-card" data-hb-open="${esc(r.key)}">${inner}</button>`
       : `<div class="hb-card">${inner}</div>`;
@@ -3563,6 +3624,21 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         </div>
       </div>
     </article>`;
+  };
+
+  // توصيات السلة لا تظهر إلا إذا اختار الأدمن منتجات لموضع cart في product_recommendation_placements.
+  const cartRecommendationHtml = () => {
+    const rows = Array.isArray(liveProductRecommendations.cart) ? liveProductRecommendations.cart : [];
+    const cartIds = new Set(state.cart.map(line => String(line.id)));
+    const seen = new Set();
+    const items = rows.map(row => ITEM[row.item_id]).filter(item => {
+      if (!item || isSecret(item) || cartIds.has(String(item.id)) || seen.has(String(item.id))) return false;
+      seen.add(String(item.id)); return true;
+    });
+    if (!items.length) return '';
+    const title = rows.find(row => row.title_override)?.title_override || 'منتجات قد تعجبك';
+    const subtitle = rows.find(row => row.description_override)?.description_override || '';
+    return `<section class="cart-recommendations" aria-label="${esc(title)}"><header class="cart-recommendations-head"><div><h3>${esc(title)}</h3>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}</div></header><div class="cart-recommendations-row" role="list">${items.map(item => `<div role="listitem">${hbProductCard(item, { show_description: false, show_price: true })}</div>`).join('')}</div></section>`;
   };
 
   // بانر: صورة + تراكب + عنوان + وصف + شارة + زر CTA (أو كامل البانر قابل للنقر إن أُخفي الزر)
@@ -3601,7 +3677,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const badge = boolOpt(s, 'show_badge', true) ? String(s.badge_text || c.badge_text_ar || '').trim().slice(0, 40) : '';
     return `<section class="hb-banner-sec${s.full_width === true ? ' hb-full' : ''}" data-hb-block="${esc(b.id)}">${hbBannerHtml(b, s, {
       img, title, sub: (b.subtitle_ar || '').trim(), badge, target, key,
-      showCta: boolOpt(s, 'show_cta', true) && target.kind !== 'none', ctaLabel: ctaText(c)
+      showCta: false, ctaLabel: ctaText(c)
     })}</section>`;
   };
 
@@ -3620,7 +3696,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       img: safeImgUrl(r.image), title: r.title, sub: r.subtitle,
       badge: badgeOn ? (customBadge || r.badge || '') : '',
       target: r.target, key: r.key,
-      showCta: boolOpt(s, 'show_cta', true) && r.target.kind !== 'none', ctaLabel: ctaText(c)
+      showCta: false, ctaLabel: ctaText(c)
     })}</div>`).join('');
     const wrapCls = layoutOf(b) === 'carousel' ? 'hb-slider hb-slider-wide' : 'hb-list';
     return `<section class="hb-banner-sec" data-hb-block="${esc(b.id)}"><div class="${wrapCls}" role="list">${banners}</div></section>`;
@@ -3638,6 +3714,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     let items = resolved.filter(r => r.kind === 'item').map(r => ({
       ...r.item, name: r.title || r.item.name, desc: r.subtitle || r.item.desc, img: r.image || r.item.img
     }));
+    if (b.block_type === 'products_discounted') {
+      const discounted = item => (item.sizes || []).some(size => Number(size.sale) > 0 && Number(size.price) > Number(size.sale));
+      items = (items.length ? items : Object.values(ITEM).filter(item => !isSecret(item) && discounted(item))).filter(discounted);
+    }
+    if (b.block_type === 'products_new' && !items.length) {
+      // لا يوجد حقل is_new في المخطط الحالي؛ هذا النوع يعتمد على المنتجات التي يختارها المدير يدويًا.
+      items = [];
+    }
     if (!items.length && b.block_type === 'products_popular') {
       const placed = (liveProductRecommendations.homepage || []).map(x => ITEM[x.item_id]).filter(i => i && !isSecret(i));
       items = placed.length ? placed : Object.values(ITEM).filter(i => !isSecret(i) && i.tags.includes('popular')).slice(0, 8);
@@ -3678,6 +3762,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     product_carousel: renderProductBlock,
     product_grid: renderProductBlock,
     products_popular: renderProductBlock,
+    products_discounted: renderProductBlock,
+    products_new: renderProductBlock,
     category_grid: renderCategoryGrid,
     text_promo: renderTextPromo,
     text: renderTextPromo
@@ -3705,11 +3791,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 // • حقول promotion_pages
   const PAGE_FIELDS = 'id,slug,title_ar,subtitle_ar,description_ar,card_image_url,cover_image_url,sort_order,is_active,starts_at,ends_at';
 // • حقول عروض الصفحة
-  const PAGE_OFFER_FIELDS = 'id,name_ar,description_ar,image_url,promotion_type,value,target_item_id,target_category_id,promotion_page_id,priority,is_active,starts_at,ends_at';
+  const PAGE_OFFER_FIELDS = 'id,name_ar,description_ar,image_url,promotion_type,promotion_scope,value,target_item_id,target_category_id,promotion_page_id,priority,is_active,starts_at,ends_at';
 // • صفحات العروض الحية
   let livePromotionPages = [];
 // • عروض كل صفحة
   let pageOffers = {};   // page.id -> [offer]
+  let pageOfferItems = {}; // offer.id -> product ids linked through menu_promotion_items
 
 // • تحميل صفحات العروض من Supabase
   async function loadPromotionPages() {
@@ -3720,28 +3807,43 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       if (error) throw error;
       const valid = (pages || []).filter(p => p && p.is_active !== false && isWithinSchedule(p) && (p.title_ar || p.card_image_url));
       let offers = [];
+      let linkedItems = [];
       if (valid.length) {
         const { data: rows, error: oErr } = await sbClient.from('menu_promotions')
           .select(PAGE_OFFER_FIELDS).in('promotion_page_id', valid.map(p => p.id)).eq('is_active', true)
           .order('priority', { ascending: false });
         if (oErr) throw oErr;
+        // سجّل كل العروض التابعة للصفحات قبل فلترة النشط منها؛ حتى لا يظهر عرض مرتبط بصفحة في الرئيسية لو كان خارج أول 20 عرضًا.
+        campaignOnlyPromotionIds = new Set((rows || []).map(o => String(o.id)));
         offers = (rows || []).filter(o => o.is_active !== false && isWithinSchedule(o));
+        if (offers.length) {
+          const { data: itemRows, error: itemErr } = await sbClient.from('menu_promotion_items')
+            .select('promotion_id,item_id').in('promotion_id', offers.map(o => o.id));
+          if (itemErr) throw itemErr;
+          linkedItems = itemRows || [];
+        }
       }
-      const byPage = {};
+      const byPage = {}, itemsByOffer = {};
       offers.forEach(o => { (byPage[o.promotion_page_id] ||= []).push(o); });
+      linkedItems.forEach(row => { (itemsByOffer[row.promotion_id] ||= []).push(row.item_id); });
       livePromotionPages = valid;
       pageOffers = byPage;
+      pageOfferItems = itemsByOffer;
     } catch (err) {
       console.warn('[PromotionPages] تعذر تحميل صفحات العروض:', err?.message || err);
       livePromotionPages = [];
+      campaignOnlyPromotionIds = new Set();
       pageOffers = {};
+      pageOfferItems = {};
     }
     renderHomepageBlocks();
+    if (homeBannersState === 'ready') renderHeroSlider();
   }
 
 // • هدف عرض الصفحة
-  const promoOfferTarget = o => o.target_item_id
-    ? { kind: 'item', id: o.target_item_id }
+  const promoOfferTarget = o => o.promotion_page_id && livePromotionPages.some(page => String(page.id) === String(o.promotion_page_id))
+    ? { kind: 'page', id: o.promotion_page_id }
+    : o.target_item_id ? { kind: 'item', id: o.target_item_id }
     : o.target_category_id ? { kind: 'category', id: o.target_category_id } : { kind: 'route', href: '#/menu' };
 
 // • نص قيمة العرض
@@ -3757,12 +3859,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
   };
 
+  // عروض موضع السلة من promotion_display_placements، دون إنشاء روابط أو بيانات ثابتة.
+  const cartPromotionStripHtml = () => {
+    const rows = (cartPromotionPlacements || []).slice().sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+    const offers = rows.map(row => promotionById(row.promotion_id)).filter(p => p && !isCampaignPageOnlyPromotion(p));
+    if (!offers.length) return '';
+    return `<section class="cart-promo-placement" aria-label="عروض السلة"><h3>عروض متاحة ليك</h3><div class="cart-promo-row">${offers.map(offer => `<button type="button" class="cart-promo-card" data-cart-promo-open="${esc(offer.id)}">${offer.image_url ? `<img src="${esc(offer.image_url)}" alt="" loading="lazy">` : '<span class="cart-promo-icon">🎁</span>'}<span><strong>${esc(offer.name_ar || 'عرض خاص')}</strong>${offer.description_ar ? `<small>${esc(offer.description_ar)}</small>` : ''}<em>${esc(offerValueLabel(offer))}</em></span></button>`).join('')}</div></section>`;
+  };
+
   // الرئيسية: صف أفقي من الكروت المربعة (صفحات العروض التي لها عروض فعلية)
 // • قالب كرت صفحة العرض
   const pageTileHtml = p => `<button type="button" class="hb-tile" data-page-open="${esc(p.id)}" aria-label="${esc(p.title_ar || 'عروض')}">
-      <span class="hb-tile-img">${p.card_image_url ? `<img src="${esc(p.card_image_url)}" alt="" loading="lazy" decoding="async">` : ''}</span>
-      ${p.title_ar ? `<span class="hb-tile-title">${esc(p.title_ar)}</span>` : ''}
-      ${p.subtitle_ar ? `<span class="hb-tile-sub">${esc(p.subtitle_ar)}</span>` : ''}
+      <span class="hb-tile-img">${p.card_image_url ? `<img src="${esc(p.card_image_url)}" alt="" loading="lazy" decoding="async">` : ''}<span class="hb-tile-content">${p.title_ar ? `<strong>${esc(p.title_ar)}</strong>` : ''}${p.subtitle_ar ? `<small>${esc(p.subtitle_ar)}</small>` : ''}</span></span>
     </button>`;
 
 // • المنتجات المرشحة للتخفيض
@@ -3804,13 +3912,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const failed = homeBlocksState === 'error';
     const renderList = list => list.map(renderOneBlock).filter(Boolean).join('');
 
-    // 1) كروت الشاشات (صفحات العروض)
-    if (cardsRoot) {
-      const visible = livePromotionPages.filter(p => (pageOffers[p.id] || []).length);
-      cardsRoot.innerHTML = visible.length
-        ? `<div class="home-sec-title"><div><h2>اكتشف العروض</h2><p>اختار القسم اللي يعجبك</p></div></div><div class="hb-rail" role="list">${visible.map(p => `<div role="listitem">${pageTileHtml(p)}</div>`).join('')}</div>`
-        : '';
-    }
+    // لا نعرض قسم "اكتشف العروض" التلقائي في الرئيسية.
+    // صفحات الحملات تظهر فقط داخل بلوكات promotion_cards التي ربطها المدير بها.
+    if (cardsRoot) cardsRoot.innerHTML = '';
     // 3) بلوك عروض السيل يُرسم في renderSaleStrip
     renderSaleStrip();
     // 4) بلوك العروض
@@ -3849,18 +3953,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         <div>${p.title_ar ? `<h2>${esc(p.title_ar)}</h2>` : ''}${p.subtitle_ar ? `<p>${esc(p.subtitle_ar)}</p>` : ''}${p.description_ar ? `<p>${esc(p.description_ar)}</p>` : ''}</div>
       </header>`;
     const cover = p.cover_image_url ? `<div class="bs-cover"><img src="${esc(p.cover_image_url)}" alt="" loading="lazy" decoding="async"></div>` : '';
-    const cards = offers.map(o => {
+    const groups = offers.map(o => {
       const label = offerValueLabel(o);
-      return `<button type="button" class="bs-offer" data-promo-open="${esc(o.id)}">
-          <span class="bs-offer-img">${o.image_url ? `<img src="${esc(o.image_url)}" alt="" loading="lazy" decoding="async">` : ''}</span>
-          <span class="bs-offer-body">
-            ${o.name_ar ? `<strong>${esc(o.name_ar)}</strong>` : ''}
-            ${o.description_ar ? `<small>${esc(o.description_ar)}</small>` : ''}
-            ${label ? `<em>${esc(label)}</em>` : ''}
-          </span>
-        </button>`;
+      let products = [];
+      if (o.promotion_scope === 'all') products = Object.values(ITEM).filter(item => !isSecret(item));
+      else if (o.promotion_scope === 'category' || o.target_category_id) products = Object.values(ITEM).filter(item => !isSecret(item) && String(item.categoryId) === String(o.target_category_id));
+      else if (o.promotion_scope === 'items') products = (pageOfferItems[o.id] || []).map(id => ITEM[id]).filter(item => item && !isSecret(item));
+      else if (o.target_item_id && ITEM[o.target_item_id] && !isSecret(ITEM[o.target_item_id])) products = [ITEM[o.target_item_id]];
+      const productCards = [...new Map(products.map(item => [String(item.id), item])).values()].map(item => hbProductCard(item, { show_description: true, show_price: true })).join('');
+      if (productCards) return `<section class="bs-offer-group"><header><div>${o.name_ar ? `<h3>${esc(o.name_ar)}</h3>` : ''}${o.description_ar ? `<p>${esc(o.description_ar)}</p>` : ''}</div>${label ? `<em>${esc(label)}</em>` : ''}</header><div class="bs-products-grid">${productCards}</div></section>`;
+      return `<div class="bs-offer"><span class="bs-offer-img">${o.image_url ? `<img src="${esc(o.image_url)}" alt="" loading="lazy" decoding="async">` : ''}</span><span class="bs-offer-body">${o.name_ar ? `<strong>${esc(o.name_ar)}</strong>` : ''}${o.description_ar ? `<small>${esc(o.description_ar)}</small>` : ''}${label ? `<em>${esc(label)}</em>` : ''}</span></div>`;
     }).join('');
-    return `<div class="bs-inner">${head}${cover}<div class="bs-grid">${cards}</div></div>`;
+    return `<div class="bs-inner">${head}${cover}${groups || '<p class="bs-empty">لا توجد منتجات مرتبطة بهذا العرض حاليًا.</p>'}</div>`;
   };
 
 // • شاشة بلوك
@@ -3901,6 +4005,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     const open = e.target.closest('[data-page-open]');
     if (open) { openPageScreen(open.dataset.pageOpen); return; }
     if (e.target.closest('[data-block-close]')) { closeBlockScreen(); return; }
+    const cartOfferEl = e.target.closest('[data-cart-promo-open]');
+    if (cartOfferEl) {
+      const offer = promotionById(cartOfferEl.dataset.cartPromoOpen);
+      if (offer) openResolved(promoOfferTarget(offer));
+      return;
+    }
     const offerEl = e.target.closest('[data-promo-open]');
     if (offerEl) {
       const id = offerEl.dataset.promoOpen;
@@ -4117,9 +4227,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 // • تحديث شريحة الهيرو
   const updateHeroSlide = () => {
     const root = document.querySelector('[data-hero-root]');
-    if (!root || !livePromotions.length) return;
-    activePromotionIndex = (activePromotionIndex + livePromotions.length) % livePromotions.length;
-    const p = livePromotions[activePromotionIndex];
+    const homepageOffers = homepagePromotions();
+    if (!root || !homepageOffers.length) return;
+    activePromotionIndex = (activePromotionIndex + homepageOffers.length) % homepageOffers.length;
+    const p = homepageOffers[activePromotionIndex];
     const item = p?.target_item_id ? ITEM[p.target_item_id] : null;
     const title = p?.name_ar || window.SHEEPBURGER_STORE?.name_ar || 'Sheep & Burger';
     const description = p?.description_ar || window.SHEEPBURGER_STORE?.address_text || 'اختار من قائمة الطعام واطلب اللي تحبه.';
@@ -4132,7 +4243,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     let imgEl=root.querySelector('[data-hero-image]');
     if(image && !imgEl){imgEl=document.createElement('img');imgEl.className='hero-img';imgEl.setAttribute('data-hero-image','');imgEl.alt='';root.prepend(imgEl);}
     if(imgEl){imgEl.hidden=!image;if(image)imgEl.src=image;imgEl.alt=title;}
-    if(count) count.textContent=`${activePromotionIndex+1} / ${livePromotions.length}`;
+    if(count) count.textContent=`${activePromotionIndex+1} / ${homepageOffers.length}`;
   };
 
 // • المنتجات بعد الفلترة
@@ -4184,6 +4295,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   const viewCart = () => {
     if (!state.cart.length) {
       return `<div class="empty view-anim">
+        <div data-announce-slot="cart" style="margin-bottom:14px;text-align:initial"></div>
         <div class="empty-icon">🛒</div>
         <h2>سلتك فاضية</h2>
         <p>لسه مضفتش حاجة. ابدأ ببرجر السماش بتاعنا.</p>
@@ -4192,7 +4304,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     }
     const pricing = calculatePricing(state.cart, { coupon: state.coupon, voucher: selectedRemoteVoucher() });
     const original = round2(pricing.subtotal + pricing.itemDiscounts);
-    const suggestions = MENU_ITEMS.filter(item => !isSecret(item) && !state.cart.find(l => l.id === item.id)).slice(0, 4);
 
     return `
       <div class="view-anim" style="padding-bottom: 120px;">
@@ -4201,6 +4312,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
           <h1>سلة المشتريات</h1>
         </div>
 
+        <div data-announce-slot="cart" style="margin-bottom:14px"></div>
+        ${cartPromotionStripHtml()}
         <div class="cart-items-list">
             ${state.cart.map((l, idx) => {
               const it = ITEM[l.id];
@@ -4235,20 +4348,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
             }).join('')}
         </div>
 
-        ${suggestions.length ? `
-        <div class="suggestions-section">
-          <h3 class="suggestions-title">قد تعجبك أيضًا...</h3>
-          <div class="suggestions-scroll">
-            ${suggestions.map(s => `
-              <div class="suggestion-card">
-                <img src="${s.img}" alt="${s.name}">
-                <button class="add-suggestion-btn" data-action="quick" data-id="${s.id}">+</button>
-                <h5>${s.name}</h5>
-                <div class="suggestion-price">${money(fromPrice(s))}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>` : ''}
+
 
         <div class="notes-section">
           <h3 style="font-size:16px; font-weight:800; margin-bottom:10px;">ملاحظات إضافية</h3>
@@ -4261,6 +4361,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
         </div>
         <p class="coupon-msg ${state.coupon ? 'ok' : ''}" style="font-size:12px; margin-top:-16px; margin-bottom:16px; color:${state.coupon ? 'var(--success)' : 'var(--danger)'}">${state.coupon ? `كوبون ${esc(state.coupon.code)} · ${serverQuote?.quote?.coupon_discount != null ? `خصم ${money(Number(serverQuote.quote.coupon_discount))}` : state.coupon.type === 'fixed' ? `خصم ${money(state.coupon.value)}` : `خصم ${Math.round((state.coupon.pct ?? Number(state.coupon.value || 0) / 100) * 100)}%`}` : esc(state.couponMsg || '')}</p>
 
+        ${cartRecommendationHtml()}
         <h3 style="font-size:18px; font-weight:900; margin-bottom:16px;">ملخص الدفع</h3>
         <div class="summary-box">
           <div class="summary-row"><span>المجموع الفرعي</span><span class="price-ltr">${money(original)}</span></div>
@@ -4445,6 +4546,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 
     return `
       <div class="profile-wrap view-anim">
+        <div data-announce-slot="rewards" style="margin-bottom:14px"></div>
         <div class="profile-head">
           <div class="profile-avatar">${state.customer.name ? esc(state.customer.name.charAt(0).toUpperCase()) : '👤'}</div>
           <h2>${state.customer.name ? esc(state.customer.name) : 'أهلاً بيك'}</h2>
